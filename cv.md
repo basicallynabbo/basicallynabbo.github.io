@@ -1,6 +1,7 @@
 ---
 layout: page
 title: CV
+show_title: false
 ---
 
 ## Contact

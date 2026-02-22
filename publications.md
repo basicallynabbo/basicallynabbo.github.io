@@ -1,9 +1,10 @@
 ---
 layout: page
 title: Publications
+show_title: false
 ---
 
-## Publications
+## Selected Works
 
 <div class="pub-item">
   <div class="pub-title">Artificial Intelligence-Powered Molecular Docking: A Promising Tool for Rational Drug Design</div>

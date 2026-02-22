@@ -1,9 +1,10 @@
 ---
 layout: page
 title: Experience
+show_title: false
 ---
 
-## Research Experience
+## Timeline
 
 <div class="timeline-item">
   <div class="timeline-header">

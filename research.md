@@ -1,9 +1,10 @@
 ---
 layout: page
 title: Research
+show_title: false
 ---
 
-## Research Interests
+## Interests
 
 <ul class="research-list">
   <li>Structural Biology</li>
