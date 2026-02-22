@@ -14,22 +14,6 @@ show_title: false
 
 ---
 
-## Ongoing Projects
-
-### G-quadruplex Biophysical Characterization
-
-Studying the structural properties and interactions of G-quadruplexes with TELO DNA and TERRA RNA using various biophysical techniques including EMSA, BCA protein assay, and Gel Permeation Chromatography.
-
-### RNA Binding Domain Analysis
-
-Computational analysis of Nucleolin RNA Binding Domains and their docking interactions with target RNAs.
-
-### Phytochemical Screening for Huntington's Disease
-
-Virtual screening of 150+ phytochemicals using PubChem, ZincDB, OpenBabel, LigPrep, AutoDock, and PyMOL to identify potential drug candidates for Huntington's Disease.
-
----
-
 ## Technical Expertise
 
 ### Computational Tools
