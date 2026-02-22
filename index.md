@@ -16,6 +16,7 @@ title: Home
       <a href="https://scholar.google.com/citations?user=YEooiOMAAAAJ">Google Scholar</a>
       <a href="https://www.linkedin.com/in/nabajit/">LinkedIn</a>
       <a href="https://x.com/TensorTwerker">Twitter</a>
+      <a href="https://medium.com/@nabbo">Medium</a>
     </div>
   </div>
 </div>
