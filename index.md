@@ -21,14 +21,6 @@ title: Home
   </div>
 </div>
 
-## About Me
-
-I am a final year student pursuing B.Tech + M.Tech in Biotechnology at Amity University, Noida with a CGPA of 9.2/10. My research focuses on computational biology, bioinformatics, and machine learning applications in drug discovery.
-
-I have hands-on experience with molecular docking, MD simulations, and various bioinformatics tools. I am passionate about applying computational approaches to solve biological problems, particularly in drug discovery and structural biology.
-
----
-
 ## News
 
 <div class="section">
@@ -52,45 +44,9 @@ I have hands-on experience with molecular docking, MD simulations, and various b
 
 ---
 
-## Selected Publications
+## Explore
 
-<div class="section">
-  <div class="pub-item">
-    <div class="pub-title">Artificial Intelligence-Powered Molecular Docking: A Promising Tool for Rational Drug Design</div>
-    <div class="pub-authors"><strong>N.K. Borah</strong>, Y. Tripathi, A. Tanwar, et al.</div>
-    <div class="pub-journal">Wiley, 2024</div>
-    <div class="pub-links">
-      <a href="https://doi.org/10.1002/9781394234196.ch6" target="_blank">[DOI]</a>
-    </div>
-  </div>
-
-  <div class="pub-item">
-    <div class="pub-title">From Enzyme to Predictors: Serine Proteases in Cancer Diagnosis and Prognosis</div>
-    <div class="pub-authors">S. Bose, M.A. Azad, <strong>N.K. Borah</strong>, N. Kaur</div>
-    <div class="pub-journal">Academic Press, 2025</div>
-    <div class="pub-links">
-      <a href="https://doi.org/10.1016/B978-0-443-30098-1.00012-5" target="_blank">[DOI]</a>
-    </div>
-  </div>
-
-  <div class="pub-item">
-    <div class="pub-title">A Comprehensive and Intricate Dynamics of Aspergillus: Implications, Therapeutic Challenges, and Drug Resistance</div>
-    <div class="pub-authors"><strong>N.K. Borah</strong>, Y. Tripathi, A. Parashar, S. Santoshi, H. Bansal</div>
-    <div class="pub-journal">Springer, 2024</div>
-    <div class="pub-links">
-      <a href="https://doi.org/10.1007/978-981-97-4909-6_17" target="_blank">[DOI]</a>
-    </div>
-  </div>
-</div>
-
----
-
-## Research Interests
-
-<ul class="research-list">
-  <li>G-quadruplex structures and biophysical characterization</li>
-  <li>RNA-protein interactions and docking</li>
-  <li>Machine Learning in Drug Discovery</li>
-  <li>Computational Biology & Bioinformatics</li>
-  <li>Virtual screening for neurodegenerative diseases</li>
-</ul>
+- Read my background and skills on [About]({{ '/about/' | relative_url }}).
+- See ongoing work and focus areas on [Research]({{ '/research/' | relative_url }}).
+- Browse full papers and DOIs on [Publications]({{ '/publications/' | relative_url }}).
+- View internships and roles on [Experience]({{ '/experience/' | relative_url }}).
