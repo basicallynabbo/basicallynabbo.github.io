@@ -41,9 +41,6 @@ show_title: false
 
 ---
 
-## Explore
+## About
 
-- Read my background and skills on [About]({{ '/about/' | relative_url }}).
-- See ongoing work and focus areas on [Research]({{ '/research/' | relative_url }}).
-- Browse full papers and DOIs on [Publications]({{ '/publications/' | relative_url }}).
-- View internships and roles on [Experience]({{ '/experience/' | relative_url }}).
+My interests sit at the intersection of AI, protein structure, and disease modeling. I’m drawn to problems where AI can speed up hypothesis generation and discovery. Working across wet and dry labs showed me how rich experimental biology data is — and how much more we can extract with good computational models. Recently, I’ve been sharpening my math and coding to use that data better. The best way to contact me is via email.
