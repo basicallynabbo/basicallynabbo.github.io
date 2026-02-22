@@ -32,8 +32,8 @@ I have hands-on experience with molecular docking, MD simulations, and various b
 
 <div class="section">
   <div class="news-item">
-    <span class="news-date">Jan 2026</span>
-    <span>Started final year of M.Tech program</span>
+    <span class="news-date">Dec 2025</span>
+    <span>Started Master Thesis guided by Dr. Lipi Thukral in Computational Structural Biology Lab, CSIR IGIB</span>
   </div>
   <div class="news-item">
     <span class="news-date">2025</span>
