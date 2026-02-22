@@ -12,11 +12,11 @@ show_title: false
     <h1 class="profile-name">Nabajit Borah</h1>
     <div class="contact-links">
       <a href="mailto:nabajitkrb@gmail.com">nabajitkrb@gmail.com</a>
-      <a href="https://github.com/basicallynabbo">GitHub</a>
-      <a href="https://scholar.google.com/citations?user=YEooiOMAAAAJ">Google Scholar</a>
-      <a href="https://www.linkedin.com/in/nabajit/">LinkedIn</a>
-      <a href="https://x.com/TensorTwerker">Twitter</a>
-      <a href="https://medium.com/@nabbo">Medium</a>
+      <a href="https://github.com/basicallynabbo"><img src="{{ '/images/icons/github.svg' | relative_url }}" alt="" class="icon"> GitHub</a>
+      <a href="https://scholar.google.com/citations?user=YEooiOMAAAAJ"><img src="{{ '/images/icons/google-scholar.svg' | relative_url }}" alt="" class="icon"> Google Scholar</a>
+      <a href="https://www.linkedin.com/in/nabajit/"><img src="{{ '/images/icons/linkedin.svg' | relative_url }}" alt="" class="icon"> LinkedIn</a>
+      <a href="https://x.com/TensorTwerker"><img src="{{ '/images/icons/twitter.svg' | relative_url }}" alt="" class="icon"> Twitter</a>
+      <a href="https://medium.com/@nabbo"><img src="{{ '/images/icons/medium.svg' | relative_url }}" alt="" class="icon"> Medium</a>
     </div>
   </div>
 </div>

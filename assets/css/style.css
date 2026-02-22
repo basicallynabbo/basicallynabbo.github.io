@@ -167,6 +167,12 @@ main {
   gap: 0.35rem;
 }
 
+.contact-links .icon {
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+}
+
 /* Sections */
 .section {
   margin-bottom: 2.5rem;
