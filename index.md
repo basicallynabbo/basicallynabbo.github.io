@@ -34,7 +34,7 @@ show_title: false
   </div>
   <div class="news-item">
     <span class="news-date">May 2025</span>
-    <span>Summer Intern under Dr. Mary Ekka working on G-quadruplex structures</span>
+    <span>Summer Intern under Dr. Mary Ekka in CSIR IGIB</span>
   </div>
   <div class="news-item">
     <span class="news-date">2025</span>
