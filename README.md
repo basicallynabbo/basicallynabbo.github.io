@@ -1,4 +1,4 @@
-# Academic Website - Nabajit Kumar Borah
+# Academic Website - Nabajit Borah
 
 Personal academic website built with Jekyll and hosted on GitHub Pages.
 

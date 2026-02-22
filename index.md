@@ -5,17 +5,17 @@ title: Home
 
 <div class="profile-section">
   <div class="profile-photo">
-    <img src="{{ '/images/profile-pic.jpg' | relative_url }}" alt="Nabajit Kumar Borah" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+    <img src="{{ '/images/greyscale.png' | relative_url }}" alt="Nabajit Borah" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
   </div>
   <div class="profile-info">
-    <h1 class="profile-name">Nabajit Kumar Borah</h1>
+    <h1 class="profile-name">Nabajit Borah</h1>
     <p class="profile-title">B.Tech + M.Tech Biotechnology (Integrated) | Amity University, Noida</p>
     <div class="contact-links">
       <a href="mailto:nabajitkrb@gmail.com">nabajitkrb@gmail.com</a>
       <a href="https://github.com/basicallynabbo">GitHub</a>
       <a href="https://scholar.google.com/citations?user=YEooiOMAAAAJ">Google Scholar</a>
-      <a href="https://linkedin.com">LinkedIn</a>
-      <a href="https://twitter.com/TensorTwerker">Twitter</a>
+      <a href="https://www.linkedin.com/in/nabajit/">LinkedIn</a>
+      <a href="https://x.com/TensorTwerker">Twitter</a>
     </div>
   </div>
 </div>

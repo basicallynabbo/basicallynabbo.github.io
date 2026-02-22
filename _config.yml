@@ -1,14 +1,14 @@
 # Site settings
-title: "Nabajit Kumar Borah"
+title: "Nabajit Borah"
 description: "B.Tech + M.Tech Biotechnology | Computational Biology & Bioinformatics"
-author: "Nabajit Kumar Borah"
+author: "Nabajit Borah"
 url: "https://basicallynabbo.github.io"
 baseurl: ""
 
 # Social links
 github: "basicallynabbo"
-google_scholar: "Nabajit Kumar Borah"
-linkedin: ""
+google_scholar: "Nabajit Borah"
+linkedin: "nabajit"
 twitter: "TensorTwerker"
 
 # Build settings
