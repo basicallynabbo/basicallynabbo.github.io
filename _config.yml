@@ -1,0 +1,37 @@
+# Site settings
+title: "Nabajit Kumar Borah"
+description: "B.Tech + M.Tech Biotechnology | Computational Biology & Bioinformatics"
+author: "Nabajit Kumar Borah"
+url: "https://basicallynabbo.github.io"
+baseurl: ""
+
+# Social links
+github: "basicallynabbo"
+google_scholar: "Nabajit Kumar Borah"
+linkedin: ""
+twitter: "TensorTwerker"
+
+# Build settings
+markdown: kramdown
+permalink: /:title/
+
+# Exclude from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+
+# Navigation
+navigation:
+  - title: Home
+    url: /
+  - title: About
+    url: /about/
+  - title: Research
+    url: /research/
+  - title: Publications
+    url: /publications/
+  - title: Experience
+    url: /experience/
+  - title: CV
+    url: /cv/
