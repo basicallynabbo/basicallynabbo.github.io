@@ -53,7 +53,7 @@ show_title: false
 <div class="timeline-item">
   <div class="timeline-header">
     <span class="timeline-title">President</span>
-    <span class="timeline-date">2022 – Present</span>
+    <span class="timeline-date">2022 – 2025</span>
   </div>
   <div class="timeline-place">Illuminati Technical Club, Amity University</div>
   <ul class="timeline-desc">
