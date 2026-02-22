@@ -28,10 +28,7 @@ show_title: false
     <span class="news-date">Dec 2025</span>
     <span>Started Master Thesis guided by Dr. Lipi Thukral in Computational Structural Biology Lab, CSIR IGIB</span>
   </div>
-  <div class="news-item">
-    <span class="news-date">2025</span>
-    <span>Published 2 research papers in Springer and Academic Press</span>
-  </div>
+  <!-- removed news item -->
   <div class="news-item">
     <span class="news-date">May 2025</span>
     <span>Summer Intern under Dr. Mary Ekka, Biophysics Lab, CSIR IGIB</span>
