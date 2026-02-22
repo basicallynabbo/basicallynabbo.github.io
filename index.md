@@ -42,7 +42,7 @@ I have hands-on experience with molecular docking, MD simulations, and various b
   </div>
   <div class="news-item">
     <span class="news-date">May-Jul 2025</span>
-    <span>Research Intern at CSIR-IGIB, studying G-quadruplex structures</span>
+    <span>Summer Intern at <a href="https://csbiolab.com/" target="_blank">CSB Lab</a> under Dr. Mary Ekka working on G-quadruplex structures</span>
   </div>
   <div class="news-item">
     <span class="news-date">2025</span>
