@@ -5,11 +5,11 @@ title: About
 
 ## About Me
 
-I am a final year student pursuing B.Tech + M.Tech in Biotechnology at Amity University, Noida. With a strong CGPA of 9.2/10, I have developed a solid foundation in both computational and wet-lab techniques.
+I am a final year student pursuing B.Tech + M.Tech in Biotechnology at Amity University, Noida, India. With a strong CGPA of 9.2/10, I have developed a solid foundation in both computational and wet-lab techniques.
 
 ### Education
 
-**Amity University, Noida**  
+**Amity University, Noida, India**  
 B.Tech + M.Tech Biotechnology (Integrated) | 2021 – Present  
 CGPA: 9.2/10
 

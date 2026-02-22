@@ -6,11 +6,9 @@ title: Research
 ## Research Interests
 
 <ul class="research-list">
-  <li><strong>G-quadruplex structures</strong> - Biophysical characterization of G-quadruplexes and their interactions with DNA/RNA</li>
-  <li><strong>RNA-protein interactions</strong> - Structural bioinformatics analysis and molecular docking of RNA Binding Domains</li>
-  <li><strong>Machine Learning in Drug Discovery</strong> - AI-powered molecular docking and virtual screening</li>
-  <li><strong>Computational Biology</strong> - Analysis of gene expression data, ADMET prediction</li>
-  <li><strong>Virtual screening</strong> - Drug candidate identification for neurodegenerative diseases</li>
+  <li>Structural Biology</li>
+  <li>Machine Learning in Drug Discovery</li>
+  <li>Deep Learning for Structure Prediction</li>
 </ul>
 
 ---

@@ -1,6 +1,7 @@
 ---
 layout: page
 title: Home
+show_title: false
 ---
 
 <div class="profile-section">
@@ -9,7 +10,6 @@ title: Home
   </div>
   <div class="profile-info">
     <h1 class="profile-name">Nabajit Borah</h1>
-    <p class="profile-title">B.Tech + M.Tech Biotechnology (Integrated) | Amity University, Noida</p>
     <div class="contact-links">
       <a href="mailto:nabajitkrb@gmail.com">nabajitkrb@gmail.com</a>
       <a href="https://github.com/basicallynabbo">GitHub</a>
@@ -33,7 +33,7 @@ title: Home
     <span>Published 2 research papers in Springer and Academic Press</span>
   </div>
   <div class="news-item">
-    <span class="news-date">May-Jul 2025</span>
+    <span class="news-date">May 2025</span>
     <span>Summer Intern under Dr. Mary Ekka working on G-quadruplex structures</span>
   </div>
   <div class="news-item">

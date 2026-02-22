@@ -222,10 +222,11 @@ main {
 }
 
 .research-list li::before {
-  content: "→";
+  content: "•";
   position: absolute;
   left: 0;
   color: var(--secondary-color);
+  font-size: 0.9rem;
 }
 
 /* Experience */
