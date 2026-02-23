@@ -11,7 +11,7 @@ show_title: false
   <div class="profile-info">
     <h1 class="profile-name">Nabajit Borah</h1>
     <div class="contact-links">
-      <a href="mailto:nabajitkrb@gmail.com">nabajitkrb@gmail.com</a>
+      <a href="mailto:nabajitkrb@gmail.com" title="Email"><img src="{{ '/images/icons/gmail.svg' | relative_url }}" alt="Email" class="icon"> Gmail</a>
       <a href="https://github.com/basicallynabbo"><img src="{{ '/images/icons/github.svg' | relative_url }}" alt="" class="icon"> GitHub</a>
       <a href="https://scholar.google.com/citations?user=YEooiOMAAAAJ"><img src="{{ '/images/icons/google-scholar.svg' | relative_url }}" alt="" class="icon"> Google Scholar</a>
       <a href="https://www.linkedin.com/in/nabajit/"><img src="{{ '/images/icons/linkedin.svg' | relative_url }}" alt="" class="icon"> LinkedIn</a>
@@ -43,4 +43,4 @@ show_title: false
 
 <!-- -->
 
-My interests sit at the intersection of AI, protein structure, and disease modeling. I’m drawn to problems where AI can speed up hypothesis generation and discovery. Working across wet and dry labs showed me how rich experimental biology data is and how much more we can extract with good computational models. Recently, I’ve been sharpening my math and coding to use that data better. The best way to contact me is via email.
+My interests sit at the intersection of AI, protein structure, and disease modeling. I’m drawn to problems where AI can speed up hypothesis generation and discovery. Working across wet and dry labs showed me how rich experimental biology data is and how much more we can extract with good computational models. Recently, I’ve been sharpening my math and coding to use that data better. The best way to contact me is via email: <span class="email-highlight">nabajitkrb@gmail.com</span>.
