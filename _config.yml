@@ -16,6 +16,19 @@ medium: "@nabbo"
 markdown: kramdown
 permalink: /:title/
 
+# Blog collection
+collections:
+  blogs:
+    output: true
+    permalink: /blogs/:name/
+
+defaults:
+  - scope:
+      path: ""
+      type: blogs
+    values:
+      layout: blog_post
+
 # Exclude from processing
 exclude:
   - Gemfile
@@ -32,6 +45,8 @@ navigation:
     url: /research/
   - title: Publications
     url: /publications/
+  - title: Blogs
+    url: /blogs/
   - title: Experience
     url: /experience/
   - title: CV
