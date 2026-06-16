@@ -25,6 +25,10 @@ show_title: false
 
 <div class="section">
   <div class="news-item">
+    <span class="news-date">June 2026</span>
+    <span>Joined LiteFold as Founding Computational Biologist</span>
+  </div>
+  <div class="news-item">
     <span class="news-date">Dec 2025</span>
     <span>Started Master Thesis guided by Dr. Lipi Thukral in Computational Structural Biology Lab, CSIR IGIB</span>
   </div>
