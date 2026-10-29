@@ -11,10 +11,11 @@ https://basicallynabbo.github.io (Jekyll on GitHub Pages)
 - **CV:** replace `assets/Nabajit-resume-july.pdf` (linked from the homepage and `/cv/`).
 
 ## The protein on the homepage
-`assets/js/protein.js` simulates ubiquitin (PDB 1UBQ, 76 Cα) with Verlet integration and
-position-based constraints: 3.8 Å bonds, a minimum bend angle, excluded volume, and a Gō model in
-which the native contacts pull the chain back into its fold once the cursor stops. The `Q` shown
-under the hero is the fraction of native contacts that are formed. It's a cartoon, not a force field.
+`assets/js/protein.js` animates a small school of real ubiquitin fragments (PDB 1UBQ, Cα only)
+that swim on their own. Each chain uses Verlet integration and position-based constraints: 3.8 Å
+bonds, a minimum bend angle, excluded volume, and soft springs that keep its native helix or hairpin
+shape. Heads wander on smooth noise and steer away from walls, from each other and, gently, from the
+cursor. On the 404 page the chains stick together into an aggregate. It's a cartoon, not a force field.
 
 ## Local preview
 ```

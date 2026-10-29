@@ -20,8 +20,7 @@ protein: true
       <a class="cv-pill" href="{{ '/assets/Nabajit-resume-july.pdf' | relative_url }}">CV ↓</a>
     </div>
     <div class="hero-hint" aria-hidden="true">
-      <p>ubiquitin · <a href="https://www.rcsb.org/structure/1UBQ">PDB 1UBQ</a> · 76 Cα · native contacts Q = <span data-q>1.00</span></p>
-      <p>move → it follows · stop → it folds · hover the fold → inspect a residue</p>
+      <p>fragments of ubiquitin · <a href="https://www.rcsb.org/structure/1UBQ">PDB 1UBQ</a> · Cα traces</p>
       <p><span class="dot" style="background:var(--ss-helix)"></span>helix<span class="dot" style="background:var(--ss-strand)"></span>strand<span class="dot" style="background:var(--ss-loop)"></span>loop</p>
     </div>
   </div>
