@@ -423,11 +423,6 @@ main > .container > .page > h2:first-child {
   background-size: 100% 1px;
 }
 
-.hero-hint [data-q] {
-  color: var(--accent);
-  font-variant-numeric: tabular-nums;
-}
-
 .hero-hint .dot:first-child {
   margin-left: 0;
 }
