@@ -1,0 +1,6 @@
+<div class="pub-item">
+  <div class="pub-title">{% if include.pub.doi %}<a href="https://doi.org/{{ include.pub.doi }}">{{ include.pub.title }}</a>{% else %}{{ include.pub.title }}{% endif %}</div>
+  <div class="pub-authors">{{ include.pub.authors }}</div>
+  <div class="pub-journal">{{ include.pub.venue }}</div>
+  {% if include.pub.doi %}<div class="pub-links"><a href="https://doi.org/{{ include.pub.doi }}">doi:{{ include.pub.doi }}</a></div>{% endif %}
+</div>

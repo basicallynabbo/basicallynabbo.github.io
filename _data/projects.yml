@@ -1,0 +1,21 @@
+# One card per project on /work/. Fields: title, when, where, problem, methods (list), outcome, link (optional).
+- title: "G-quadruplex biophysics with telomeric DNA and TERRA RNA"
+  when: "2025"
+  where: "CSIR-IGIB, Biophysics Lab"
+  problem: "Characterise G-quadruplex structures and how they interact with telomeric DNA (TELO) and TERRA RNA."
+  methods: [EMSA, Gel permeation chromatography, BCA assay]
+  outcome: "Biophysical characterisation of G-quadruplex binding with TELO DNA and TERRA RNA."
+
+- title: "RNA-binding domains of Nucleolin"
+  when: "2024"
+  where: "CSIR-IGIB, Biophysics Lab"
+  problem: "How do Nucleolin's RNA-binding domains recognise RNA?"
+  methods: [Structural bioinformatics, RNA–protein docking]
+  outcome: "Structural bioinformatics analysis and RNA–protein docking of the RNA-binding domains."
+
+- title: "Virtual screening for Huntington's disease"
+  when: "2023"
+  where: "Amity Institute of Biotechnology"
+  problem: "Find plant-derived compounds that act on Huntington's disease pathways."
+  methods: [RNA-seq differential expression, STRING-DB, Cytoscape, LigPrep, AutoDock, PyMOL]
+  outcome: "Screened 150+ phytochemicals and identified 3 potential drug candidates. Presented at APB-2023 (2nd place)."

@@ -1,20 +1,39 @@
 # Site settings
 title: "Nabajit Borah"
-description: "B.Tech + M.Tech Biotechnology | Computational Biology & Bioinformatics"
-author: "Nabajit Borah"
+description: "Computational biologist working at the intersection of AI and protein structure."
+author:
+  name: "Nabajit Borah"
+  twitter: "TensorTwerker"
 url: "https://basicallynabbo.github.io"
 baseurl: ""
+lang: en_US
 
-# Social links
+# Social links (also read by jekyll-seo-tag)
 github: "basicallynabbo"
 google_scholar: "Nabajit Borah"
 linkedin: "nabajit"
-twitter: "TensorTwerker"
+twitter:
+  username: "TensorTwerker"
+  card: summary_large_image
 medium: "@nabbo"
+social:
+  name: "Nabajit Borah"
+  links:
+    - https://github.com/basicallynabbo
+    - https://www.linkedin.com/in/nabajit/
+    - https://x.com/TensorTwerker
+    - https://medium.com/@nabbo
+    - https://scholar.google.com/citations?user=YEooiOMAAAAJ
 
 # Build settings
 markdown: kramdown
+highlighter: rouge
 permalink: /:title/
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+  - jekyll-sitemap
+  - jekyll-redirect-from
 
 # Blog collection
 collections:
@@ -22,7 +41,15 @@ collections:
     output: true
     permalink: /blogs/:name/
 
+feed:
+  collections:
+    - blogs
+
 defaults:
+  - scope:
+      path: ""
+    values:
+      image: /assets/og.png   # link-card preview (jekyll-seo-tag)
   - scope:
       path: ""
       type: blogs
@@ -34,20 +61,15 @@ exclude:
   - Gemfile
   - Gemfile.lock
   - README.md
+  - vendor/
 
-# Navigation
+# Navigation ("Writing" is hidden until there is at least one published post)
 navigation:
   - title: Home
     url: /
-  - title: About
-    url: /about/
-  - title: Research
-    url: /research/
+  - title: Work
+    url: /work/
   - title: Publications
     url: /publications/
-  - title: Blogs
+  - title: Writing
     url: /blogs/
-  - title: Experience
-    url: /experience/
-  - title: CV
-    url: /cv/

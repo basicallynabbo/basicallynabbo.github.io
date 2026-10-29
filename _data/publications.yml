@@ -1,0 +1,27 @@
+# Book chapters. `selected: true` also shows the entry on the homepage.
+- title: "Artificial Intelligence-Powered Molecular Docking: A Promising Tool for Rational Drug Design"
+  authors: "<strong>N.K. Borah</strong>, Y. Tripathi, A. Tanwar, D. Tiwari, A. Sinha, S. Sharma, N. Jabalia, R. Jakhmola Mani, S. Santoshi, H. Bansal"
+  venue: "In: Artificial Intelligence and Machine Learning in Drug Design and Development, Wiley, 2024"
+  year: 2024
+  doi: "10.1002/9781394234196.ch6"
+  selected: true
+
+- title: "A Comprehensive and Intricate Dynamics of Aspergillus: Implications, Therapeutic Challenges, and Drug Resistance"
+  authors: "<strong>N.K. Borah</strong>, Y. Tripathi, A. Parashar, S. Santoshi, H. Bansal"
+  venue: "In: Recent Advances in Human Fungal Diseases: Progress and Prospects, Springer, 2024, pp. 427-455"
+  year: 2024
+  doi: "10.1007/978-981-97-4909-6_17"
+  selected: true
+
+- title: "From Enzyme to Predictors: Serine Proteases in Cancer Diagnosis and Prognosis"
+  authors: "S. Bose, M.A. Azad, <strong>N.K. Borah</strong>, N. Kaur"
+  venue: "In: Pathophysiological Aspects of Proteases in Cancer, Academic Press, 2025, pp. 223-237"
+  year: 2025
+  doi: "10.1016/B978-0-443-30098-1.00012-5"
+  selected: true
+
+- title: "Medicinal and Aromatic Plant Cultivation, Improvement and Conservation for Sustainable Development"
+  authors: "S. Shukla, D. Patra, A. Sinha, R. Saha, Y. Tripathi, <strong>N.K. Borah</strong>, S.K. Shukla"
+  venue: "In: Industrial Crops Improvement: Biotechnological Approaches for Sustainable Agricultural Development, Springer, 2025, pp. 183-204"
+  year: 2025
+  doi: "10.1007/978-3-031-75937-6_11"
