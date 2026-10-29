@@ -6,10 +6,20 @@
   <title>{% if page.title %}{{ page.title }} | {% endif %}{{ site.title }}</title>
   <meta name="description" content="{{ site.description }}">
 
+  <!-- Theme: set before first paint to avoid a flash -->
+  <script>
+    (function () {
+      var t = null;
+      try { t = localStorage.getItem('theme'); } catch (e) {}
+      if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
   <!-- Styles -->
   <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
@@ -22,14 +32,25 @@
   <!-- RSS -->
   <link rel="alternate" type="application/rss+xml" title="{{ site.title }}" href="{{ '/feed.xml' | relative_url }}">
 </head>
-<body>
+<body{% if page.url == "/" %} class="home"{% endif %}>
+  {% if page.url == "/" %}<canvas id="protein-canvas" aria-hidden="true"></canvas>{% endif %}
+
   <header>
     <div class="container header-inner">
       <a href="{{ '/' | relative_url }}" class="site-title">{{ site.title }}</a>
-      <nav>
+      <div class="header-actions">
+        <button class="icon-button theme-toggle" type="button" aria-label="Toggle dark mode">
+          <span class="theme-icon-light" aria-hidden="true">☀</span>
+          <span class="theme-icon-dark" aria-hidden="true">☾</span>
+        </button>
+        <button class="icon-button nav-toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="site-nav">
+          <span class="nav-toggle-bar" aria-hidden="true"></span>
+        </button>
+      </div>
+      <nav id="site-nav">
         <ul>
           {% for item in site.navigation %}
-          <li><a href="{{ item.url | relative_url }}" {% if page.url == item.url %}class="active"{% endif %}>{{ item.title }}</a></li>
+          <li><a href="{{ item.url | relative_url }}" {% if page.url == item.url %}class="active" aria-current="page"{% endif %}>{{ item.title }}</a></li>
           {% endfor %}
         </ul>
       </nav>
@@ -44,9 +65,27 @@
 
   <footer>
     <div class="container">
-      <p>&copy; {{ site.time | date: '%Y' }} {{ site.author }}. All rights reserved.</p>
-      <p>Last updated: {{ site.time | date: '%B %Y' }}</p>
+      <p>&copy; {{ site.time | date: '%Y' }} {{ site.author }} · Last updated {{ site.time | date: '%B %Y' }}</p>
     </div>
   </footer>
+
+  <script>
+    (function () {
+      var root = document.documentElement;
+      document.querySelector('.theme-toggle').addEventListener('click', function () {
+        var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', next);
+        try { localStorage.setItem('theme', next); } catch (e) {}
+        document.dispatchEvent(new Event('themechange'));
+      });
+
+      var toggle = document.querySelector('.nav-toggle');
+      toggle.addEventListener('click', function () {
+        var open = document.body.classList.toggle('nav-open');
+        toggle.setAttribute('aria-expanded', open);
+      });
+    })();
+  </script>
+  {% if page.url == "/" %}<script defer src="{{ '/assets/js/protein.js' | relative_url }}"></script>{% endif %}
 </body>
 </html>
