@@ -1,14 +1,55 @@
 ---
 layout: default
 ---
-<article class="page">
-  {% if page.title and page.show_title != false %}
-  <h1>{{ page.title }}</h1>
-  {% endif %}
+{% assign words = content | strip_html | number_of_words %}
+{% assign minutes = words | divided_by: 200 | plus: 1 %}
+<article class="page post">
+  <a class="back-link" href="{{ '/blogs/' | relative_url }}">← Writing</a>
+  <h1 class="post-title">{{ page.title }}</h1>
+  <p class="post-meta">
+    {% if page.date %}<time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%B %-d, %Y" }}</time> · {% endif %}{{ minutes }} min read
+  </p>
 
-  {% if page.date %}
-  <p class="pub-journal">{{ page.date | date: "%B %d, %Y" }}</p>
-  {% endif %}
+  <nav class="toc" aria-label="Contents" hidden>
+    <p class="toc-title">Contents</p>
+    <ol></ol>
+  </nav>
 
-  {{ content }}
+  <div class="post-body">
+    {{ content }}
+  </div>
 </article>
+
+<script>
+  // Table of contents from h2/h3, shown only for posts with 3+ headings.
+  (function () {
+    var heads = document.querySelectorAll('.post-body h2[id], .post-body h3[id]');
+    if (heads.length < 3) return;
+    var toc = document.querySelector('.toc'), list = toc.querySelector('ol'), lastTop = null;
+    heads.forEach(function (h) {
+      var li = document.createElement('li'), a = document.createElement('a');
+      a.href = '#' + h.id;
+      a.textContent = h.textContent;
+      li.appendChild(a);
+      if (h.tagName === 'H3' && lastTop) {
+        var sub = lastTop.querySelector('ul') || lastTop.appendChild(document.createElement('ul'));
+        sub.appendChild(li);
+      } else {
+        list.appendChild(li);
+        lastTop = li;
+      }
+    });
+    toc.hidden = false;
+  })();
+</script>
+
+{% if page.math %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.querySelector('.post-body'), {delimiters: [
+    {left: '\\[', right: '\\]', display: true},
+    {left: '\\(', right: '\\)', display: false},
+    {left: '$$', right: '$$', display: true}
+  ]});"></script>
+{% endif %}
