@@ -24,22 +24,23 @@
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,0,0;0,9..144,300..700,0,1;1,9..144,300..700,0,1&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..600&family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
 
   <!-- Styles -->
   <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
 </head>
 <body{% if page.protein %} class="home"{% endif %}>
   <a class="skip-link" href="#main">Skip to content</a>
+  <div class="grain" aria-hidden="true"></div>
   {% if page.protein %}<canvas id="protein-canvas" aria-hidden="true"{% if page.protein == "aggregate" %} data-mode="aggregate"{% endif %}></canvas>{% endif %}
 
   <header>
     <div class="container header-inner">
-      <a href="{{ '/' | relative_url }}" class="site-title">{{ site.title }}</a>
+      <a href="{{ '/' | relative_url }}" class="site-title" aria-label="{{ site.title }}, home">n.borah<span class="cursor-blink" aria-hidden="true">_</span></a>
       <div class="header-actions">
         <button class="icon-button theme-toggle" type="button" aria-label="Toggle dark mode">
-          <span class="theme-icon-light" aria-hidden="true">☀</span>
-          <span class="theme-icon-dark" aria-hidden="true">☾</span>
+          <svg class="theme-icon-light" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg class="theme-icon-dark" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
         </button>
         <button class="icon-button nav-toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="site-nav">
           <span class="nav-toggle-bar" aria-hidden="true"></span>
@@ -52,7 +53,7 @@
           {% assign active = false %}
           {% if page.url == item.url %}{% assign active = true %}{% endif %}
           {% if item.url == "/blogs/" and page.collection == "blogs" %}{% assign active = true %}{% endif %}
-          <li><a href="{{ item.url | relative_url }}"{% if active %} class="active" aria-current="page"{% endif %}>{{ item.title }}</a></li>
+          <li><a href="{{ item.url | relative_url }}"{% if active %} class="active" aria-current="page"{% endif %}>{{ item.title | downcase }}</a></li>
           {% endfor %}
         </ul>
       </nav>
@@ -67,7 +68,8 @@
 
   <footer>
     <div class="container">
-      <p>&copy; {{ site.time | date: '%Y' }} {{ site.author.name }} · Last updated {{ site.time | date: '%B %Y' }}</p>
+      <p>&copy; {{ site.time | date: '%Y' }} {{ site.author.name | downcase }} · updated {{ site.time | date: '%Y.%m' }}</p>
+      <p class="footer-seq" aria-hidden="true">MQIFVKTLTG · the first ten residues of ubiquitin</p>
     </div>
   </footer>
 
@@ -79,6 +81,38 @@
         root.setAttribute('data-theme', next);
         try { localStorage.setItem('theme', next); } catch (e) {}
         document.dispatchEvent(new Event('themechange'));
+      });
+
+      // Staggered scroll reveals. Classes are added here, so without JS nothing is hidden.
+      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var targets = document.querySelectorAll('.page > *:not(.profile-section), .profile-info > *, .profile-photo, .section > *, .project-card');
+      if ('IntersectionObserver' in window && !reduce) {
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+          });
+        }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+        var groups = new Map();
+        targets.forEach(function (el) {
+          if (el.closest('.reveal') || el.hidden) return;
+          var n = groups.get(el.parentElement) || 0;
+          groups.set(el.parentElement, n + 1);
+          el.classList.add('reveal');
+          el.style.setProperty('--d', Math.min(n * 0.07, 0.5).toFixed(2) + 's');
+          io.observe(el);
+        });
+      }
+
+      // Decorative sequence: ubiquitin, with the Ile44 hydrophobic patch (L8, I44, V70) marked.
+      var SEQ = 'MQIFVKTLTGKTITLEVEPSDTIENVKAKIQDKEGIPPDQQRLIFAGKQLEDGRTLSDYNIQKESTLHLVLRLRGG';
+      var HOT = { 7: 1, 43: 1, 69: 1 };
+      document.querySelectorAll('.sequence-divider').forEach(function (div) {
+        var out = '';
+        for (var i = 0; i < SEQ.length * 2; i++) {
+          var k = i % SEQ.length, ch = SEQ.charAt(k);
+          out += HOT[k] ? '<span class="hot">' + ch + '</span>' : ch;
+        }
+        div.innerHTML = out;
       });
 
       var toggle = document.querySelector('.nav-toggle');

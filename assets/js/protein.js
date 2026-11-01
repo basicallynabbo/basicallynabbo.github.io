@@ -13,6 +13,8 @@
             native shape   soft springs to native distances within the fragment
    Swim:  the head is pushed along a heading that drifts with smooth noise;
           heads steer away from walls, from other chains and, gently, from the cursor.
+   Gather: click the water and the school converges on that point and circles
+          it for a few seconds, then disperses again.
    404:   chains attract each other and clump, like an aggregate.
    ========================================== */
 (function () {
@@ -54,6 +56,8 @@
   var colors = {};
   var chains = [];
   var pointer = null;        // {x, y} in px, or null when the cursor is away
+  var gather = null;         // {x, y, until} in px / ms, set by a click on the water
+  var GATHER_MS = 6000;
   var running = false, visible = true;
 
   function nativeDist(i, j) {
@@ -169,9 +173,22 @@
       }
     }
 
+    // Gather: steer toward the clicked point, then circle it (tangential pull
+    // once close), so the school forms a loose ring instead of a pile.
+    var gathering = gather && t < gather.until;
+    if (gather && !gathering) gather = null;
+    if (gathering) {
+      var gx = gather.x - hx, gy = gather.y - hy, gd = Math.sqrt(gx * gx + gy * gy) || 1;
+      var ring = 70 + 18 * k, side = k % 2 ? 1 : -1;
+      var pull = Math.max(-1, Math.min(1, (gd - ring) / 120));
+      sx += gx / gd * pull * 4 + side * -gy / gd * 2;
+      sy += gy / gd * pull * 4 + side * gx / gd * 2;
+      c.boost = Math.max(c.boost, Math.min(1.2, gd / 200));
+    }
+
     // Gentle nudge away from the cursor, like a fish avoiding a hand.
     // Distance is measured to the chain's nearest bead, so touching any part of it counts.
-    if (pointer) {
+    if (pointer && !gathering) {
       var px = 0, py = 0;
       d = Infinity;
       for (i = 0; i < c.n; i++) {
@@ -338,6 +355,13 @@
 
   window.addEventListener('pointermove', function (e) { pointer = { x: e.clientX, y: e.clientY }; }, { passive: true });
   window.addEventListener('pointerdown', function (e) { pointer = { x: e.clientX, y: e.clientY }; }, { passive: true });
+  // Click on empty page (not a link, button or text you might be selecting) to gather the school.
+  window.addEventListener('click', function (e) {
+    if (e.button !== 0 || e.target.closest('a, button, input, textarea, select, label, img, summary')) return;
+    var sel = window.getSelection && window.getSelection();
+    if (sel && String(sel).length) return;
+    gather = { x: e.clientX, y: e.clientY, until: performance.now() + GATHER_MS };
+  });
   document.addEventListener('pointerleave', function () { pointer = null; });
   window.addEventListener('blur', function () { pointer = null; });
   window.addEventListener('resize', function () {
@@ -352,13 +376,11 @@
     if (reduceMotion) draw();
   });
 
-  // Only animate while the hero is on screen; fade the canvas out below it.
+  // The school swims behind the whole page; below the hero it dims so text stays easy to read.
   var hero = document.querySelector('.profile-section');
   if (hero && 'IntersectionObserver' in window) {
     new IntersectionObserver(function (entries) {
-      visible = entries[0].isIntersecting;
-      canvas.classList.toggle('is-hidden', !visible);
-      if (visible) start(); else stop();
+      canvas.classList.toggle('is-dim', !entries[0].isIntersecting);
     }).observe(hero);
   }
 
