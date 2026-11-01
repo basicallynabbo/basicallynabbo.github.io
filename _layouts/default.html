@@ -10,7 +10,8 @@
   <script>
     (function () {
       var t = null;
-      try { t = localStorage.getItem('theme'); } catch (e) {}
+      // 'theme' was the pre-automatic key; drop it so old clicks don't pin the theme forever.
+      try { localStorage.removeItem('theme'); t = localStorage.getItem('theme-choice'); } catch (e) {}
       if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
       document.documentElement.setAttribute('data-theme', t);
     })();
@@ -77,7 +78,7 @@
       var root = document.documentElement;
       var systemDark = window.matchMedia('(prefers-color-scheme: dark)');
       function systemTheme() { return systemDark.matches ? 'dark' : 'light'; }
-      function savedTheme() { try { return localStorage.getItem('theme'); } catch (e) { return null; } }
+      function savedTheme() { try { return localStorage.getItem('theme-choice'); } catch (e) { return null; } }
       function applyTheme(t) {
         if (root.getAttribute('data-theme') === t) return;
         root.setAttribute('data-theme', t);
@@ -88,8 +89,8 @@
       document.querySelector('.theme-toggle').addEventListener('click', function () {
         var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
         try {
-          if (next === systemTheme()) localStorage.removeItem('theme');
-          else localStorage.setItem('theme', next);
+          if (next === systemTheme()) localStorage.removeItem('theme-choice');
+          else localStorage.setItem('theme-choice', next);
         } catch (e) {}
         applyTheme(next);
       });
