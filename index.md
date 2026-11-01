@@ -33,7 +33,7 @@ protein: true
 
 <div class="currently">
   <span class="currently-label">Currently</span>
-  <span>Founding Computational Biologist at <strong>LiteFold</strong> · Master's thesis in the Computational Structural Biology Lab, CSIR-IGIB (Dr. Lipi Thukral)</span>
+  <span>Founding Computational Biologist at <strong>LiteFold</strong></span>
 </div>
 
 ## Selected publications
