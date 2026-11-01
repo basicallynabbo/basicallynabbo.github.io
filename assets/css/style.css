@@ -1085,35 +1085,11 @@ footer p {
   color: var(--ink-soft);
 }
 
-/* Writing list: text + cover thumbnail */
-.blog-item {
-  display: flex;
-  gap: 1.5rem;
-  align-items: center;
-}
-
-.blog-text {
-  flex: 1;
-  min-width: 0;
-}
-
+/* Writing list */
 .blog-excerpt {
   margin-top: 6px;
   font-size: 1rem;
   color: var(--ink-soft);
-}
-
-.blog-thumb {
-  flex: 0 0 150px;
-}
-
-.blog-thumb img {
-  display: block;
-  width: 150px;
-  height: 100px;
-  object-fit: cover;
-  border-radius: 4px;
-  border: 1px solid var(--line);
 }
 
 .blog-more {
@@ -1269,19 +1245,6 @@ pre code {
 
   .pub-item {
     padding-left: 44px;
-  }
-
-  .blog-item {
-    flex-direction: column-reverse;
-    align-items: stretch;
-    gap: 1rem;
-  }
-
-  .blog-thumb,
-  .blog-thumb img {
-    flex-basis: auto;
-    width: 100%;
-    height: 160px;
   }
 }
 
