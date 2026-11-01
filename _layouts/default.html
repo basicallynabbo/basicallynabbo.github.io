@@ -75,12 +75,29 @@
   <script>
     (function () {
       var root = document.documentElement;
+      var systemDark = window.matchMedia('(prefers-color-scheme: dark)');
+      function systemTheme() { return systemDark.matches ? 'dark' : 'light'; }
+      function savedTheme() { try { return localStorage.getItem('theme'); } catch (e) { return null; } }
+      function applyTheme(t) {
+        if (root.getAttribute('data-theme') === t) return;
+        root.setAttribute('data-theme', t);
+        document.dispatchEvent(new Event('themechange'));
+      }
+
+      // Toggle: picking the theme the system already wants returns to automatic mode.
       document.querySelector('.theme-toggle').addEventListener('click', function () {
         var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-        root.setAttribute('data-theme', next);
-        try { localStorage.setItem('theme', next); } catch (e) {}
-        document.dispatchEvent(new Event('themechange'));
+        try {
+          if (next === systemTheme()) localStorage.removeItem('theme');
+          else localStorage.setItem('theme', next);
+        } catch (e) {}
+        applyTheme(next);
       });
+
+      // Automatic mode: follow the system live (e.g. phone switching to dark at sunset).
+      function onSystemChange() { if (!savedTheme()) applyTheme(systemTheme()); }
+      if (systemDark.addEventListener) systemDark.addEventListener('change', onSystemChange);
+      else if (systemDark.addListener) systemDark.addListener(onSystemChange);
 
       // Email button: copy the address instead of opening a mail app.
       document.querySelectorAll('.copy-email').forEach(function (btn) {
