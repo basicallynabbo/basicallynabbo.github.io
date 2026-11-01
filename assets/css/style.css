@@ -1129,6 +1129,15 @@ pre code {
   max-width: 36rem;
 }
 
+.not-found .profile-kicker {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--ink-soft);
+  margin: 0 0 28px;
+}
+
 /* Scroll reveal (classes added by default.html) */
 .reveal {
   opacity: 0;

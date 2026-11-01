@@ -2,7 +2,7 @@
 """Import Medium posts (from the RSS feed) into the Jekyll `_blogs` collection.
 
 - Each post becomes _blogs/<slug>.md with front matter + the post HTML.
-- Images are downloaded to images/blogs/<slug>/ and links rewritten.
+- Images are downloaded to assets/images/blogs/<slug>/ and links rewritten.
 - Posts that already exist are skipped, so manual edits are kept.
 
 Usage: python3 scripts/import_medium.py [--force]
@@ -20,7 +20,7 @@ from email.utils import parsedate_to_datetime
 FEED = "https://medium.com/feed/@nabbo"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 POSTS_DIR = os.path.join(ROOT, "_blogs")
-IMG_DIR = os.path.join(ROOT, "images", "blogs")
+IMG_DIR = os.path.join(ROOT, "assets", "images", "blogs")
 NS = {"content": "http://purl.org/rss/1.0/modules/content/"}
 UA = {"User-Agent": "Mozilla/5.0 (medium-import; +https://nabajitb.github.io)"}
 
@@ -94,7 +94,7 @@ def clean_body(body, slug):
         name = "%d.%s" % (count[0], ext_for(src, ctype))
         with open(os.path.join(IMG_DIR, slug, name), "wb") as f:
             f.write(data)
-        local = "/images/blogs/%s/%s" % (slug, name)
+        local = "/assets/images/blogs/%s/%s" % (slug, name)
         images.append(local)
         tag = tag.replace(src, local)
         return tag.replace("<img ", '<img loading="lazy" ', 1)
