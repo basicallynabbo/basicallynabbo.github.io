@@ -11,7 +11,7 @@ protein: true
       <span class="line">Nabajit</span>
       <span class="line">Borah</span>
     </h1>
-    <p class="profile-title">Founding Computational Biologist at <strong>LiteFold</strong>. I work with generative deep learning models to design biomolecules.</p>
+    <p class="profile-title">I work with generative deep learning models to design biomolecules.</p>
     <ul class="contact-links">
       <li><a href="mailto:nabajitkrb@gmail.com" aria-label="Email" title="Email"><span class="ico" style="--i: url('{{ '/images/icons/gmail.svg' | relative_url }}')"></span></a></li>
       <li><a href="https://github.com/nabajitb" aria-label="GitHub" title="GitHub"><span class="ico" style="--i: url('{{ '/images/icons/github.svg' | relative_url }}')"></span></a></li>
