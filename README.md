@@ -1,6 +1,6 @@
-# basicallynabbo.github.io
+# nabajitb.github.io
 
-https://basicallynabbo.github.io (Jekyll on GitHub Pages)
+https://nabajitb.github.io (Jekyll on GitHub Pages)
 
 ## Editing content
 - **Publications / talks:** `_data/publications.yml`, `_data/talks.yml`. Set `selected: true` to also show a paper on the homepage.
