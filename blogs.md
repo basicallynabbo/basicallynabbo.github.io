@@ -17,7 +17,6 @@ permalink: /blogs/
   {% if blog.excerpt %}<div class="blog-excerpt">{{ blog.excerpt | strip_html | truncate: 180 }}</div>{% endif %}
 </div>
 {% endfor %}
-<p class="blog-more">More on <a href="https://medium.com/{{ site.medium }}" rel="noopener">Medium</a>.</p>
 {% else %}
 <p>Nothing here yet. Posts are on the way.</p>
 {% endif %}
