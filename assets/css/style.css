@@ -1092,12 +1092,6 @@ footer p {
   color: var(--ink-soft);
 }
 
-.blog-more {
-  margin-top: 1.5rem;
-  font-size: 1rem;
-  color: var(--ink-soft);
-}
-
 .post-body blockquote {
   margin: 1.5rem 0;
   padding: 0.25rem 1.25rem;
