@@ -431,10 +431,6 @@ main {
   display: block;
 }
 
-.profile-name .mid {
-  color: var(--ink-soft);
-}
-
 .profile-name em {
   font-family: var(--font-body);
   font-style: italic;

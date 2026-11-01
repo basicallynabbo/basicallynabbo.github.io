@@ -8,7 +8,7 @@ protein: true
 <section class="profile-section">
   <div class="profile-info">
     <h1 class="profile-name">
-      <span class="line">Nabajit <span class="mid">(Kumar)</span></span>
+      <span class="line">Nabajit</span>
       <span class="line">Borah</span>
     </h1>
     <p class="profile-title">I work with generative deep learning models to design biomolecules.</p>
