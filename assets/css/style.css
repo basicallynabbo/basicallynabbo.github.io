@@ -772,6 +772,20 @@ main {
   border-bottom: 0;
 }
 
+/* Log lines are links, but read as text until hovered. */
+.news-item a {
+  color: var(--ink);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.news-item a:hover,
+.news-item a:focus-visible {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .news-date {
   display: flex;
   align-items: baseline;

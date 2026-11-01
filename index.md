@@ -45,22 +45,4 @@ protein: true
 
 ## Log
 
-<div class="section">
-  <div class="news-item">
-    <span class="news-date">June 2026</span>
-    <span>Joined LiteFold as Founding Computational Biologist</span>
-  </div>
-  <div class="news-item">
-    <span class="news-date">Dec 2025</span>
-    <span>Started Master Thesis guided by Dr. Lipi Thukral in Computational Structural Biology Lab, CSIR IGIB</span>
-  </div>
-  <!-- removed news item -->
-  <div class="news-item">
-    <span class="news-date">May 2025</span>
-    <span>Summer Intern under Dr. Mary Ekka, Biophysics Lab, CSIR IGIB</span>
-  </div>
-  <div class="news-item">
-    <span class="news-date">2025</span>
-    <span>3rd Place, Oral Presentation at FAVBS-2025</span>
-  </div>
-</div>
+{% include log.html limit=3 per_kind=2 %}

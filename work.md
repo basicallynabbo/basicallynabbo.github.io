@@ -18,53 +18,15 @@ redirect_from:
 
 ## Experience {#experience}
 
+{% for job in site.data.experience %}
 <div class="timeline-item">
   <div class="timeline-header">
-    <span class="timeline-title">Founding Computational Biologist</span>
-    <span class="timeline-date">June 2026 – Present</span>
+    <span class="timeline-title">{{ job.title }}</span>
+    <span class="timeline-date">{{ job.dates }}</span>
   </div>
-  <div class="timeline-place">LiteFold</div>
+  <div class="timeline-place">{{ job.place }}</div>
 </div>
-
-<div class="timeline-item">
-  <div class="timeline-header">
-    <span class="timeline-title">Master's Thesis</span>
-    <span class="timeline-date">Dec 2025 – Present</span>
-  </div>
-  <div class="timeline-place">CSIR–Institute of Genomics and Integrative Biology, Computational Structural Biology Lab (Dr. Lipi Thukral)</div>
-</div>
-
-<div class="timeline-item">
-  <div class="timeline-header">
-    <span class="timeline-title">Computational Biologist (Part-time)</span>
-    <span class="timeline-date">Sep 2025 – Dec 2025</span>
-  </div>
-  <div class="timeline-place">OpenBio AI, Remote</div>
-</div>
-
-<div class="timeline-item">
-  <div class="timeline-header">
-    <span class="timeline-title">Research Intern</span>
-    <span class="timeline-date">May 2025 – July 2025</span>
-  </div>
-  <div class="timeline-place">CSIR–Institute of Genomics and Integrative Biology, Biophysics Lab (Dr. Mary Ekka)</div>
-</div>
-
-<div class="timeline-item">
-  <div class="timeline-header">
-    <span class="timeline-title">Research Intern</span>
-    <span class="timeline-date">May 2024 – July 2024</span>
-  </div>
-  <div class="timeline-place">CSIR–Institute of Genomics and Integrative Biology, Biophysics Lab (Dr. Mary Ekka)</div>
-</div>
-
-<div class="timeline-item">
-  <div class="timeline-header">
-    <span class="timeline-title">In-House Research Intern</span>
-    <span class="timeline-date">May 2023 – July 2023</span>
-  </div>
-  <div class="timeline-place">Centre for Computational Biology and Bioinformatics, Amity Institute of Biotechnology</div>
-</div>
+{% endfor %}
 
 ## Projects {#projects}
 
