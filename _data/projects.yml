@@ -18,4 +18,4 @@
   where: "Amity Institute of Biotechnology"
   problem: "Find plant-derived compounds that act on Huntington's disease pathways."
   methods: [RNA-seq differential expression, STRING-DB, Cytoscape, LigPrep, AutoDock, PyMOL]
-  outcome: "Screened 150+ phytochemicals and identified 3 potential drug candidates. Presented at APB-2023 (2nd place)."
+  outcome: "Screened 150+ phytochemicals and identified 3 potential drug candidates. Presented at APB-2024 (2nd place)."
