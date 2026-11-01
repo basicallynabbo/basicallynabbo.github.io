@@ -10,12 +10,12 @@
 :root {
   --paper: #f7f3ec;
   --paper-header: rgba(247, 243, 236, 0.82);
-  --ink: #1f1b16;
-  --ink-soft: #6e6759;
-  --line: #d9d2c4;
-  --accent: #16687a;
-  --accent-ink: #0e4e5c;
-  --seal: #b13a2c;
+  --ink: #15120e;
+  --ink-soft: #575145;
+  --line: #c4bba9;
+  --accent: #0f5868;
+  --accent-ink: #0a4552;
+  --seal: #9a2f22;
   --surface: rgba(31, 27, 22, 0.04);
 
   /* Protein chain colors (secondary structure), read by protein.js */
@@ -95,6 +95,11 @@ body {
   color: var(--ink);
   background: var(--paper);
   -webkit-font-smoothing: antialiased;
+}
+
+/* Light mode: a heavier body weight reads with more contrast on paper. */
+:root:not([data-theme="dark"]) body {
+  font-weight: 400;
 }
 
 img {
