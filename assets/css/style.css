@@ -417,15 +417,6 @@ main {
   min-width: 0;
 }
 
-.profile-kicker {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-  color: var(--ink-soft);
-  margin: 0 0 28px;
-}
-
 .profile-name {
   font-family: var(--font-display);
   font-variation-settings: 'opsz' 144, 'WONK' 1;

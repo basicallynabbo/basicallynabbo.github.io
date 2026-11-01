@@ -7,7 +7,6 @@ protein: true
 
 <section class="profile-section">
   <div class="profile-info">
-    <p class="profile-kicker">field notes · protein structure × ai</p>
     <h1 class="profile-name">
       <span class="line">Nabajit</span>
       <span class="line">Borah</span>
