@@ -1,21 +1,17 @@
 /* ==========================================
-   A small school of peptide chains, swimming on their own.
+   A school of small folded proteins.
 
-   Each chain is a real fragment of ubiquitin (PDB 1UBQ, Cα only), so it
-   carries its native local structure: the β-hairpin stays a hairpin, the
-   α-helix stays a helix. Simulated in 3D (units: Å), drawn as an
-   orthographic projection.
+   Each swimmer is a real Cα trace from ubiquitin (PDB 1UBQ): the whole
+   76-residue fold, or one of its halves. It keeps its native 3D shape,
+   tumbles slowly, and is drawn as a tube coloured by secondary structure
+   (helix / strand / loop), shaded by depth.
 
-   Body:  Verlet integration + position-based constraints
-            bonds          Cα–Cα = 3.8 Å
-            bend           d(i, i+2) ≥ 5.2 Å  (virtual bond angle ≥ ~87°)
-            excluded vol.  non-bonded Cα ≥ 3.9 Å
-            native shape   soft springs to native distances within the fragment
-   Swim:  the head is pushed along a heading that drifts with smooth noise;
-          heads steer away from walls, from other chains and, gently, from the cursor.
-   Gather: click the water and the school converges on that point and circles
-          it for a few seconds, then disperses again.
-   404:   chains attract each other and clump, like an aggregate.
+   The school moves as boids (Reynolds, 1987): separation, alignment and
+   cohesion between neighbours, plus soft walls.
+
+   Click the empty page: the school streams over and circles that point.
+   data-sparse: fewer proteins (subpages, so reading stays easy).
+   data-mode="aggregate" (404): proteins collapse into one clump and stay there.
    ========================================== */
 (function () {
   'use strict';
@@ -24,11 +20,11 @@
   if (!canvas || !canvas.getContext) return;
   var ctx = canvas.getContext('2d');
   var AGGREGATE = canvas.getAttribute('data-mode') === 'aggregate';
+  var SPARSE = canvas.hasAttribute('data-sparse');
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // Chain A of 1UBQ (Vijay-Kumar, Bugg & Cook, 1987). Cα only, centred and
-  // rotated onto principal axes. SS from the PDB HELIX/SHEET records:
-  // E β-strand, H α-helix, G 3₁₀-helix, L loop.
-  var SEQ = 'MQIFVKTLTGKTITLEVEPSDTIENVKAKIQDKEGIPPDQQRLIFAGKQLEDGRTLSDYNIQKESTLHLVLRLRGG';
+  // Chain A of 1UBQ (Vijay-Kumar, Bugg & Cook, 1987), Cα only, in Å.
+  // SS from the PDB HELIX/SHEET records: E strand, H α-helix, G 3₁₀-helix, L loop.
   var SS = 'EEEEEEELLEEEEEEEELLLLLHHHHHHHHHHHHLLLLLEEEEEELLEEELLLLLGGGGLLLLEEEEEEEEELLLL';
   var XYZ = [
     11.9, -6, -3.7, 8.9, -7.9, -2.5, 6.5, -6.4, 0.1, 3.3, -7.7, 1.6, -0, -5.8, 1.8, -2.4, -7.3, 4.4, -6.1, -6.5, 4, -8.8, -6.5, 6.6,
@@ -42,341 +38,223 @@
     7.9, -5.4, 5.1, 4.1, -5.7, 5.5, 1.9, -2.6, 5, -1.7, -2.7, 6.2, -4.5, -1.7, 3.8, -7.7, -0.2, 5.3, -10.5, 0.7, 2.9, -12.3, 4, 3.2,
     -15.6, 3.7, 1.1, -17.4, 6.9, -0.1, -20.9, 6.5, 1.2, -22.7, 4.8, 4.1
   ];
+  // Folds the school is made of, 0-based [start, end): whole ubiquitin,
+  // N-terminal half (β-hairpin + α-helix), C-terminal half (β-sheet + 3₁₀).
+  var FOLDS = [[0, 76], [0, 36], [38, 76], [0, 76]];
 
-  // Fragments, 0-based [start, end): β-hairpin 1–17, α1 21–36, β3–β4 40–50,
-  // C-terminal strand 63–76, 3₁₀ segment 52–62.
-  var FRAGMENTS = [[0, 17], [20, 36], [39, 50], [62, 76], [51, 62]];
+  var MAX_FORCE = 0.035;     // steering acceleration cap, px/frame²
+  var FOCUS_MS = 6000;       // how long a click gathers the school
 
-  var BOND = 3.8, MIN_NB = 3.9, MIN_I2 = 5.2, CONTACT = 8;
-  var DAMP = 0.94, ITER = 4;
-  var SPEED = 32;            // cruise speed, px/s
-  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  var w = 0, h = 0, dpr = 1, scale = 3;   // scale: px per Å
+  var W = 0, H = 0, dpr = 1;
   var colors = {};
-  var chains = [];
-  var pointer = null;        // {x, y} in px, or null when the cursor is away
-  var gather = null;         // {x, y, until} in px / ms, set by a click on the water
-  var GATHER_MS = 6000;
-  var running = false, visible = true;
+  var school = [];
+  var focus = null;          // {x, y, r, until}
+  var running = false;
+  var last = 0;
 
-  function nativeDist(i, j) {
-    var dx = XYZ[3 * i] - XYZ[3 * j], dy = XYZ[3 * i + 1] - XYZ[3 * j + 1], dz = XYZ[3 * i + 2] - XYZ[3 * j + 2];
-    return Math.sqrt(dx * dx + dy * dy + dz * dz);
+  function settings() {
+    var s = Math.min(W, H), o;
+    if (s < 500) o = { count: 5, scale: 2.2 };
+    else if (s < 900) o = { count: 8, scale: 2.8 };
+    else o = { count: 10, scale: 3.4 };
+    if (SPARSE) o.count = Math.max(3, Math.round(o.count * 0.4));
+    return o;
   }
 
-  function makeChain(frag, k, cx, cy) {
-    var a = frag[0], n = frag[1] - frag[0], c = {
-      res: a, n: n, ss: SS.slice(a, a + n),
-      px: new Float64Array(n), py: new Float64Array(n), pz: new Float64Array(n),
-      ox: new Float64Array(n), oy: new Float64Array(n), oz: new Float64Array(n),
-      springs: [],
-      seed: k * 2.39996,     // golden angle: spreads phases evenly
-      heading: Math.random() * Math.PI * 2,
-      boost: 0
-    };
-    // Centre the fragment's native coordinates on (cx, cy).
-    var mx = 0, my = 0, mz = 0, i, j;
+  function rand(a, b) { return a + Math.random() * (b - a); }
+
+  // Native coordinates of a fold, centred on its own centroid.
+  function foldCoords(f) {
+    var a = f[0], n = f[1] - f[0], x = new Float32Array(n), y = new Float32Array(n), z = new Float32Array(n);
+    var mx = 0, my = 0, mz = 0, i;
     for (i = 0; i < n; i++) { mx += XYZ[3 * (a + i)]; my += XYZ[3 * (a + i) + 1]; mz += XYZ[3 * (a + i) + 2]; }
     mx /= n; my /= n; mz /= n;
-    for (i = 0; i < n; i++) {
-      c.px[i] = c.ox[i] = cx / scale + XYZ[3 * (a + i)] - mx;
-      c.py[i] = c.oy[i] = cy / scale + XYZ[3 * (a + i) + 1] - my;
-      c.pz[i] = c.oz[i] = XYZ[3 * (a + i) + 2] - mz;
-    }
-    // Native shape: local helix/strand geometry is stiff, other contacts are soft.
-    for (i = 0; i < n; i++) {
-      for (j = i + 2; j < n; j++) {
-        var d0 = nativeDist(a + i, a + j), same = c.ss[i] !== 'L' && c.ss[i] === c.ss[j] && SS.slice(a + i, a + j + 1).indexOf('L') < 0;
-        if (same && j - i <= 4) c.springs.push(i, j, d0, 0.5);
-        else if (j - i >= 3 && d0 < CONTACT) c.springs.push(i, j, d0, 0.03);
+    for (i = 0; i < n; i++) { x[i] = XYZ[3 * (a + i)] - mx; y[i] = XYZ[3 * (a + i) + 1] - my; z[i] = XYZ[3 * (a + i) + 2] - mz; }
+    return { n: n, ss: SS.slice(a, a + n), x: x, y: y, z: z };
+  }
+
+  function makeProtein(scale, k) {
+    var fold = foldCoords(FOLDS[k % FOLDS.length]);
+    var depth = Math.random();                                  // 0 far, 1 near
+    var a = rand(0, Math.PI * 2), speed = rand(0.35, 0.8) * (0.8 + 0.4 * depth);
+    return {
+      fold: fold, depth: depth,
+      scale: scale * (0.65 + 0.55 * depth),                     // px per Å
+      x: rand(0.1, 0.9) * W, y: rand(0.1, 0.9) * H,
+      vx: Math.cos(a) * speed, vy: Math.sin(a) * speed, maxSpeed: speed,
+      // Orientation (Euler angles) and a slow, steady tumble.
+      rx: rand(0, 6.3), ry: rand(0, 6.3), rz: rand(0, 6.3),
+      wx: rand(-1, 1) * 0.004, wy: rand(-1, 1) * 0.006, wz: rand(-1, 1) * 0.003,
+      px: new Float32Array(fold.n), py: new Float32Array(fold.n), pz: new Float32Array(fold.n)
+    };
+  }
+
+  function limit(x, y, m) {
+    var d = Math.sqrt(x * x + y * y);
+    return d > m ? [x / d * m, y / d * m] : [x, y];
+  }
+
+  // ---- Steering (one boid) --------------------------------------------
+  function steer(c, k) {
+    var sepR = 170, nbrR = 300, sepX = 0, sepY = 0, sepN = 0;
+    var aliX = 0, aliY = 0, cohX = 0, cohY = 0, cohN = 0, nbrN = 0, v, i;
+
+    for (i = 0; i < school.length; i++) {
+      var o = school[i];
+      if (o === c) continue;
+      var dx = c.x - o.x, dy = c.y - o.y, d2 = dx * dx + dy * dy;
+      if (d2 < sepR * sepR && d2 > 0) {
+        var d = Math.sqrt(d2);
+        sepX += dx / d * (1 - d / sepR); sepY += dy / d * (1 - d / sepR); sepN++;
       }
-    }
-    return c;
-  }
-
-  function readColors() {
-    var s = getComputedStyle(document.documentElement);
-    function v(name, fallback) { return s.getPropertyValue(name).trim() || fallback; }
-    colors.E = v('--ss-strand', '#e0a526');
-    colors.H = colors.G = v('--ss-helix', '#e05a47');
-    colors.L = v('--ss-loop', '#8a9ab0');
-    colors.backbone = v('--ss-backbone', 'rgba(120,130,150,0.35)');
-  }
-
-  function resize() {
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
-    w = window.innerWidth;
-    h = window.innerHeight;
-    canvas.width = Math.round(w * dpr);
-    canvas.height = Math.round(h * dpr);
-    canvas.style.width = w + 'px';
-    canvas.style.height = h + 'px';
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  }
-
-  function init() {
-    resize();
-    readColors();
-    scale = Math.max(3, Math.min(5, w / 256));
-    var count = w < 760 ? 3 : w < 1180 ? 4 : 5;
-    chains = [];
-    for (var k = 0; k < count; k++) {
-      // Spread the school across the viewport, slightly jittered.
-      var cx = w * (0.15 + 0.7 * (k + 0.5) / count) + (Math.random() - 0.5) * 60;
-      var cy = h * (0.25 + 0.5 * ((k * 0.618) % 1));
-      chains.push(makeChain(FRAGMENTS[k], k, cx, cy));
-    }
-  }
-
-  // ---- Constraints ----------------------------------------------------
-  // kind: 0 = keep distance d0, 1 = at least d0. The head is heavy (inverse mass
-  // HEAD_INV), so corrections mostly move the body and the head leads the swim.
-  var HEAD_INV = 0.15;
-  function constrain(c, i, j, d0, k, kind) {
-    var dx = c.px[j] - c.px[i], dy = c.py[j] - c.py[i], dz = c.pz[j] - c.pz[i];
-    var d2 = dx * dx + dy * dy + dz * dz;
-    if (kind === 1 && d2 >= d0 * d0) return;
-    var wi = i === 0 ? HEAD_INV : 1, wj = j === 0 ? HEAD_INV : 1;
-    var d = Math.sqrt(d2) || 1e-6, s = k * (d - d0) / d / (wi + wj);
-    c.px[i] += dx * s * wi; c.py[i] += dy * s * wi; c.pz[i] += dz * s * wi;
-    c.px[j] -= dx * s * wj; c.py[j] -= dy * s * wj; c.pz[j] -= dz * s * wj;
-  }
-
-  function solve(c) {
-    var a, b, n = c.n, sp = c.springs;
-    for (var it = 0; it < ITER; it++) {
-      for (a = 0; a < sp.length; a += 4) constrain(c, sp[a], sp[a + 1], sp[a + 2], sp[a + 3], 0);
-      for (a = 0; a < n - 2; a++) constrain(c, a, a + 2, MIN_I2, 1, 1);
-      for (a = 0; a < n; a++) for (b = a + 3; b < n; b++) constrain(c, a, b, MIN_NB, 1, 1);
-      for (a = 0; a < n - 1; a++) constrain(c, a, a + 1, BOND, 1, 0);
-    }
-  }
-
-  // ---- Swimming -------------------------------------------------------
-  function steer(c, k, t) {
-    var hx = c.px[0] * scale, hy = c.py[0] * scale, sx = 0, sy = 0, d, i, m;
-
-    // Walls: push back in when within 60 px of an edge.
-    m = 60;
-    if (hx < m) sx += (m - hx) / m; else if (hx > w - m) sx -= (hx - (w - m)) / m;
-    if (hy < m) sy += (m - hy) / m; else if (hy > h - m) sy -= (hy - (h - m)) / m;
-
-    // Separation from other chains (not on the 404 page, where they should meet).
-    for (var o = 0; o < chains.length && !AGGREGATE; o++) {
-      if (o === k) continue;
-      var other = chains[o];
-      for (i = 0; i < other.n; i += 2) {
-        var dx = hx - other.px[i] * scale, dy = hy - other.py[i] * scale;
-        d = Math.sqrt(dx * dx + dy * dy);
-        if (d < 80 && d > 0) { sx += dx / d * (1 - d / 80) * 0.4; sy += dy / d * (1 - d / 80) * 0.4; }
+      if (d2 < nbrR * nbrR) {
+        aliX += o.vx; aliY += o.vy; nbrN++;
+        if (d2 >= sepR * sepR) { cohX += o.x; cohY += o.y; cohN++; }
       }
     }
 
-    // Gather: steer toward the clicked point, then circle it (tangential pull
-    // once close), so the school forms a loose ring instead of a pile.
-    var gathering = gather && t < gather.until;
-    if (gather && !gathering) gather = null;
-    if (gathering) {
-      var gx = gather.x - hx, gy = gather.y - hy, gd = Math.sqrt(gx * gx + gy * gy) || 1;
-      var ring = 70 + 18 * k, side = k % 2 ? 1 : -1;
-      var pull = Math.max(-1, Math.min(1, (gd - ring) / 120));
-      sx += gx / gd * pull * 4 + side * -gy / gd * 2;
-      sy += gy / gd * pull * 4 + side * gx / gd * 2;
-      c.boost = Math.max(c.boost, Math.min(1.2, gd / 200));
+    var ax = 0, ay = 0, cap = c.maxSpeed;
+    if (sepN) { v = limit(sepX, sepY, MAX_FORCE * (AGGREGATE ? 0.6 : 1.6)); ax += v[0]; ay += v[1]; }
+    if (nbrN) {
+      v = limit(aliX / nbrN - c.vx, aliY / nbrN - c.vy, MAX_FORCE * 0.7); ax += v[0]; ay += v[1];
+      var coh = AGGREGATE ? 1 : 1 - nbrN / 4;                   // groups form, then drift apart
+      if (cohN && coh > 0) { v = limit(cohX / cohN - c.x, cohY / cohN - c.y, MAX_FORCE * 0.5 * coh); ax += v[0]; ay += v[1]; }
     }
 
-    // Gentle nudge away from the cursor, like a fish avoiding a hand.
-    // Distance is measured to the chain's nearest bead, so touching any part of it counts.
-    if (pointer && !gathering) {
-      var px = 0, py = 0;
-      d = Infinity;
-      for (i = 0; i < c.n; i++) {
-        var ex = c.px[i] * scale - pointer.x, ey = c.py[i] * scale - pointer.y, ed = Math.sqrt(ex * ex + ey * ey);
-        if (ed < d) { d = ed; px = ex; py = ey; }
-      }
-      if (d < 140 && d > 0) {
-        var f = 1 - d / 140;
-        sx += px / d * f * 2.5; sy += py / d * f * 2.5;
-        c.boost = Math.max(c.boost, f);
-      }
+    // Gather: stream toward the point, then orbit it in a shared spin.
+    var f = AGGREGATE ? { x: W * 0.62, y: H * 0.58, r: 40 } : focus;
+    if (f) {
+      cap = c.maxSpeed * (AGGREGATE ? 0.8 : 2.6);
+      var fx = f.x - c.x, fy = f.y - c.y, fd = Math.sqrt(fx * fx + fy * fy) || 1e-4;
+      var ux = fx / fd, uy = fy / fd;
+      var radial = fd > f.r ? cap : -cap * 0.4;
+      v = limit(ux * radial - uy * cap * 0.6 - c.vx, uy * radial + ux * cap * 0.6 - c.vy, MAX_FORCE * 4);
+      ax += v[0]; ay += v[1];
     }
 
-    // Wander: heading drifts with smooth, per-chain noise, then bends toward the steering vector.
-    c.heading += 0.012 * Math.sin(t * 0.00041 + c.seed) + 0.008 * Math.sin(t * 0.00097 + c.seed * 1.7);
-    var vx = Math.cos(c.heading) + sx * 0.08, vy = Math.sin(c.heading) + sy * 0.08;
-    c.heading = Math.atan2(vy, vx);
-    c.boost *= 0.97;
+    // Soft walls: turn back before the edge.
+    var m = 110;
+    if (c.x < m) ax += MAX_FORCE * 2 * (m - c.x) / m; else if (c.x > W - m) ax -= MAX_FORCE * 2 * (c.x - W + m) / m;
+    if (c.y < m) ay += MAX_FORCE * 2 * (m - c.y) / m; else if (c.y > H - m) ay -= MAX_FORCE * 2 * (c.y - H + m) / m;
+
+    c.vx += ax * k; c.vy += ay * k;
+    var sp = Math.sqrt(c.vx * c.vx + c.vy * c.vy) || 1e-4;
+    var target = Math.max(cap * 0.4, Math.min(cap, sp));        // never stall, never exceed the cap
+    c.vx *= target / sp; c.vy *= target / sp;
   }
 
-  function step(t) {
-    for (var k = 0; k < chains.length; k++) {
-      var c = chains[k], i;
-      steer(c, k, t);
-
-      // Push the head along its heading (desired velocity in Å/frame),
-      // plus a sideways undulation that makes the body swim.
-      var speed = SPEED * (AGGREGATE ? 0.3 : 1) * (1 + 1.5 * c.boost) / 60 / scale;
-      var ch = Math.cos(c.heading), sh = Math.sin(c.heading);
-      var wig = 0.6 * speed * Math.sin(t * 0.004 + c.seed);
-      var tvx = ch * speed - sh * wig, tvy = sh * speed + ch * wig;
-      var vmax = 3 * SPEED / 60 / scale;
-
-      for (i = 0; i < c.n; i++) {
-        var vx = (c.px[i] - c.ox[i]) * DAMP, vy = (c.py[i] - c.oy[i]) * DAMP, vz = (c.pz[i] - c.oz[i]) * DAMP;
-        if (i === 0) { vx += (tvx - vx) * 0.25; vy += (tvy - vy) * 0.25; }
-        // Speed cap: constraint corrections must never become a launch.
-        var v2 = vx * vx + vy * vy + vz * vz;
-        if (v2 > vmax * vmax) { var f = vmax / Math.sqrt(v2); vx *= f; vy *= f; vz *= f; }
-        c.ox[i] = c.px[i]; c.oy[i] = c.py[i]; c.oz[i] = c.pz[i];
-        c.px[i] += vx; c.py[i] += vy; c.pz[i] += vz + (Math.random() - 0.5) * 0.02;
-      }
-
-      roll(c, ch, sh, 0.008);
-      solve(c);
-    }
-    if (AGGREGATE) { collapse(); stick(); }
-    walls();
+  function move(c, k) {
+    c.x += c.vx * k; c.y += c.vy * k;
+    // Tumble faster while swimming fast (e.g. rushing to a click).
+    var spin = k * (1 + 1.5 * Math.sqrt(c.vx * c.vx + c.vy * c.vy) / c.maxSpeed);
+    c.rx += c.wx * spin; c.ry += c.wy * spin; c.rz += c.wz * spin;
   }
 
-  // 404 only: "poor solvent". A weak harmonic pull of every bead toward one fixed
-  // point gathers the chains. It is external, so a clump can't propel itself anywhere.
-  function collapse() {
-    var tx = w * 0.62 / scale, ty = h * 0.58 / scale;
-    for (var k = 0; k < chains.length; k++) {
-      var c = chains[k];
-      for (var i = 0; i < c.n; i++) {
-        c.px[i] += (tx - c.px[i]) * 0.0015;
-        c.py[i] += (ty - c.py[i]) * 0.0015;
-      }
-    }
-  }
-
-  // Safety net: beads can never leave the viewport (steering normally keeps them well inside).
-  function walls() {
-    var m = 2, maxX = w / scale - m, maxY = h / scale - m;
-    for (var k = 0; k < chains.length; k++) {
-      var c = chains[k];
-      for (var i = 0; i < c.n; i++) {
-        if (c.px[i] < m) c.px[i] += (m - c.px[i]) * 0.2; else if (c.px[i] > maxX) c.px[i] += (maxX - c.px[i]) * 0.2;
-        if (c.py[i] < m) c.py[i] += (m - c.py[i]) * 0.2; else if (c.py[i] > maxY) c.py[i] += (maxY - c.py[i]) * 0.2;
-      }
-    }
-  }
-
-  // Slow roll about the swimming direction so the 3D shape reads.
-  function roll(c, ux, uy, a) {
-    var cx = 0, cy = 0, cz = 0, i, n = c.n;
-    for (i = 0; i < n; i++) { cx += c.px[i]; cy += c.py[i]; cz += c.pz[i]; }
-    cx /= n; cy /= n; cz /= n;
-    var cos = Math.cos(a), sin = Math.sin(a);
-    function rot(X, Y, Z, idx) {
-      var x = X[idx] - cx, y = Y[idx] - cy, z = Z[idx] - cz;
-      var dot = ux * x + uy * y;
-      // Rodrigues' rotation about the unit axis u = (ux, uy, 0)
-      X[idx] = cx + x * cos + (uy * z) * sin + ux * dot * (1 - cos);
-      Y[idx] = cy + y * cos + (-ux * z) * sin + uy * dot * (1 - cos);
-      Z[idx] = cz + z * cos + (ux * y - uy * x) * sin;
-    }
-    for (i = 0; i < n; i++) { rot(c.px, c.py, c.pz, i); rot(c.ox, c.oy, c.oz, i); }
-  }
-
-  // 404 only: beads of different chains stick when they touch.
-  function stick() {
-    for (var a = 0; a < chains.length; a++) for (var b = a + 1; b < chains.length; b++) {
-      var A = chains[a], B = chains[b];
-      for (var i = 0; i < A.n; i++) for (var j = 0; j < B.n; j++) {
-        var dx = B.px[j] - A.px[i], dy = B.py[j] - A.py[i], dz = B.pz[j] - A.pz[i];
-        var d2 = dx * dx + dy * dy + dz * dz;
-        if (d2 > 144) continue;   // only within 12 Å
-        // Soft on both sides: a hard correction here turns into velocity and launches the chains.
-        var d = Math.sqrt(d2) || 1e-6, s = (d - 5) / d * (d < 5 ? 0.1 : 0.01);
-        A.px[i] += dx * s; A.py[i] += dy * s; A.pz[i] += dz * s;
-        B.px[j] -= dx * s; B.py[j] -= dy * s; B.pz[j] -= dz * s;
-      }
+  // Rotate the native fold into screen space (orthographic).
+  function project(c) {
+    var f = c.fold, s = c.scale;
+    var cx = Math.cos(c.rx), sx = Math.sin(c.rx), cy = Math.cos(c.ry), sy = Math.sin(c.ry), cz = Math.cos(c.rz), sz = Math.sin(c.rz);
+    for (var i = 0; i < f.n; i++) {
+      var x = f.x[i], y = f.y[i], z = f.z[i], t;
+      t = y * cx - z * sx; z = y * sx + z * cx; y = t;           // about x
+      t = x * cy + z * sy; z = -x * sy + z * cy; x = t;          // about y
+      t = x * cz - y * sz; y = x * sz + y * cz; x = t;           // about z
+      c.px[i] = c.x + x * s; c.py[i] = c.y + y * s; c.pz[i] = z;
     }
   }
 
   // ---- Drawing --------------------------------------------------------
+  function readColors() {
+    var s = getComputedStyle(document.documentElement);
+    function v(name, fallback) { return s.getPropertyValue(name).trim() || fallback; }
+    colors.E = v('--ss-strand', '#16687a');
+    colors.H = colors.G = v('--ss-helix', '#b13a2c');
+    colors.L = v('--ss-loop', '#9f968a');
+  }
+
+  var segs = [];
   function draw() {
-    ctx.clearRect(0, 0, w, h);
-    var beads = [], k, i, c;
-
-    ctx.strokeStyle = colors.backbone;
-    ctx.lineWidth = Math.max(1.5, 0.7 * scale);
-    ctx.lineCap = ctx.lineJoin = 'round';
-    for (k = 0; k < chains.length; k++) {
-      c = chains[k];
-      ctx.beginPath();
-      ctx.moveTo(c.px[0] * scale, c.py[0] * scale);
-      for (i = 1; i < c.n - 1; i++) {
-        ctx.quadraticCurveTo(c.px[i] * scale, c.py[i] * scale,
-          (c.px[i] + c.px[i + 1]) / 2 * scale, (c.py[i] + c.py[i + 1]) / 2 * scale);
+    ctx.clearRect(0, 0, W, H);
+    ctx.lineCap = 'round';
+    for (var k = 0; k < school.length; k++) {                   // sorted far → near
+      var c = school[k], f = c.fold, i, n = f.n;
+      project(c);
+      // Tube segments between consecutive Cα, drawn back to front within the fold.
+      segs.length = 0;
+      for (i = 0; i < n - 1; i++) segs.push(i);
+      segs.sort(function (a, b) { return (c.pz[a] + c.pz[a + 1]) - (c.pz[b] + c.pz[b + 1]); });
+      var base = 0.45 + 0.45 * c.depth;
+      for (var j = 0; j < segs.length; j++) {
+        i = segs[j];
+        var zt = Math.max(-1, Math.min(1, (c.pz[i] + c.pz[i + 1]) / 30));   // -1 back … 1 front
+        ctx.globalAlpha = base * (0.6 + 0.4 * zt);
+        ctx.strokeStyle = colors[f.ss[i]];
+        ctx.lineWidth = c.scale * (f.ss[i] === 'L' ? 0.55 : 0.95) * (1 + 0.3 * zt);
+        ctx.beginPath();
+        // Smooth the trace: run through the midpoints, with the Cα as control points.
+        var x0 = i > 0 ? (c.px[i - 1] + c.px[i]) / 2 : c.px[i], y0 = i > 0 ? (c.py[i - 1] + c.py[i]) / 2 : c.py[i];
+        var x2 = (c.px[i] + c.px[i + 1]) / 2, y2 = (c.py[i] + c.py[i + 1]) / 2;
+        ctx.moveTo(x0, y0);
+        ctx.quadraticCurveTo(c.px[i], c.py[i], x2, y2);
+        if (i === n - 2) ctx.lineTo(c.px[i + 1], c.py[i + 1]);
+        ctx.stroke();
       }
-      ctx.lineTo(c.px[c.n - 1] * scale, c.py[c.n - 1] * scale);
-      ctx.stroke();
-      var cz = 0;
-      for (i = 0; i < c.n; i++) cz += c.pz[i];
-      cz /= c.n;
-      for (i = 0; i < c.n; i++) beads.push({ c: c, i: i, z: c.pz[i], depth: Math.max(-1, Math.min(1, (c.pz[i] - cz) / 8)) });
-    }
-
-    // Beads back to front; nearer beads are larger and more opaque.
-    beads.sort(function (a, b) { return a.z - b.z; });
-    for (k = 0; k < beads.length; k++) {
-      var b = beads[k];
-      c = b.c; i = b.i;
-      ctx.globalAlpha = 0.75 + 0.25 * b.depth;
-      ctx.beginPath();
-      ctx.arc(c.px[i] * scale, c.py[i] * scale, scale * 1.25 * (1 + 0.25 * b.depth) * (i === 0 ? 1.2 : 1), 0, Math.PI * 2);
-      ctx.fillStyle = colors[c.ss[i]];
-      ctx.fill();
     }
     ctx.globalAlpha = 1;
   }
 
-  // ---- Loop & input ---------------------------------------------------
+  // ---- Setup & loop ---------------------------------------------------
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width = Math.round(W * dpr);
+    canvas.height = Math.round(H * dpr);
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    var s = settings();
+    while (school.length > s.count) school.pop();
+    while (school.length < s.count) school.push(makeProtein(s.scale, school.length));
+    school.sort(function (a, b) { return a.depth - b.depth; });
+  }
+
   function frame(t) {
     if (!running) return;
-    step(t);
+    var k = last ? Math.min((t - last) / 16.67, 3) : 1;        // frame-rate independent
+    last = t;
+    if (focus && t > focus.until) focus = null;
+    for (var i = 0; i < school.length; i++) steer(school[i], k);
+    for (i = 0; i < school.length; i++) move(school[i], k);
     draw();
     requestAnimationFrame(frame);
   }
 
   function start() {
-    if (running || reduceMotion || !visible || document.hidden) return;
+    if (running || reduceMotion || document.hidden) return;
     running = true;
+    last = 0;
     requestAnimationFrame(frame);
   }
 
-  function stop() { running = false; }
+  resize();
+  readColors();
+  canvas.classList.add('is-ready');
 
-  init();
-
-  window.addEventListener('pointermove', function (e) { pointer = { x: e.clientX, y: e.clientY }; }, { passive: true });
-  window.addEventListener('pointerdown', function (e) { pointer = { x: e.clientX, y: e.clientY }; }, { passive: true });
-  // Click on empty page (not a link, button or text you might be selecting) to gather the school.
+  // Click on empty page (not a link, button, image or selected text) to gather the school.
   window.addEventListener('click', function (e) {
-    if (e.button !== 0 || e.target.closest('a, button, input, textarea, select, label, img, summary')) return;
+    if (AGGREGATE || e.button !== 0 || e.target.closest('a, button, input, textarea, select, label, img, summary')) return;
     var sel = window.getSelection && window.getSelection();
     if (sel && String(sel).length) return;
-    gather = { x: e.clientX, y: e.clientY, until: performance.now() + GATHER_MS };
+    focus = { x: e.clientX, y: e.clientY, r: 150, until: performance.now() + FOCUS_MS };
   });
-  document.addEventListener('pointerleave', function () { pointer = null; });
-  window.addEventListener('blur', function () { pointer = null; });
-  window.addEventListener('resize', function () {
-    resize();
-    if (reduceMotion) draw();
-  });
+  window.addEventListener('resize', function () { resize(); if (reduceMotion) draw(); });
   document.addEventListener('visibilitychange', function () {
-    if (document.hidden) stop(); else start();
+    if (document.hidden) running = false; else start();
   });
-  document.addEventListener('themechange', function () {
-    readColors();
-    if (reduceMotion) draw();
-  });
+  document.addEventListener('themechange', function () { readColors(); if (reduceMotion) draw(); });
 
-  // The school swims behind the whole page; below the hero it dims so text stays easy to read.
+  // Below the hero the school dims so text stays easy to read.
   var hero = document.querySelector('.profile-section');
   if (hero && 'IntersectionObserver' in window) {
     new IntersectionObserver(function (entries) {
