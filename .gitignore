@@ -6,3 +6,5 @@ vendor/
 *.gem
 .DS_Store
 Gemfile.lock
+.bundle/
+__pycache__/
