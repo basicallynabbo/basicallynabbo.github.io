@@ -90,16 +90,11 @@ body {
   margin: 0;
   font-family: var(--font-body);
   font-size: 1.1rem;
-  font-weight: 350;
+  font-weight: 400;
   line-height: 1.65;
   color: var(--ink);
   background: var(--paper);
   -webkit-font-smoothing: antialiased;
-}
-
-/* Light mode: a heavier body weight reads with more contrast on paper. */
-:root:not([data-theme="dark"]) body {
-  font-weight: 400;
 }
 
 img {
