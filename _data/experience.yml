@@ -1,0 +1,35 @@
+# Experience, newest first. Shown on /work/ and, by `start` date, in the homepage Log.
+# `log` is the one-line homepage text; without it the Log shows "title, place".
+- title: "Founding Computational Biologist"
+  place: "LiteFold"
+  dates: "June 2026 – Present"
+  start: 2026-06-01
+  log: "Joined LiteFold as Founding Computational Biologist"
+
+- title: "Master's Thesis"
+  place: "CSIR–Institute of Genomics and Integrative Biology, Computational Structural Biology Lab (Dr. Lipi Thukral)"
+  dates: "Dec 2025 – Present"
+  start: 2025-12-01
+  log: "Started Master's thesis with Dr. Lipi Thukral, Computational Structural Biology Lab, CSIR–IGIB"
+
+- title: "Computational Biologist (Part-time)"
+  place: "OpenBio AI, Remote"
+  dates: "Sep 2025 – Dec 2025"
+  start: 2025-09-01
+  log: "Joined OpenBio AI as Computational Biologist (part-time)"
+
+- title: "Research Intern"
+  place: "CSIR–Institute of Genomics and Integrative Biology, Biophysics Lab (Dr. Mary Ekka)"
+  dates: "May 2025 – July 2025"
+  start: 2025-05-01
+  log: "Summer intern with Dr. Mary Ekka, Biophysics Lab, CSIR–IGIB"
+
+- title: "Research Intern"
+  place: "CSIR–Institute of Genomics and Integrative Biology, Biophysics Lab (Dr. Mary Ekka)"
+  dates: "May 2024 – July 2024"
+  start: 2024-05-01
+
+- title: "In-House Research Intern"
+  place: "Centre for Computational Biology and Bioinformatics, Amity Institute of Biotechnology"
+  dates: "May 2023 – July 2023"
+  start: 2023-05-01
