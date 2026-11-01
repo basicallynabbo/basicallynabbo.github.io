@@ -10,7 +10,7 @@ protein: true
     <p class="profile-kicker">field notes · protein structure × ai</p>
     <h1 class="profile-name">
       <span class="line">Nabajit</span>
-      <span class="line">Borah <em>(n.k.)</em></span>
+      <span class="line">Borah</span>
     </h1>
     <p class="profile-title">Founding Computational Biologist at <strong>LiteFold</strong>. I use machine learning to read more out of protein structure and experimental data.</p>
     <ul class="contact-links">
