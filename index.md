@@ -25,6 +25,7 @@ protein: true
   </div>
   <figure class="profile-photo">
     <img src="{{ '/assets/images/profile.webp' | relative_url }}" alt="Nabajit Borah" width="640" height="640">
+    <figcaption>a.k.a. nabbo</figcaption>
   </figure>
 </section>
 
