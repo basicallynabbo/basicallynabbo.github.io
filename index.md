@@ -33,7 +33,7 @@ protein: true
 
 <div class="currently">
   <span class="currently-label">Currently</span>
-  <span>Founding Computational Biologist at <strong>LiteFold</strong></span>
+  <span>Founding Computational Biologist at <strong><a href="https://www.litefold.ai/" rel="noopener">LiteFold</a></strong></span>
 </div>
 
 ## Selected publications
