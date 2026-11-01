@@ -36,6 +36,14 @@ redirect_from:
 
 <div class="timeline-item">
   <div class="timeline-header">
+    <span class="timeline-title">Computational Biologist (Part-time)</span>
+    <span class="timeline-date">Sep 2025 – Dec 2025</span>
+  </div>
+  <div class="timeline-place">OpenBio AI, Remote</div>
+</div>
+
+<div class="timeline-item">
+  <div class="timeline-header">
     <span class="timeline-title">Research Intern</span>
     <span class="timeline-date">May 2025 – July 2025</span>
   </div>
