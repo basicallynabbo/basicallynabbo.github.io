@@ -32,11 +32,11 @@
 <body{% if page.protein %} class="home"{% endif %}>
   <a class="skip-link" href="#main">Skip to content</a>
   <div class="grain" aria-hidden="true"></div>
-  {% if page.protein %}<canvas id="protein-canvas" aria-hidden="true"{% if page.protein == "aggregate" %} data-mode="aggregate"{% endif %}></canvas>{% endif %}
+  <canvas id="protein-canvas" aria-hidden="true"{% if page.protein == "aggregate" %} data-mode="aggregate"{% elsif page.protein != true %} data-sparse{% endif %}></canvas>
 
   <header>
     <div class="container header-inner">
-      <a href="{{ '/' | relative_url }}" class="site-title" aria-label="{{ site.title }}, home">n.borah<span class="cursor-blink" aria-hidden="true">_</span></a>
+      <a href="{{ '/' | relative_url }}" class="site-title" aria-label="{{ site.title }}, home">nabbo<span class="cursor-blink" aria-hidden="true">_</span></a>
       <div class="header-actions">
         <button class="icon-button theme-toggle" type="button" aria-label="Toggle dark mode">
           <svg class="theme-icon-light" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
@@ -69,7 +69,6 @@
   <footer>
     <div class="container">
       <p>&copy; {{ site.time | date: '%Y' }} {{ site.author.name | downcase }} · updated {{ site.time | date: '%Y.%m' }}</p>
-      <p class="footer-seq" aria-hidden="true">MQIFVKTLTG · the first ten residues of ubiquitin</p>
     </div>
   </footer>
 
@@ -103,18 +102,6 @@
         });
       }
 
-      // Decorative sequence: ubiquitin, with the Ile44 hydrophobic patch (L8, I44, V70) marked.
-      var SEQ = 'MQIFVKTLTGKTITLEVEPSDTIENVKAKIQDKEGIPPDQQRLIFAGKQLEDGRTLSDYNIQKESTLHLVLRLRGG';
-      var HOT = { 7: 1, 43: 1, 69: 1 };
-      document.querySelectorAll('.sequence-divider').forEach(function (div) {
-        var out = '';
-        for (var i = 0; i < SEQ.length * 2; i++) {
-          var k = i % SEQ.length, ch = SEQ.charAt(k);
-          out += HOT[k] ? '<span class="hot">' + ch + '</span>' : ch;
-        }
-        div.innerHTML = out;
-      });
-
       var toggle = document.querySelector('.nav-toggle');
       toggle.addEventListener('click', function () {
         var open = document.body.classList.toggle('nav-open');
@@ -122,6 +109,6 @@
       });
     })();
   </script>
-  {% if page.protein %}<script defer src="{{ '/assets/js/protein.js' | relative_url }}"></script>{% endif %}
+  <script defer src="{{ '/assets/js/protein.js' | relative_url }}"></script>
 </body>
 </html>
