@@ -13,8 +13,9 @@ show_title: false
 {% for talk in site.data.talks %}
 <div class="pub-item">
   <div class="pub-title">{{ talk.title }}</div>
-  <div class="pub-authors"><strong>N.K. Borah</strong></div>
-  <div class="pub-journal">{{ talk.venue }} · {{ talk.award }}</div>
+  <div class="pub-authors">{{ talk.authors }}</div>
+  <div class="pub-journal">{{ talk.venue }}</div>
+  {% if talk.award %}<div class="pub-award">{{ talk.award }}</div>{% endif %}
   {% if talk.link %}<div class="pub-links"><a href="{{ talk.link }}">linkedin post</a></div>{% endif %}
 </div>
 {% endfor %}
