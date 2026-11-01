@@ -11,13 +11,11 @@ permalink: /blogs/
 {% if sorted_blogs.size > 0 %}
 {% for blog in sorted_blogs %}
 {% assign words = blog.content | strip_html | number_of_words %}
-<div class="pub-item blog-item">
-  <div class="blog-text">
-    <div class="pub-title"><a href="{{ blog.url | relative_url }}">{{ blog.title }}</a></div>
-    <div class="pub-journal">{% if blog.date %}{{ blog.date | date: "%B %-d, %Y" }} · {% endif %}{{ words | divided_by: 200 | plus: 1 }} min read</div>
-    {% if blog.excerpt %}<div class="blog-excerpt">{{ blog.excerpt | strip_html | truncate: 180 }}</div>{% endif %}
-  </div>
-  {% if blog.image %}<a class="blog-thumb" href="{{ blog.url | relative_url }}" tabindex="-1" aria-hidden="true"><img src="{{ blog.image | relative_url }}" alt="" loading="lazy"></a>{% endif %}
+<div class="pub-item">
+  <div class="pub-title"><a href="{{ blog.url | relative_url }}">{{ blog.title }}</a></div>
+  <div class="pub-journal">{% if blog.date %}{{ blog.date | date: "%B %-d, %Y" }} · {% endif %}{{ words | divided_by: 200 | plus: 1 }} min read</div>
+  {% if blog.excerpt %}<div class="blog-excerpt">{{ blog.excerpt | strip_html | truncate: 180 }}</div>{% endif %}
+  {% if blog.medium_url %}<div class="pub-links"><a href="{{ blog.medium_url }}" target="_blank" rel="noopener">read on medium ↗</a></div>{% endif %}
 </div>
 {% endfor %}
 <p class="blog-more">More on <a href="https://medium.com/{{ site.medium }}" rel="noopener">Medium</a>.</p>
