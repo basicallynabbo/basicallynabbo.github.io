@@ -1,18 +1,17 @@
 /* ==========================================
-   A school of short peptide chains.
+   A school of small folded proteins.
 
-   Each chain is a boid (Reynolds, 1987): it steers by three local rules —
-     separation  keep clear of very close neighbours
-     alignment   match the heading of nearby chains
-     cohesion    drift toward neighbours a little further out
-   plus soft walls. The body follows the head bead by bead at a fixed spacing,
-   so every turn of the head travels down the chain like a swimming tail.
-   Beads are coloured by secondary structure (helix / strand / loop), taken
-   from a real stretch of ubiquitin (PDB 1UBQ).
+   Each swimmer is a real Cα trace from ubiquitin (PDB 1UBQ): the whole
+   76-residue fold, or one of its halves. It keeps its native 3D shape,
+   tumbles slowly, and is drawn as a tube coloured by secondary structure
+   (helix / strand / loop), shaded by depth.
+
+   The school moves as boids (Reynolds, 1987): separation, alignment and
+   cohesion between neighbours, plus soft walls.
 
    Click the empty page: the school streams over and circles that point.
-   data-sparse: fewer chains (subpages, so reading stays easy).
-   data-mode="aggregate" (404): chains collapse into one clump and stay there.
+   data-sparse: fewer proteins (subpages, so reading stays easy).
+   data-mode="aggregate" (404): proteins collapse into one clump and stay there.
    ========================================== */
 (function () {
   'use strict';
@@ -24,10 +23,26 @@
   var SPARSE = canvas.hasAttribute('data-sparse');
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // Secondary structure of ubiquitin, one letter per residue: E strand, H/G helix, L loop.
+  // Chain A of 1UBQ (Vijay-Kumar, Bugg & Cook, 1987), Cα only, in Å.
+  // SS from the PDB HELIX/SHEET records: E strand, H α-helix, G 3₁₀-helix, L loop.
   var SS = 'EEEEEEELLEEEEEEEELLLLLHHHHHHHHHHHHLLLLLEEEEEELLEEELLLLLGGGGLLLLEEEEEEEEELLLL';
+  var XYZ = [
+    11.9, -6, -3.7, 8.9, -7.9, -2.5, 6.5, -6.4, 0.1, 3.3, -7.7, 1.6, -0, -5.8, 1.8, -2.4, -7.3, 4.4, -6.1, -6.5, 4, -8.8, -6.5, 6.6,
+    -10.3, -9.7, 5.2, -7.2, -11.8, 5.9, -6, -11.8, 2.3, -2.3, -10.8, 1.9, -1.2, -9.5, -1.5, 2.5, -9.6, -2.6, 3.8, -6.7, -4.7, 7.1, -6.1, -6.4,
+    8.3, -2.6, -5.8, 11.4, -0.4, -5.6, 12, 1.9, -2.6, 12, 4.8, -5.1, 8.4, 4.2, -6, 5.9, 6.7, -4.7, 2.9, 5.7, -2.6, 0.6, 6.8, -5.5,
+    2.4, 4.2, -7.6, 2, 1.4, -5, -1.8, 2.2, -4.9, -2, 1.9, -8.7, -0.2, -1.5, -8.6, -2.8, -2.6, -5.9, -5.6, -1.4, -8.2, -4.2, -3.2, -11.1,
+    -3.9, -6.5, -9.2, -7, -6.6, -6.9, -9.2, -3.9, -8.5, -9.5, -1.6, -5.5, -9.7, 2.1, -6.5, -6.8, 4.2, -5.2, -9.2, 6.7, -3.6, -10.5, 3.9, -1.3,
+    -7, 2.8, -0.1, -5.5, 3.9, 3.2, -1.9, 2.4, 3.6, -0.4, 2, 7.1, 3.2, 1.2, 8.1, 4.7, 1.5, 11.5, 1.6, 3.3, 12.7, 1.9, 6.1, 10.1,
+    -0.7, 6.6, 7.2, 1.4, 6.7, 4, 1, 9.9, 1.8, 0.8, 9.7, -2, 3.7, 11.9, -3, 6.3, 10.3, -0.7, 8.4, 7.3, -1.8, 8.7, 4, 0.2,
+    12.3, 5, 1, 11, 8.1, 2.8, 9.4, 5.7, 5.3, 12.4, 3.3, 5.5, 10.3, 0.4, 4.2, 12.7, -2.5, 3.6, 12.3, -5.8, 1.7, 9.7, -8.1, 3,
+    7.9, -5.4, 5.1, 4.1, -5.7, 5.5, 1.9, -2.6, 5, -1.7, -2.7, 6.2, -4.5, -1.7, 3.8, -7.7, -0.2, 5.3, -10.5, 0.7, 2.9, -12.3, 4, 3.2,
+    -15.6, 3.7, 1.1, -17.4, 6.9, -0.1, -20.9, 6.5, 1.2, -22.7, 4.8, 4.1
+  ];
+  // Folds the school is made of, 0-based [start, end): whole ubiquitin,
+  // N-terminal half (β-hairpin + α-helix), C-terminal half (β-sheet + 3₁₀).
+  var FOLDS = [[0, 76], [0, 36], [38, 76], [0, 76]];
 
-  var MAX_FORCE = 0.04;      // steering acceleration cap, px/frame²
+  var MAX_FORCE = 0.035;     // steering acceleration cap, px/frame²
   var FOCUS_MS = 6000;       // how long a click gathers the school
 
   var W = 0, H = 0, dpr = 1;
@@ -39,35 +54,39 @@
 
   function settings() {
     var s = Math.min(W, H), o;
-    if (s < 500) o = { count: 18, scale: 0.8 };
-    else if (s < 900) o = { count: 34, scale: 0.95 };
-    else o = { count: 40, scale: 1.1 };
-    if (SPARSE) o.count = Math.round(o.count * 0.4);
+    if (s < 500) o = { count: 5, scale: 2.2 };
+    else if (s < 900) o = { count: 8, scale: 2.8 };
+    else o = { count: 10, scale: 3.4 };
+    if (SPARSE) o.count = Math.max(3, Math.round(o.count * 0.4));
     return o;
   }
 
   function rand(a, b) { return a + Math.random() * (b - a); }
 
-  function makeChain(scale) {
-    var n = 6 + Math.floor(Math.random() * 5);                 // 6–10 residues
-    var start = Math.floor(Math.random() * (SS.length - n));
-    var z = Math.random();                                      // depth: 0 far, 1 near
-    var size = scale * (0.9 + 0.9 * z);
-    var x = rand(0.1, 0.9) * W, y = rand(0.1, 0.9) * H, a = rand(0, Math.PI * 2);
-    var speed = rand(0.55, 1.3) * (0.8 + 0.4 * z);
-    var c = {
-      ss: SS.slice(start, start + n), n: n, z: z, size: size,
-      gap: 5.2 * size,
-      maxSpeed: speed,
-      vx: Math.cos(a) * speed, vy: Math.sin(a) * speed,
-      phase: Math.random() * Math.PI * 2,
-      bx: new Float32Array(n), by: new Float32Array(n)
+  // Native coordinates of a fold, centred on its own centroid.
+  function foldCoords(f) {
+    var a = f[0], n = f[1] - f[0], x = new Float32Array(n), y = new Float32Array(n), z = new Float32Array(n);
+    var mx = 0, my = 0, mz = 0, i;
+    for (i = 0; i < n; i++) { mx += XYZ[3 * (a + i)]; my += XYZ[3 * (a + i) + 1]; mz += XYZ[3 * (a + i) + 2]; }
+    mx /= n; my /= n; mz /= n;
+    for (i = 0; i < n; i++) { x[i] = XYZ[3 * (a + i)] - mx; y[i] = XYZ[3 * (a + i) + 1] - my; z[i] = XYZ[3 * (a + i) + 2] - mz; }
+    return { n: n, ss: SS.slice(a, a + n), x: x, y: y, z: z };
+  }
+
+  function makeProtein(scale, k) {
+    var fold = foldCoords(FOLDS[k % FOLDS.length]);
+    var depth = Math.random();                                  // 0 far, 1 near
+    var a = rand(0, Math.PI * 2), speed = rand(0.35, 0.8) * (0.8 + 0.4 * depth);
+    return {
+      fold: fold, depth: depth,
+      scale: scale * (0.65 + 0.55 * depth),                     // px per Å
+      x: rand(0.1, 0.9) * W, y: rand(0.1, 0.9) * H,
+      vx: Math.cos(a) * speed, vy: Math.sin(a) * speed, maxSpeed: speed,
+      // Orientation (Euler angles) and a slow, steady tumble.
+      rx: rand(0, 6.3), ry: rand(0, 6.3), rz: rand(0, 6.3),
+      wx: rand(-1, 1) * 0.004, wy: rand(-1, 1) * 0.006, wz: rand(-1, 1) * 0.003,
+      px: new Float32Array(fold.n), py: new Float32Array(fold.n), pz: new Float32Array(fold.n)
     };
-    for (var i = 0; i < n; i++) {                               // laid out behind the head
-      c.bx[i] = x - Math.cos(a) * c.gap * i;
-      c.by[i] = y - Math.sin(a) * c.gap * i;
-    }
-    return c;
   }
 
   function limit(x, y, m) {
@@ -77,76 +96,70 @@
 
   // ---- Steering (one boid) --------------------------------------------
   function steer(c, k) {
-    var hx = c.bx[0], hy = c.by[0];
-    var sepX = 0, sepY = 0, sepN = 0, aliX = 0, aliY = 0, cohX = 0, cohY = 0, cohN = 0, nbrN = 0;
-    var crdX = 0, crdY = 0, v, i;
+    var sepR = 170, nbrR = 300, sepX = 0, sepY = 0, sepN = 0;
+    var aliX = 0, aliY = 0, cohX = 0, cohY = 0, cohN = 0, nbrN = 0, v, i;
 
     for (i = 0; i < school.length; i++) {
       var o = school[i];
       if (o === c) continue;
-      var dx = hx - o.bx[0], dy = hy - o.by[0], d2 = dx * dx + dy * dy;
-      if (d2 < 1600 && d2 > 0) {                                // separation < 40 px
+      var dx = c.x - o.x, dy = c.y - o.y, d2 = dx * dx + dy * dy;
+      if (d2 < sepR * sepR && d2 > 0) {
         var d = Math.sqrt(d2);
-        sepX += dx / d / d; sepY += dy / d / d; sepN++;
+        sepX += dx / d * (1 - d / sepR); sepY += dy / d * (1 - d / sepR); sepN++;
       }
-      if (d2 < 6400) {                                          // neighbours < 80 px
-        aliX += o.vx; aliY += o.vy; crdX += o.bx[0]; crdY += o.by[0]; nbrN++;
-        if (d2 >= 1600) { cohX += o.bx[0]; cohY += o.by[0]; cohN++; }
+      if (d2 < nbrR * nbrR) {
+        aliX += o.vx; aliY += o.vy; nbrN++;
+        if (d2 >= sepR * sepR) { cohX += o.x; cohY += o.y; cohN++; }
       }
     }
 
     var ax = 0, ay = 0, cap = c.maxSpeed;
-    if (sepN) { v = limit(sepX * 40, sepY * 40, MAX_FORCE * 1.6); ax += v[0]; ay += v[1]; }
+    if (sepN) { v = limit(sepX, sepY, MAX_FORCE * (AGGREGATE ? 0.6 : 1.6)); ax += v[0]; ay += v[1]; }
     if (nbrN) {
-      v = limit(aliX / nbrN - c.vx, aliY / nbrN - c.vy, MAX_FORCE); ax += v[0]; ay += v[1];
-      // Cohere only to the outer ring, and less as the neighbourhood fills,
-      // so groups form and drift apart instead of collapsing into one clump.
-      var coh = AGGREGATE ? 1 : 1 - nbrN / 5;
-      if (cohN && coh > 0) { v = limit(cohX / cohN - hx, cohY / cohN - hy, MAX_FORCE * coh); ax += v[0]; ay += v[1]; }
-      if (!AGGREGATE && nbrN > 3) {                             // gentle shove out of a crowd
-        var ox = hx - crdX / nbrN, oy = hy - crdY / nbrN, od = Math.sqrt(ox * ox + oy * oy) || 1e-4;
-        v = limit(ox / od * c.maxSpeed - c.vx, oy / od * c.maxSpeed - c.vy, MAX_FORCE * 0.6 * Math.min((nbrN - 3) / 3, 1));
-        ax += v[0]; ay += v[1];
-      }
+      v = limit(aliX / nbrN - c.vx, aliY / nbrN - c.vy, MAX_FORCE * 0.7); ax += v[0]; ay += v[1];
+      var coh = AGGREGATE ? 1 : 1 - nbrN / 4;                   // groups form, then drift apart
+      if (cohN && coh > 0) { v = limit(cohX / cohN - c.x, cohY / cohN - c.y, MAX_FORCE * 0.5 * coh); ax += v[0]; ay += v[1]; }
     }
 
     // Gather: stream toward the point, then orbit it in a shared spin.
-    var f = AGGREGATE ? { x: W * 0.62, y: H * 0.58, r: 50 } : focus;
+    var f = AGGREGATE ? { x: W * 0.62, y: H * 0.58, r: 40 } : focus;
     if (f) {
-      cap = c.maxSpeed * (AGGREGATE ? 0.7 : 2.2);
-      var fx = f.x - hx, fy = f.y - hy, fd = Math.sqrt(fx * fx + fy * fy) || 1e-4;
+      cap = c.maxSpeed * (AGGREGATE ? 0.8 : 2.6);
+      var fx = f.x - c.x, fy = f.y - c.y, fd = Math.sqrt(fx * fx + fy * fy) || 1e-4;
       var ux = fx / fd, uy = fy / fd;
       var radial = fd > f.r ? cap : -cap * 0.4;
-      v = limit(ux * radial - uy * cap * 0.7 - c.vx, uy * radial + ux * cap * 0.7 - c.vy, MAX_FORCE * 4);
+      v = limit(ux * radial - uy * cap * 0.6 - c.vx, uy * radial + ux * cap * 0.6 - c.vy, MAX_FORCE * 4);
       ax += v[0]; ay += v[1];
     }
 
-    // Soft walls: turn back before the edge (chains have tails, so no wrap-around).
-    var m = 70;
-    if (hx < m) ax += MAX_FORCE * 2 * (m - hx) / m; else if (hx > W - m) ax -= MAX_FORCE * 2 * (hx - W + m) / m;
-    if (hy < m) ay += MAX_FORCE * 2 * (m - hy) / m; else if (hy > H - m) ay -= MAX_FORCE * 2 * (hy - H + m) / m;
+    // Soft walls: turn back before the edge.
+    var m = 110;
+    if (c.x < m) ax += MAX_FORCE * 2 * (m - c.x) / m; else if (c.x > W - m) ax -= MAX_FORCE * 2 * (c.x - W + m) / m;
+    if (c.y < m) ay += MAX_FORCE * 2 * (m - c.y) / m; else if (c.y > H - m) ay -= MAX_FORCE * 2 * (c.y - H + m) / m;
 
     c.vx += ax * k; c.vy += ay * k;
-    // Never stall, never exceed the cap.
     var sp = Math.sqrt(c.vx * c.vx + c.vy * c.vy) || 1e-4;
-    var target = Math.max(cap * 0.5, Math.min(cap, sp));
+    var target = Math.max(cap * 0.4, Math.min(cap, sp));        // never stall, never exceed the cap
     c.vx *= target / sp; c.vy *= target / sp;
   }
 
-  // ---- Body: follow the leader ----------------------------------------
-  function move(c, k, t) {
-    // A sideways wiggle on the head makes the body undulate as it swims.
-    var sp = Math.sqrt(c.vx * c.vx + c.vy * c.vy) || 1e-4;
-    var wig = 0.7 * Math.sin(t * 0.005 + c.phase) * sp;
-    c.bx[0] += (c.vx - c.vy / sp * wig) * k;
-    c.by[0] += (c.vy + c.vx / sp * wig) * k;
-    for (var i = 1; i < c.n; i++) {
-      var dx = c.bx[i] - c.bx[i - 1], dy = c.by[i] - c.by[i - 1];
-      var d = Math.sqrt(dx * dx + dy * dy) || 1e-4;
-      // Helical residues sit closer together along the screen than strand residues.
-      var gap = c.gap * (c.ss[i] === 'E' ? 1 : c.ss[i] === 'L' ? 0.9 : 0.7);
-      c.bx[i] = c.bx[i - 1] + dx / d * gap;
-      c.by[i] = c.by[i - 1] + dy / d * gap;
+  function move(c, k) {
+    c.x += c.vx * k; c.y += c.vy * k;
+    // Tumble faster while swimming fast (e.g. rushing to a click).
+    var spin = k * (1 + 1.5 * Math.sqrt(c.vx * c.vx + c.vy * c.vy) / c.maxSpeed);
+    c.rx += c.wx * spin; c.ry += c.wy * spin; c.rz += c.wz * spin;
+  }
+
+  // Rotate the native fold into screen space (orthographic).
+  function project(c) {
+    var f = c.fold, s = c.scale;
+    var cx = Math.cos(c.rx), sx = Math.sin(c.rx), cy = Math.cos(c.ry), sy = Math.sin(c.ry), cz = Math.cos(c.rz), sz = Math.sin(c.rz);
+    for (var i = 0; i < f.n; i++) {
+      var x = f.x[i], y = f.y[i], z = f.z[i], t;
+      t = y * cx - z * sx; z = y * sx + z * cx; y = t;           // about x
+      t = x * cy + z * sy; z = -x * sy + z * cy; x = t;          // about y
+      t = x * cz - y * sz; y = x * sz + y * cz; x = t;           // about z
+      c.px[i] = c.x + x * s; c.py[i] = c.y + y * s; c.pz[i] = z;
     }
   }
 
@@ -157,29 +170,34 @@
     colors.E = v('--ss-strand', '#16687a');
     colors.H = colors.G = v('--ss-helix', '#b13a2c');
     colors.L = v('--ss-loop', '#9f968a');
-    colors.backbone = v('--ss-backbone', 'rgba(110,103,89,0.32)');
   }
 
+  var segs = [];
   function draw() {
     ctx.clearRect(0, 0, W, H);
-    ctx.lineCap = ctx.lineJoin = 'round';
-    for (var k = 0; k < school.length; k++) {                  // sorted far → near
-      var c = school[k], i;
-      ctx.globalAlpha = 0.35 + 0.55 * c.z;
-      ctx.strokeStyle = colors.backbone;
-      ctx.lineWidth = Math.max(1, 1.1 * c.size);
-      ctx.beginPath();
-      ctx.moveTo(c.bx[0], c.by[0]);
-      for (i = 1; i < c.n - 1; i++) {
-        ctx.quadraticCurveTo(c.bx[i], c.by[i], (c.bx[i] + c.bx[i + 1]) / 2, (c.by[i] + c.by[i + 1]) / 2);
-      }
-      ctx.lineTo(c.bx[c.n - 1], c.by[c.n - 1]);
-      ctx.stroke();
-      for (i = c.n - 1; i >= 0; i--) {                          // head drawn last, on top
+    ctx.lineCap = 'round';
+    for (var k = 0; k < school.length; k++) {                   // sorted far → near
+      var c = school[k], f = c.fold, i, n = f.n;
+      project(c);
+      // Tube segments between consecutive Cα, drawn back to front within the fold.
+      segs.length = 0;
+      for (i = 0; i < n - 1; i++) segs.push(i);
+      segs.sort(function (a, b) { return (c.pz[a] + c.pz[a + 1]) - (c.pz[b] + c.pz[b + 1]); });
+      var base = 0.45 + 0.45 * c.depth;
+      for (var j = 0; j < segs.length; j++) {
+        i = segs[j];
+        var zt = Math.max(-1, Math.min(1, (c.pz[i] + c.pz[i + 1]) / 30));   // -1 back … 1 front
+        ctx.globalAlpha = base * (0.6 + 0.4 * zt);
+        ctx.strokeStyle = colors[f.ss[i]];
+        ctx.lineWidth = c.scale * (f.ss[i] === 'L' ? 0.55 : 0.95) * (1 + 0.3 * zt);
         ctx.beginPath();
-        ctx.arc(c.bx[i], c.by[i], c.size * (i === 0 ? 2.6 : 2.1 - 0.06 * i), 0, Math.PI * 2);
-        ctx.fillStyle = colors[c.ss[i]];
-        ctx.fill();
+        // Smooth the trace: run through the midpoints, with the Cα as control points.
+        var x0 = i > 0 ? (c.px[i - 1] + c.px[i]) / 2 : c.px[i], y0 = i > 0 ? (c.py[i - 1] + c.py[i]) / 2 : c.py[i];
+        var x2 = (c.px[i] + c.px[i + 1]) / 2, y2 = (c.py[i] + c.py[i + 1]) / 2;
+        ctx.moveTo(x0, y0);
+        ctx.quadraticCurveTo(c.px[i], c.py[i], x2, y2);
+        if (i === n - 2) ctx.lineTo(c.px[i + 1], c.py[i + 1]);
+        ctx.stroke();
       }
     }
     ctx.globalAlpha = 1;
@@ -197,8 +215,8 @@
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     var s = settings();
     while (school.length > s.count) school.pop();
-    while (school.length < s.count) school.push(makeChain(s.scale));
-    school.sort(function (a, b) { return a.z - b.z; });
+    while (school.length < s.count) school.push(makeProtein(s.scale, school.length));
+    school.sort(function (a, b) { return a.depth - b.depth; });
   }
 
   function frame(t) {
@@ -207,7 +225,7 @@
     last = t;
     if (focus && t > focus.until) focus = null;
     for (var i = 0; i < school.length; i++) steer(school[i], k);
-    for (i = 0; i < school.length; i++) move(school[i], k, t);
+    for (i = 0; i < school.length; i++) move(school[i], k);
     draw();
     requestAnimationFrame(frame);
   }
@@ -228,7 +246,7 @@
     if (AGGREGATE || e.button !== 0 || e.target.closest('a, button, input, textarea, select, label, img, summary')) return;
     var sel = window.getSelection && window.getSelection();
     if (sel && String(sel).length) return;
-    focus = { x: e.clientX, y: e.clientY, r: 60, until: performance.now() + FOCUS_MS };
+    focus = { x: e.clientX, y: e.clientY, r: 150, until: performance.now() + FOCUS_MS };
   });
   window.addEventListener('resize', function () { resize(); if (reduceMotion) draw(); });
   document.addEventListener('visibilitychange', function () {
