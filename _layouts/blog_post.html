@@ -7,7 +7,7 @@ layout: default
   <a class="back-link" href="{{ '/blogs/' | relative_url }}">← Writing</a>
   <h1 class="post-title">{{ page.title }}</h1>
   <p class="post-meta">
-    {% if page.date %}<time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%B %-d, %Y" }}</time> · {% endif %}{{ minutes }} min read
+    {% if page.date %}<time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%B %-d, %Y" }}</time> · {% endif %}{{ minutes }} min read{% if page.medium_url %} · <a href="{{ page.medium_url }}" rel="noopener">read on Medium</a>{% endif %}
   </p>
 
   <nav class="toc" aria-label="Contents" hidden>
@@ -18,6 +18,13 @@ layout: default
   <div class="post-body">
     {{ content }}
   </div>
+
+  {% if page.tags.size > 0 or page.medium_url %}
+  <footer class="post-footer">
+    {% if page.tags.size > 0 %}<ul class="post-tags">{% for t in page.tags %}<li>{{ t | replace: "-", " " }}</li>{% endfor %}</ul>{% endif %}
+    {% if page.medium_url %}<p class="post-origin">Originally published on <a href="{{ page.medium_url }}" rel="noopener">Medium</a>.</p>{% endif %}
+  </footer>
+  {% endif %}
 </article>
 
 <script>

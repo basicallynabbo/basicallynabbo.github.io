@@ -24,7 +24,7 @@ protein: true
     </ul>
   </div>
   <figure class="profile-photo">
-    <img src="{{ '/images/profile.webp' | relative_url }}" alt="Nabajit Borah" width="320" height="320">
+    <img src="{{ '/images/profile.webp' | relative_url }}" alt="Nabajit Borah" width="640" height="800">
     <figcaption>specimen: human bean · habitat: conserved motif</figcaption>
   </figure>
 </section>
@@ -33,7 +33,7 @@ protein: true
 
 <div class="currently">
   <span class="currently-label">Currently</span>
-  <span>Founding Computational Biologist at <strong>LiteFold</strong></span>
+  <span>Founding Computational Biologist at <strong><a href="https://www.litefold.ai/" rel="noopener">LiteFold</a></strong></span>
 </div>
 
 ## Selected publications

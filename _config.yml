@@ -62,6 +62,7 @@ exclude:
   - Gemfile.lock
   - README.md
   - vendor/
+  - scripts/
 
 # Navigation ("Writing" is hidden until there is at least one published post)
 navigation:
