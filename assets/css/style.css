@@ -646,6 +646,12 @@ main {
   color: var(--ink-soft);
 }
 
+.pub-award {
+  margin-top: 2px;
+  font-size: 1rem;
+  color: var(--seal);
+}
+
 .pub-links {
   margin-top: 8px;
   font-family: var(--font-mono);
