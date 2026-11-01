@@ -544,11 +544,27 @@ main {
 }
 
 .profile-photo figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 18px;
   margin-top: 12px;
   font-family: var(--font-mono);
   font-size: 0.72rem;
   letter-spacing: 0.08em;
   color: var(--ink-soft);
+}
+
+.profile-photo .loc {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.profile-photo .pin {
+  width: 12px;
+  height: 12px;
+  flex: none;
 }
 
 
