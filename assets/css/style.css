@@ -496,7 +496,8 @@ main {
 
 .profile-photo img {
   width: 100%;
-  aspect-ratio: 1;
+  height: auto;
+  aspect-ratio: 4 / 5;
   object-fit: cover;
   display: block;
   border-radius: 4px;
