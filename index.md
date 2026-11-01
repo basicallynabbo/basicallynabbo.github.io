@@ -24,7 +24,7 @@ protein: true
     </ul>
   </div>
   <figure class="profile-photo">
-    <img src="{{ '/images/profile.webp' | relative_url }}" alt="Nabajit Borah" width="640" height="800">
+    <img src="{{ '/images/profile.webp' | relative_url }}" alt="Nabajit Borah" width="640" height="640">
     <figcaption>specimen: human bean · habitat: conserved motif</figcaption>
   </figure>
 </section>
