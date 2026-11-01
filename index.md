@@ -5,36 +5,45 @@ show_title: false
 protein: true
 ---
 
-<div class="profile-section">
+<section class="profile-section">
   <div class="profile-info">
-    <p class="profile-kicker">// computational biology</p>
-    <h1 class="profile-name">Nabajit Borah</h1>
-    <p class="profile-title">Founding Computational Biologist at LiteFold · protein structure × AI</p>
-    <div class="contact-links">
-      <a href="mailto:nabajitkrb@gmail.com"><img src="{{ '/images/icons/gmail.svg' | relative_url }}" alt="" class="icon"> Mail</a>
-      <a href="https://github.com/basicallynabbo"><img src="{{ '/images/icons/github.svg' | relative_url }}" alt="" class="icon"> GitHub</a>
-      <a href="https://scholar.google.com/citations?user=YEooiOMAAAAJ"><img src="{{ '/images/icons/google-scholar.svg' | relative_url }}" alt="" class="icon"> Scholar</a>
-      <a href="https://www.linkedin.com/in/nabajit/"><img src="{{ '/images/icons/linkedin.svg' | relative_url }}" alt="" class="icon"> LinkedIn</a>
-      <a href="https://x.com/TensorTwerker"><img src="{{ '/images/icons/twitter.svg' | relative_url }}" alt="" class="icon"> Twitter</a>
-      <a href="https://medium.com/@nabbo"><img src="{{ '/images/icons/medium.svg' | relative_url }}" alt="" class="icon"> Medium</a>
-      <a class="cv-pill" href="{{ '/assets/Nabajit-resume-july.pdf' | relative_url }}">CV ↓</a>
-    </div>
+    <p class="profile-kicker">field notes · protein structure × ai</p>
+    <h1 class="profile-name">
+      <span class="line">Nabajit</span>
+      <span class="line">Borah <em>(n.k.)</em></span>
+    </h1>
+    <p class="profile-title">Founding Computational Biologist at <strong>LiteFold</strong>. I use machine learning to read more out of protein structure and experimental data.</p>
+    <ul class="contact-links">
+      <li><span class="idx">01</span><a href="mailto:nabajitkrb@gmail.com">mail</a></li>
+      <li><span class="idx">02</span><a href="https://github.com/basicallynabbo">github</a></li>
+      <li><span class="idx">03</span><a href="https://scholar.google.com/citations?user=YEooiOMAAAAJ">scholar</a></li>
+      <li><span class="idx">04</span><a href="https://www.linkedin.com/in/nabajit/">linkedin</a></li>
+      <li><span class="idx">05</span><a href="https://x.com/TensorTwerker">x / twitter</a></li>
+      <li><span class="idx">06</span><a href="https://medium.com/@nabbo">medium</a></li>
+      <li><span class="idx">07</span><a class="cv-pill" href="{{ '/assets/Nabajit-resume-july.pdf' | relative_url }}">cv ↓</a></li>
+    </ul>
     <div class="hero-hint" aria-hidden="true">
-      <p>fragments of ubiquitin · <a href="https://www.rcsb.org/structure/1UBQ">PDB 1UBQ</a> · Cα traces</p>
+      <p>↓ scroll · click the water to gather the chains</p>
+      <p>fragments of ubiquitin · <a href="https://www.rcsb.org/structure/1UBQ">pdb 1ubq</a> · cα traces</p>
       <p><span class="dot" style="background:var(--ss-helix)"></span>helix<span class="dot" style="background:var(--ss-strand)"></span>strand<span class="dot" style="background:var(--ss-loop)"></span>loop</p>
     </div>
   </div>
-  <div class="profile-photo">
+  <figure class="profile-photo">
     <img src="{{ '/images/profile.webp' | relative_url }}" alt="Nabajit Borah" width="320" height="320">
-  </div>
-</div>
+    <figcaption>specimen: n. borah · habitat: wet lab → dry lab</figcaption>
+  </figure>
+</section>
+
+<div class="sequence-divider" aria-hidden="true"></div>
+
+## About
 
 <div class="currently">
   <span class="currently-label">Currently</span>
   <span>Founding Computational Biologist at <strong>LiteFold</strong> · Master's thesis in the Computational Structural Biology Lab, CSIR-IGIB (Dr. Lipi Thukral)</span>
 </div>
 
-<p class="intro">My interests sit at the intersection of AI, protein structure, and disease modeling. I’m drawn to problems where AI can speed up hypothesis generation and discovery. Working across wet and dry labs showed me how rich experimental biology data is and how much more we can extract with good computational models. Recently, I’ve been sharpening my math and coding to use that data better. The best way to contact me is via email: <span class="email-highlight">nabajitkrb@gmail.com</span></p>
+<p class="intro lede">My interests sit at the intersection of AI, protein structure, and disease modeling. I’m drawn to problems where AI can speed up hypothesis generation and discovery. Working across wet and dry labs showed me how rich experimental biology data is and how much more we can extract with good computational models. Recently, I’ve been sharpening my math and coding to use that data better. The best way to contact me is via email: <span class="email-highlight">nabajitkrb@gmail.com</span></p>
 
 ## Selected publications
 
@@ -43,7 +52,7 @@ protein: true
 <p class="more-link"><a href="{{ '/publications/' | relative_url }}">All publications →</a></p>
 </div>
 
-## News
+## Log
 
 <div class="section">
   <div class="news-item">
