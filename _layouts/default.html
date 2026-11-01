@@ -100,6 +100,17 @@
       if (systemDark.addEventListener) systemDark.addEventListener('change', onSystemChange);
       else if (systemDark.addListener) systemDark.addListener(onSystemChange);
 
+      // Outside links and PDFs open in a new tab; internal pages stay in the same tab.
+      document.querySelectorAll('a[href]').forEach(function (a) {
+        var url;
+        try { url = new URL(a.getAttribute('href'), location.href); } catch (e) { return; }
+        var external = (url.protocol === 'http:' || url.protocol === 'https:') && url.host !== location.host;
+        if (external || /\.pdf$/i.test(url.pathname)) {
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+        }
+      });
+
       // Email button: copy the address instead of opening a mail app.
       document.querySelectorAll('.copy-email').forEach(function (btn) {
         var tip = btn.querySelector('.copy-tip'), email = btn.getAttribute('data-email'), timer;
