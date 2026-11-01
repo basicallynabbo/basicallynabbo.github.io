@@ -15,7 +15,7 @@ protein: true
     <p class="profile-title">Founding Computational Biologist at <strong>LiteFold</strong>. I work with generative deep learning models to design biomolecules.</p>
     <ul class="contact-links">
       <li><a href="mailto:nabajitkrb@gmail.com" aria-label="Email" title="Email"><span class="ico" style="--i: url('{{ '/images/icons/gmail.svg' | relative_url }}')"></span></a></li>
-      <li><a href="https://github.com/basicallynabbo" aria-label="GitHub" title="GitHub"><span class="ico" style="--i: url('{{ '/images/icons/github.svg' | relative_url }}')"></span></a></li>
+      <li><a href="https://github.com/nabajitb" aria-label="GitHub" title="GitHub"><span class="ico" style="--i: url('{{ '/images/icons/github.svg' | relative_url }}')"></span></a></li>
       <li><a href="https://scholar.google.com/citations?user=YEooiOMAAAAJ" aria-label="Google Scholar" title="Google Scholar"><span class="ico" style="--i: url('{{ '/images/icons/google-scholar.svg' | relative_url }}')"></span></a></li>
       <li><a href="https://www.linkedin.com/in/nabajit/" aria-label="LinkedIn" title="LinkedIn"><span class="ico" style="--i: url('{{ '/images/icons/linkedin.svg' | relative_url }}')"></span></a></li>
       <li><a href="https://x.com/TensorTwerker" aria-label="X (Twitter)" title="X (Twitter)"><span class="ico" style="--i: url('{{ '/images/icons/twitter.svg' | relative_url }}')"></span></a></li>

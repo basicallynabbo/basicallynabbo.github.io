@@ -4,12 +4,12 @@ description: "Computational biologist working at the intersection of AI and prot
 author:
   name: "Nabajit Borah"
   twitter: "TensorTwerker"
-url: "https://basicallynabbo.github.io"
+url: "https://nabajitb.github.io"
 baseurl: ""
 lang: en_US
 
 # Social links (also read by jekyll-seo-tag)
-github: "basicallynabbo"
+github: "nabajitb"
 google_scholar: "Nabajit Borah"
 linkedin: "nabajit"
 twitter:
@@ -19,7 +19,7 @@ medium: "@nabbo"
 social:
   name: "Nabajit Borah"
   links:
-    - https://github.com/basicallynabbo
+    - https://github.com/nabajitb
     - https://www.linkedin.com/in/nabajit/
     - https://x.com/TensorTwerker
     - https://medium.com/@nabbo
