@@ -82,6 +82,28 @@
         document.dispatchEvent(new Event('themechange'));
       });
 
+      // Email button: copy the address instead of opening a mail app.
+      document.querySelectorAll('.copy-email').forEach(function (btn) {
+        var tip = btn.querySelector('.copy-tip'), email = btn.getAttribute('data-email'), timer;
+        function copied() {
+          tip.textContent = 'copied ✓';
+          btn.classList.add('copied');
+          clearTimeout(timer);
+          timer = setTimeout(function () { tip.textContent = email; btn.classList.remove('copied'); }, 1600);
+        }
+        function fallback() {
+          var t = document.createElement('textarea');
+          t.value = email; t.setAttribute('readonly', ''); t.style.position = 'fixed'; t.style.opacity = '0';
+          document.body.appendChild(t); t.select();
+          try { document.execCommand('copy'); copied(); } catch (e) {}
+          document.body.removeChild(t);
+        }
+        btn.addEventListener('click', function () {
+          if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(email).then(copied, fallback);
+          else fallback();
+        });
+      });
+
       // Staggered scroll reveals. Classes are added here, so without JS nothing is hidden.
       var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       var targets = document.querySelectorAll('.page > *:not(.profile-section), .profile-info > *, .profile-photo, .section > *, .project-card');

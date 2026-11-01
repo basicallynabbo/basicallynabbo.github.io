@@ -460,15 +460,57 @@ main {
   letter-spacing: 0.04em;
 }
 
-.contact-links a {
+.contact-links a,
+.contact-links .copy-email {
   display: block;
   color: var(--ink);
   transition: color 0.25s ease, transform 0.35s var(--ease-out);
 }
 
-.contact-links a:hover {
+.contact-links a:hover,
+.contact-links .copy-email:hover {
   color: var(--seal);
   transform: translateY(-3px);
+}
+
+/* Email: a button that copies the address; the tooltip shows it on hover/focus. */
+.contact-links .copy-email {
+  position: relative;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+}
+
+.copy-tip {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 0;
+  padding: 4px 8px;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  color: var(--ink-soft);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  opacity: 0;
+  transform: translateY(4px);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.copy-email:hover .copy-tip,
+.copy-email:focus-visible .copy-tip,
+.copy-email.copied .copy-tip {
+  opacity: 1;
+  transform: none;
+}
+
+.copy-email.copied .copy-tip {
+  color: var(--accent);
 }
 
 /* Icon files are used as masks, so they take the current text colour. */
@@ -501,13 +543,6 @@ main {
   box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.35);
 }
 
-.profile-photo figcaption {
-  margin-top: 12px;
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.08em;
-  color: var(--ink-soft);
-}
 
 .email-highlight {
   font-family: var(--font-mono);

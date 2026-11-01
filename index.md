@@ -13,18 +13,18 @@ protein: true
     </h1>
     <p class="profile-title">I work with generative deep learning models to design biomolecules.</p>
     <ul class="contact-links">
-      <li><a href="mailto:nabajitkrb@gmail.com" aria-label="Email" title="Email"><span class="ico" style="--i: url('{{ '/assets/images/icons/gmail.svg' | relative_url }}')"></span></a></li>
+      <li><button type="button" class="copy-email" data-email="nabajitkrb@gmail.com" aria-label="Copy email address nabajitkrb@gmail.com"><span class="ico" style="--i: url('{{ '/assets/images/icons/gmail.svg' | relative_url }}')"></span><span class="copy-tip" role="status">nabajitkrb@gmail.com</span></button></li>
       <li><a href="https://github.com/nabajitb" aria-label="GitHub" title="GitHub"><span class="ico" style="--i: url('{{ '/assets/images/icons/github.svg' | relative_url }}')"></span></a></li>
       <li><a href="https://scholar.google.com/citations?user=YEooiOMAAAAJ" aria-label="Google Scholar" title="Google Scholar"><span class="ico" style="--i: url('{{ '/assets/images/icons/google-scholar.svg' | relative_url }}')"></span></a></li>
       <li><a href="https://www.linkedin.com/in/nabajit/" aria-label="LinkedIn" title="LinkedIn"><span class="ico" style="--i: url('{{ '/assets/images/icons/linkedin.svg' | relative_url }}')"></span></a></li>
       <li><a href="https://x.com/TensorTwerker" aria-label="X (Twitter)" title="X (Twitter)"><span class="ico" style="--i: url('{{ '/assets/images/icons/twitter.svg' | relative_url }}')"></span></a></li>
       <li><a href="https://medium.com/@nabbo" aria-label="Medium" title="Medium"><span class="ico" style="--i: url('{{ '/assets/images/icons/medium.svg' | relative_url }}')"></span></a></li>
-      <li><a class="cv-pill" href="{{ '/assets/Nabajit-resume-july.pdf' | relative_url }}">cv ↓</a></li>
+      <li><a href="https://substack.com/@nabbo" aria-label="Substack" title="Substack"><span class="ico" style="--i: url('{{ '/assets/images/icons/substack.svg' | relative_url }}')"></span></a></li>
+      <li><a class="cv-pill" href="{{ '/assets/Nabajit-resume-july.pdf' | relative_url }}">cv</a></li>
     </ul>
   </div>
   <figure class="profile-photo">
     <img src="{{ '/assets/images/profile.webp' | relative_url }}" alt="Nabajit Borah" width="640" height="640">
-    <figcaption>specimen: human bean · habitat: conserved motif</figcaption>
   </figure>
 </section>
 
