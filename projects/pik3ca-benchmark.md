@@ -17,7 +17,7 @@ extra_js:
   <p class="pk-byline">M.Tech dissertation supervised by <a href="https://www.igib.res.in/Scientists/lipi-thukral">Dr. Lipi Thukral</a> (CSIR-IGIB)</p>
   <ul class="pk-links">
     <li><a class="pk-pill" href="{{ '/assets/thesis.pdf' | relative_url }}">Read the thesis (PDF)</a></li>
-    <li><a class="pk-pill pk-pill--quiet" href="#thesis">Corrections &amp; reruns</a></li>
+    <li><a class="pk-pill pk-pill--quiet" href="#thesis">Updates</a></li>
   </ul>
 </div>
 
@@ -41,12 +41,6 @@ Structure-based AI tools are now used to triage compounds like these. For them t
 
 ## The benchmark
 
-The matrix crosses 15 p110α sequences (wild type and 14 clinical variants) with 20 ligands: approved and clinical PI3Kα inhibitors, the two allosteric compounds, pan-PI3K and isoform-selective inhibitors, and drugs for unrelated targets as negative controls. Every one of the 300 pairs went through every tool.
-
-Labels came from literature mining. 52 pairs have binding evidence, 19 of them with a measured IC₅₀ or Kᵢ. These 19 are used for ranking. 150 pairs are negative controls. The remaining pairs had no usable evidence and were left out of scoring.
-
-Structures came from co-folding (Boltz-2, Protenix) and docking (DiffDock-L, FlowDock, GNINA, Vina, TankBind). Affinity rescorers (GatorAffinity, CheapNet, GIGN, DualBind) were run on both Boltz-2 and DiffDock-L poses. PLAPT predicts affinity from sequence and SMILES alone, with no structure.
-
 <figure class="pk-figure pk-viewer-wrap" id="viewer-mutmap">
   <div class="pk-viewer" data-viewer="mutmap" role="img" aria-label="3D view of full-length p110α coloured by domain, with the twelve mutated residues shown as red balls"></div>
   <div class="pk-mutkey" role="group" aria-label="Domains and mutation sites">
@@ -59,6 +53,12 @@ Structures came from co-folding (Boltz-2, Protenix) and docking (DiffDock-L, Flo
   </div>
   <figcaption>AlphaFold model of p110α. Mutations in red; tap one to find it, drag to rotate.</figcaption>
 </figure>
+
+The matrix crosses 15 p110α sequences (wild type and 14 clinical variants) with 20 ligands: approved and clinical PI3Kα inhibitors, the two allosteric compounds, pan-PI3K and isoform-selective inhibitors, and drugs for unrelated targets as negative controls. Every one of the 300 pairs went through every tool.
+
+Labels came from literature mining. 52 pairs have binding evidence, 19 of them with a measured IC₅₀ or Kᵢ. These 19 are used for ranking. 150 pairs are negative controls. The remaining pairs had no usable evidence and were left out of scoring.
+
+Structures came from co-folding (Boltz-2, Protenix) and docking (DiffDock-L, FlowDock, GNINA, Vina, TankBind). Affinity rescorers (GatorAffinity, CheapNet, GIGN, DualBind) were run on both Boltz-2 and DiffDock-L poses. PLAPT predicts affinity from sequence and SMILES alone, with no structure.
 
 <figure class="pk-figure pk-chart" id="chart-matrix">
   <div class="pk-legend" data-legend="matrix"></div>
@@ -229,23 +229,11 @@ TFG fixed the geometry. The top pose passed every PoseBusters check in 30 of 30 
 - **Pocket blindness with overconfidence.** No tool finds the allosteric pocket; every pose lands in or at the ATP pocket, sometimes at high confidence. For an allosteric series, check where the ligand landed before trusting any affinity number built on that pose.
 - **Physical validity is cheap to fix and is not the bottleneck.** Guidance cleans up geometry for about a quarter more compute. It does not fix placement.
 
-## Thesis, corrections and reruns {#thesis}
+## Updates {#thesis}
 
-<div class="pk-doc">
-  <a class="pk-doc-link" href="{{ '/assets/thesis.pdf' | relative_url }}">
-    <span class="pk-doc-title">Benchmarking AI Tools for Mutation-Aware PIK3CA Recognition</span>
-    <span class="pk-doc-meta">M.Tech dissertation · Amity University / CSIR-IGIB · June 2026 · PDF, 64 pages</span>
-  </a>
-</div>
+Two sets of runs postdate the thesis and are tagged <span class="pk-tag">after thesis</span> on this page:
 
-In November 2026 every reported result was recomputed from the raw tool outputs. The tool runs and figure values reproduced. A few numbers in the text did not, and they are corrected in the PDF above. The main ones:
-
-- **Mutation response.** The text gave ρ = 0.90 for GatorAffinity. The data give 0.67, and the best tool is CheapNet on Boltz-2 poses at 0.75.
-- **Protenix PoseBusters rate.** The text gave a 94.7% failure rate. The correct figure is 35.5% of top poses failing at least one check, against 3.5% for Boltz-2.
-- **FlowDock** was missing from the pose figure. It is included in the charts above.
-- **Idelalisib** is weakly active on PI3Kα, not inactive, and the taselisib potency comes from Ndubaku et al. (2013).
-- **Serabelisib.** The Boltz-2 affinity runs for serabelisib had used the wrong molecule. After correction Boltz-2 gives ρ = 0.80 (was 0.79).
-
-Two sets of runs postdate the thesis and are tagged <span class="pk-tag">after thesis</span> on this page: Nesso-1 on all 300 pairs, and Protenix v2 with and without guidance across five seeds.
+- **Nesso-1** on all 300 pairs.
+- **Protenix v2 PoseBusters with and without TFG** (training-free guidance), across five seeds on the six crystal pairs.
 
 <noscript><p class="pk-note">The charts and 3D views on this page need JavaScript.</p></noscript>
