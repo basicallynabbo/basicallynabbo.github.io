@@ -16,6 +16,10 @@ twitter:
   username: "TensorTwerker"
   card: summary_large_image
 medium: "@nabbo"
+# Home-page Reading list: the latest Bluesky posts carrying #tag (read in the browser from Bluesky's public API).
+bluesky:
+  handle: "nabajitb.bsky.social"
+  tag: "reading"
 social:
   name: "Nabajit Borah"
   links:
@@ -24,6 +28,7 @@ social:
     - https://x.com/TensorTwerker
     - https://medium.com/@nabbo
     - https://scholar.google.com/citations?user=YEooiOMAAAAJ
+    - https://bsky.app/profile/nabajitb.bsky.social
 
 # Build settings
 markdown: kramdown

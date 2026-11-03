@@ -8,14 +8,6 @@ redirect_from:
   - /experience/
 ---
 
-## Research interests {#research}
-
-<ul class="research-list">
-  <li>Structural Biology</li>
-  <li>Machine Learning in Drug Discovery</li>
-  <li>Deep Learning for Structure Prediction</li>
-</ul>
-
 ## Projects {#projects}
 
 {% assign theses = site.data.projects | where_exp: "p", "p.thesis" %}
