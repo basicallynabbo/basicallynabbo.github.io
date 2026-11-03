@@ -1,0 +1,70 @@
+{
+ "7PG6": {
+  "ligand": "Alpelisib",
+  "site": "orthosteric",
+  "lrmsd": {
+   "Boltz-2": 0.58,
+   "Protenix": 0.91,
+   "FlowDock": 8.85,
+   "DiffDock-L": 0.87
+  }
+ },
+ "8AM0": {
+  "ligand": "Inavolisib",
+  "site": "orthosteric",
+  "lrmsd": {
+   "Boltz-2": 0.79,
+   "Protenix": 1.8,
+   "FlowDock": 8.22,
+   "DiffDock-L": 1.35
+  }
+ },
+ "8EXL": {
+  "ligand": "Taselisib",
+  "site": "orthosteric",
+  "lrmsd": {
+   "Boltz-2": 0.42,
+   "Protenix": 0.42,
+   "FlowDock": 10.01,
+   "DiffDock-L": 1.67
+  }
+ },
+ "8TDU": {
+  "ligand": "STX-478",
+  "site": "allosteric",
+  "lrmsd": {
+   "Boltz-2": 19.62,
+   "Protenix": 26.73,
+   "FlowDock": 22.86,
+   "DiffDock-L": 22.21
+  }
+ },
+ "8TGD": {
+  "ligand": "STX-478",
+  "site": "allosteric",
+  "lrmsd": {
+   "Boltz-2": 19.73,
+   "Protenix": 26.65,
+   "FlowDock": 22.52,
+   "DiffDock-L": 22.17
+  }
+ },
+ "8TSD": {
+  "ligand": "RLY-2608",
+  "site": "allosteric",
+  "lrmsd": {
+   "Boltz-2": 21.99,
+   "Protenix": 20.5,
+   "FlowDock": 20.32,
+   "DiffDock-L": 22.61
+  }
+ },
+ "4XE0": {
+  "ligand": "Idelalisib",
+  "site": "cross-isoform",
+  "lrmsd": {
+   "Boltz-2": 0.53,
+   "DiffDock-L": 3.36
+  }
+ }
+}
