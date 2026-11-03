@@ -16,6 +16,36 @@ redirect_from:
   <li>Deep Learning for Structure Prediction</li>
 </ul>
 
+## Projects {#projects}
+
+{% assign theses = site.data.projects | where_exp: "p", "p.thesis" %}
+{% assign others = site.data.projects | where_exp: "p", "p.thesis == nil" %}
+<div class="thesis-grid">
+{% for p in theses %}
+  <a class="thesis-card" href="{{ p.link | relative_url }}">
+    <p class="thesis-kind">{{ p.thesis }} · {{ p.when }}</p>
+    <h3 class="thesis-title">{{ p.title }}</h3>
+    <p class="thesis-where">{{ p.where }}</p>
+    <p class="thesis-summary">{{ p.summary }}</p>
+    <span class="thesis-cta">Read the project <span aria-hidden="true">→</span></span>
+  </a>
+{% endfor %}
+</div>
+
+<h3 class="project-subhead">Other projects</h3>
+<ul class="project-list">
+{% for p in others %}
+  <li class="project-row">
+    <span class="project-when">{{ p.when }}</span>
+    <div>
+      <p class="project-name">{% if p.link %}<a href="{{ p.link }}">{{ p.title }} <span aria-hidden="true">→</span></a>{% else %}{{ p.title }}{% endif %}</p>
+      <p class="project-line">{{ p.outcome }} <span class="project-where">{{ p.where }}</span></p>
+      <ul class="tag-list">{% for m in p.methods %}<li>{{ m }}</li>{% endfor %}</ul>
+    </div>
+  </li>
+{% endfor %}
+</ul>
+
 ## Experience {#experience}
 
 {% for job in site.data.experience %}
@@ -27,20 +57,6 @@ redirect_from:
   <div class="timeline-place">{{ job.place }}</div>
 </div>
 {% endfor %}
-
-## Projects {#projects}
-
-<div class="project-grid">
-{% for p in site.data.projects %}
-  <article class="project-card">
-    <p class="project-meta">{{ p.when }} · {{ p.where }}</p>
-    <h3 class="project-title">{% if p.link %}<a href="{{ p.link }}">{{ p.title }}</a>{% else %}{{ p.title }}{% endif %}</h3>
-    <p class="project-problem">{{ p.problem }}</p>
-    <ul class="tag-list">{% for m in p.methods %}<li>{{ m }}</li>{% endfor %}</ul>
-    <p class="project-outcome">{{ p.outcome }}</p>
-  </article>
-{% endfor %}
-</div>
 
 ## Education {#education}
 
