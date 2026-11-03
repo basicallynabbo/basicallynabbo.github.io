@@ -184,58 +184,55 @@
   }
 
   // ---------- chart: mutation response ----------
-  // Both affinity rescorers on one chart: colour is the tool, shape is the ligand type, and a line joins each pair of predictions.
+  // One row per mutant-WT pair, sorted by the measured shift. The black mark is the measurement; each tool's prediction is a
+  // dot joined to it, so the length of the join is that tool's error. Same units on one axis, so closeness reads directly.
   var DP_TOOLS = [
-    { tool: 'CheapNet | Boltz-2', short: 'CheapNet', color: '--pk-c1', dx: -5 },
-    { tool: 'GatorAffinity | Boltz-2', short: 'GatorAffinity', color: '--pk-c3', dx: 5 }
+    { tool: 'CheapNet | Boltz-2', short: 'CheapNet', color: '--pk-c1', dy: -5 },
+    { tool: 'GatorAffinity | Boltz-2', short: 'GatorAffinity', color: '--pk-c3', dy: 5 }
   ];
   function drawDp(node, d, hidden) {
-    var pts = d.dp_points, W = widthOf(node);
+    var pts = d.dp_points.slice().sort(function (p, q) { return q.exp - p.exp; });
+    var W = widthOf(node), narrow = W < 520;
     var shown = DP_TOOLS.filter(function (t) { return !hidden[t.tool]; });
-    var h = Math.round(Math.min(380, Math.max(260, W * 0.6)));
-    var m = { l: 48, r: 16, t: 28, b: 40 };
+    var left = narrow ? 118 : 150, right = 16, top = 62, rowH = 30, bottom = 30;
+    var h = top + rowH * pts.length + bottom;
     var svg = newSvg(node, W, h);
-    var all = [];
-    pts.forEach(function (p) { DP_TOOLS.forEach(function (t) { all.push(Math.abs(p[t.tool])); }); });
-    var yMax = Math.max(0.4, Math.max.apply(null, all)) * 1.15;  // one scale for both tools
-    var x = lin(-0.3, 1.3, m.l, W - m.r), y = lin(-yMax, yMax, h - m.b, m.t);
-    // Quadrants where the predicted sign matches the measured one.
-    svgEl('rect', { x: x(0), y: m.t, width: x(1.3) - x(0), height: y(0) - m.t, class: 'q-ok' }, svg);
-    svgEl('rect', { x: m.l, y: y(0), width: x(0) - m.l, height: h - m.b - y(0), class: 'q-ok' }, svg);
-    [-0.25, 0, 0.25, 0.5, 0.75, 1, 1.25].forEach(function (t) {
-      svgEl('line', { x1: x(t), x2: x(t), y1: m.t, y2: h - m.b, class: t === 0 ? 'zero' : 'grid' }, svg);
-      text(svg, x(t), h - m.b + 16, fmt(t), { 'text-anchor': 'middle' });
+    var x = lin(-0.3, 1.2, left, W - right);
+    // Shifts of 0.3 log units or more (two-fold) are the ones that count; shade that side.
+    svgEl('rect', { x: x(0.3), y: top - 6, width: x(1.2) - x(0.3), height: rowH * pts.length + 12, class: 'band' }, svg);
+    [-0.25, 0, 0.25, 0.5, 0.75, 1].forEach(function (t) {
+      svgEl('line', { x1: x(t), x2: x(t), y1: top - 6, y2: top + rowH * pts.length + 6, class: t === 0 ? 'zero' : 'grid' }, svg);
+      text(svg, x(t), top - 14, fmt(t), { 'text-anchor': 'middle' });
     });
-    var step = yMax > 1.2 ? 0.5 : 0.25;
-    for (var t = -Math.floor(yMax / step) * step; t <= yMax; t += step) {
-      t = Math.round(t * 100) / 100;
-      svgEl('line', { x1: m.l, x2: W - m.r, y1: y(t), y2: y(t), class: t === 0 ? 'zero' : 'grid' }, svg);
-      text(svg, m.l - 6, y(t) + 4, fmt(t), { 'text-anchor': 'end' });
-    }
-    text(svg, (m.l + W - m.r) / 2, h - 4, 'Measured Δp (mutant − WT, log units)', { 'text-anchor': 'middle' });
-    text(svg, m.l, m.t - 10, 'Predicted change', {});
-    pts.forEach(function (p) {
-      var cx = x(p.exp), g = svgEl('g', {}, svg);
-      if (shown.length > 1) svgEl('line', { x1: cx, x2: cx, y1: y(p[shown[0].tool]), y2: y(p[shown[1].tool]), class: 'dp-link' }, g);
+    text(svg, left, top - 46, 'Shift in potency, mutant − wild type (log units)', { class: 't-strong' });
+    text(svg, x(0) - 8, top - 30, '← weaker', { 'text-anchor': 'end', class: 'zone-note' });
+    text(svg, x(0) + 8, top - 30, 'tighter →', { class: 'zone-note' });
+    text(svg, x(0.3) + 4, h - 8, 'two-fold or more', { class: 'zone-note' });
+    pts.forEach(function (p, i) {
+      var y = top + i * rowH + rowH / 2, g = svgEl('g', { class: 'row' }, svg);
+      svgEl('rect', { x: 0, y: y - rowH / 2, width: W, height: rowH, class: 'row-hover' }, g);
+      var lab = text(g, left - 10, y + 4, p.ligand + ' · ' + p.variant, { 'text-anchor': 'end', class: 't-strong' });
+      if (p.allosteric) { var tg = svgEl('tspan', { class: 't-tag' }, lab); tg.textContent = narrow ? ' AL' : '  ALLO'; }
+      var mx = x(p.exp);
       shown.forEach(function (tl) {
-        var mx = shown.length > 1 ? cx + tl.dx : cx, my = y(p[tl.tool]), st = 'fill:var(' + tl.color + ')';
-        if (p.allosteric) svgEl('path', { d: 'M' + mx + ' ' + (my - 7.5) + 'l7.5 7.5l-7.5 7.5l-7.5 -7.5z', class: 'dot', style: st }, g);
-        else svgEl('circle', { cx: mx, cy: my, r: 6, class: 'dot', style: st }, g);
+        var py = y + (shown.length > 1 ? tl.dy : 0);
+        svgEl('line', { x1: mx, x2: x(p[tl.tool]), y1: py, y2: py, class: 'dp-link', style: 'stroke:var(' + tl.color + ')' }, g);
+        svgEl('circle', { cx: x(p[tl.tool]), cy: py, r: 5, class: 'dot', style: 'fill:var(' + tl.color + ')' }, g);
       });
-      if (Math.abs(p.exp) > 1) {
-        var top = Math.min.apply(null, shown.map(function (tl) { return y(p[tl.tool]); }));
-        text(g, cx - 14, top + 4, p.variant + ' · ' + p.ligand, { 'text-anchor': 'end', 'font-size': 10 });
-      }
-      svgEl('rect', { x: cx - 14, y: m.t, width: 28, height: h - m.t - m.b, class: 'hit' }, g);
+      svgEl('rect', { x: mx - 2, y: y - 10, width: 4, height: 20, rx: 1, class: 'dp-measured' }, g);
+      svgEl('rect', { x: 0, y: y - rowH / 2, width: W, height: rowH, class: 'hit' }, g);
       hover(g, function () {
-        return '<b>' + p.ligand + ' · ' + p.variant + '</b><br>measured ' + fmt(p.exp) + shown.map(function (tl) {
-          return '<br>' + tl.short + ' ' + fmt(p[tl.tool]);
-        }).join('');
+        return '<b>' + p.ligand + ' · ' + p.variant + '</b>' + (p.allosteric ? ' (allosteric)' : '') + '<br>measured ' + fmt(p.exp) +
+          DP_TOOLS.map(function (tl) { return '<br>' + tl.short + ' ' + fmt(p[tl.tool]); }).join('');
       });
     });
   }
   function dpLegend(node, d, hidden, onToggle) {
     node.textContent = '';
+    var meas = document.createElement('span');
+    meas.className = 'pk-key';
+    meas.innerHTML = '<i class="pk-sw pk-sw--measured"></i>Measured';
+    node.appendChild(meas);
     DP_TOOLS.forEach(function (tl) {
       var st = d.tools.filter(function (t) { return t.tool === tl.tool; })[0];
       var b = document.createElement('button');
@@ -360,7 +357,7 @@
   // ---------- pose charts (shared frame) ----------
   function poseFrame(node, rowH, xDom, ticks) {
     var W = widthOf(node), narrow = W < 520;
-    var left = narrow ? 112 : 150, right = 18, top = 48, bottom = 8;
+    var left = narrow ? 112 : 150, right = 18, top = 66, bottom = 8;
     var h = top + rowH * REFS.length + bottom;
     var svg = newSvg(node, W, h);
     var x = logScale(xDom[0], xDom[1], left, W - right);
@@ -368,7 +365,11 @@
     svgEl('rect', { x: 0, y: top + 3 * rowH, width: W, height: 3 * rowH, class: 'band' }, svg);
     xAxisLog(svg, x, ticks, top - 6, h - bottom, top - 14);
     svgEl('line', { x1: x(2), x2: x(2), y1: top - 6, y2: h - bottom, class: 'thresh' }, svg);
-    text(svg, left, top - 34, 'Ligand RMSD to crystal (Å, log scale)', { class: 't-strong' });
+    text(svg, left, top - 52, 'Ligand RMSD to crystal (Å, log scale)', { class: 't-strong' });
+    // What the 2 Å line means, said above the axis rather than inside the plot.
+    text(svg, x(2) - 8, top - 32, '← correct pose', { 'text-anchor': 'end', class: 'zone-note' });
+    text(svg, x(2) + 8, top - 32, 'wrong place →', { class: 'zone-note' });
+    svgEl('line', { x1: x(2), x2: x(2), y1: top - 42, y2: top - 26, class: 'thresh' }, svg);
     REFS.forEach(function (r, i) {
       var y = top + i * rowH + rowH / 2;
       text(svg, left - 10, y - 2, r.ligand + (r.variant !== 'WT' ? ' ' + r.variant : ''), { 'text-anchor': 'end', class: 't-strong' });
@@ -396,7 +397,6 @@
   function drawTfg(node, d) {
     var f = poseFrame(node, 72, [0.1, 40], [0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 40]);
     var modes = [{ mode: 'notfg', label: 'Without TFG', color: '--pk-c2', dy: -18 }, { mode: 'tfg', label: 'With TFG', color: '--pk-c1', dy: 18 }];
-    text(f.svg, f.x(2) - 6, f.top - 1, '← crystal-like', { 'text-anchor': 'end', 'font-size': 9.5, class: 'tfg-note' });
     REFS.forEach(function (r, i) {
       var y0 = f.top + i * f.rowH + f.rowH / 2;
       modes.forEach(function (mo) {

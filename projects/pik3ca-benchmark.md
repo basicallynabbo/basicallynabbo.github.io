@@ -129,8 +129,8 @@ All five shifts larger than 0.3 log units are potency gains. A constant “mutan
 
 <figure class="pk-figure pk-chart" id="chart-dp">
   <div class="pk-controls" data-legend="dp" role="group" aria-label="Tools"></div>
-  <div class="pk-plot" data-chart="dp" role="img" aria-label="Scatter of measured against predicted mutation shifts for 9 pairs, with predictions from CheapNet and GatorAffinity joined by a line"></div>
-  <figcaption>Measured Δp (mutant minus wild type) against the predicted change. Each measured shift has one dot per tool, joined by a line, so the line length is how much the two tools disagree. Diamonds are allosteric ligands. Shaded quadrants are where the predicted sign is right. Click a tool to hide or show it.</figcaption>
+  <div class="pk-plot" data-chart="dp" role="img" aria-label="Measured and predicted mutation shifts for 9 mutant–wild-type pairs, one row each, with CheapNet and GatorAffinity predictions joined to the measurement"></div>
+  <figcaption>Each row is one mutant–wild-type pair, largest measured shift first. The black mark is the measured shift; each dot is a tool’s prediction, and the line to it is the error. Shaded: shifts of two-fold or more. ALLO marks the allosteric ligands. Click a tool to hide or show it.</figcaption>
 </figure>
 
 ## The wrong pocket
@@ -219,28 +219,10 @@ TFG fixed the geometry. The top pose passed every PoseBusters check in 30 of 30 
   <figcaption>One sampling run per model, from a random start to its final pose. The co-folders build ligand and protein together, FlowDock moves the ligand and pocket, and DiffDock-L moves only the ligand. Line: distance to the crystal ligand. Bars: ligand atoms clashing with the protein.</figcaption>
 </figure>
 
-<div class="pk-cards">
-  <div class="pk-card">
-    <h3>Protenix v2</h3>
-    <p class="pk-card-lede">Clean geometry with guidance</p>
-    <p class="pk-card-catch">but no affinity score</p>
-  </div>
-  <div class="pk-card">
-    <h3>Boltz-2</h3>
-    <p class="pk-card-lede">Best poses, best ranking</p>
-    <p class="pk-card-catch">but confident even when wrong</p>
-  </div>
-  <div class="pk-card">
-    <h3>FlowDock</h3>
-    <p class="pk-card-lede">Lets the pocket move as it docks</p>
-    <p class="pk-card-catch">but most top poses land 8–10 Å off</p>
-  </div>
-  <div class="pk-card">
-    <h3>DiffDock-L</h3>
-    <p class="pk-card-lede">Knows when a ligand doesn't fit</p>
-    <p class="pk-card-catch">but a weak ranker</p>
-  </div>
-</div>
+- **Protenix v2**: physically valid poses with guidance (TFG); no affinity output.
+- **Boltz-2**: the most accurate orthosteric poses and the best single-model affinity ranking; confident even on wrong poses.
+- **FlowDock**: models pocket flexibility while docking; most top poses land 8–10 Å from the crystal pose.
+- **DiffDock-L**: its confidence separates binders from controls (best average precision of the thesis tools); a weak affinity ranker.
 
 All four share one blind spot: every allosteric ligand went to or near the ATP pocket, 20–27 Å from where it binds.
 

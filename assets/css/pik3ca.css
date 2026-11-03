@@ -486,10 +486,12 @@
 .pk-tool span { color: var(--ink-soft); }
 .pk-tool.is-on { color: var(--ink); border-color: var(--ink-soft); }
 .pk-tool:not(.is-on) .pk-sw { opacity: 0.35; }
-.pk-plot .dp-link { stroke: var(--ink-soft); stroke-width: 1.2; opacity: 0.55; }
+.pk-plot .dp-link { stroke-width: 2; opacity: 0.45; }
 
 /* Guidance chart */
-.pk-plot .tfg-note { fill: var(--ink-soft); }
+.pk-plot .zone-note { fill: var(--ink-soft); font-size: 10.5px; }
+.pk-plot .dp-measured { fill: var(--ink); }
+.pk-sw--measured { --sw: var(--ink); width: 4px; height: 14px; border-radius: 1px; }
 .pk-plot .dot.tfg-fail { stroke-width: 2.4; }
 
 /* Tooltip */
@@ -790,55 +792,6 @@
 
 .pk-narrow-only {
   display: none;
-}
-
-/* Three models, three strengths */
-.pk-cards {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1rem;
-  margin: 1.2rem 0;
-}
-
-.pk-card {
-  padding: 1rem 1.1rem;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-}
-
-.pk-card h3 {
-  margin: 0;
-  font-size: 1rem;
-}
-
-.pk-card p {
-  margin: 0.5rem 0 0;
-  font-size: 0.88rem;
-}
-
-.pk-card .pk-card-lede {
-  margin-top: 0.15rem;
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-}
-
-.pk-card .pk-card-catch {
-  color: var(--ink-soft);
-}
-
-@media (max-width: 960px) {
-  .pk-cards {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 520px) {
-  .pk-cards {
-    grid-template-columns: 1fr;
-  }
 }
 
 @media (max-width: 760px) {
