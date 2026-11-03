@@ -453,6 +453,38 @@
 .pk-plot .c-excluded { fill: var(--surface); }
 .pk-plot rect.cell:hover { stroke: var(--ink); stroke-width: 1.5; }
 
+/* Similarity figure: heatmap and scatter highlight each other */
+.pk-plot .lk-label { cursor: default; }
+.pk-plot .lk-label.is-lk { fill: var(--ink); font-weight: 600; }
+.pk-plot .lk-pt { transition: opacity 0.12s; }
+.pk-plot .lk-name:not(.always) { display: none; }
+.pk-plot .lk-pt.is-lk .lk-name { display: block; fill: var(--ink); font-weight: 600; }
+#chart-similarity.has-lk .lk-pt:not(.is-lk) { opacity: 0.3; }
+.pk-sim-plot + .pk-sim-plot { margin-top: 2rem; }
+
+/* Mutation-shift chart: tool legend and pair links */
+.pk-tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 11px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+  background: transparent;
+  cursor: pointer;
+}
+.pk-tool span { color: var(--ink-soft); }
+.pk-tool.is-on { color: var(--ink); border-color: var(--ink-soft); }
+.pk-tool:not(.is-on) .pk-sw { opacity: 0.35; }
+.pk-plot .dp-link { stroke: var(--ink-soft); stroke-width: 1.2; opacity: 0.55; }
+
+/* Guidance chart */
+.pk-plot .tfg-note { fill: var(--ink-soft); }
+.pk-plot .dot.tfg-fail { stroke-width: 2.4; }
+
 /* Tooltip */
 .pk-tip {
   position: fixed;
@@ -697,7 +729,8 @@
   align-items: start;
 }
 
-.pk-two h4 {
+.pk-two h4,
+.pk-sim-plot h4 {
   margin: 0 0 0.6rem;
   font-family: var(--font-mono);
   font-size: 0.72rem;
