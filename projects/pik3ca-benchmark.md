@@ -14,7 +14,6 @@ extra_js:
 ---
 
 <div class="pk-hero">
-  <p class="pk-kicker">Master's thesis · M.Tech Biotechnology · 2025–26</p>
   <h1 class="pk-title">Benchmarking AI Tools for Mutation&#8209;Aware PIK3CA Recognition</h1>
   <p class="pk-dek">Tested co-folding, docking and affinity-prediction tools on 300 pairs of PIK3CA variants and inhibitors. They rank known inhibitors well. Every tool that builds a pose misses the allosteric pocket that the newest mutant-selective drugs bind.</p>
   <p class="pk-byline">M.Tech dissertation supervised by <a href="https://www.igib.res.in/Scientists/lipi-thukral">Dr. Lipi Thukral</a> (CSIR-IGIB)</p>
