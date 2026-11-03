@@ -20,17 +20,16 @@ redirect_from:
 
 {% assign theses = site.data.projects | where_exp: "p", "p.thesis" %}
 {% assign others = site.data.projects | where_exp: "p", "p.thesis == nil" %}
-<div class="thesis-grid">
 {% for p in theses %}
-  <a class="thesis-card" href="{{ p.link | relative_url }}">
-    <p class="thesis-kind">{{ p.thesis }} · {{ p.when }}</p>
-    <h3 class="thesis-title">{{ p.title }}</h3>
-    <p class="thesis-where">{{ p.where }}</p>
+<article class="thesis">
+  <p class="thesis-side"><span>{{ p.when }}</span><span>{{ p.thesis }}</span></p>
+  <div>
+    <h3 class="thesis-title"><a href="{{ p.link | relative_url }}">{{ p.title }}</a></h3>
     <p class="thesis-summary">{{ p.summary }}</p>
-    <span class="thesis-cta">Read the project <span aria-hidden="true">→</span></span>
-  </a>
+    <a class="thesis-more" href="{{ p.link | relative_url }}">{{ p.cta }} <span aria-hidden="true">→</span></a>
+  </div>
+</article>
 {% endfor %}
-</div>
 
 <h3 class="project-subhead">Other projects</h3>
 <ul class="project-list">
