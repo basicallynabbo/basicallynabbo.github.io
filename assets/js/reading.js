@@ -1,19 +1,22 @@
-// Home-page Reading list: the newest Bluesky posts carrying the configured #tag, read from Bluesky's public API
-// (no key, open to browsers). The heading and list stay hidden until at least one tagged post comes back, so a
-// failed request or an empty feed leaves the page as it was.
+// Home-page Reading and Books lists, read from Bluesky's public API (no key, open to browsers).
+//   Reading: the newest posts carrying #tag that link anything but a book.
+//   Books:   posts linking a book page (Goodreads etc.) with #tag (started) or #done_tag (finished), paired by the
+//            book, written as "Title by Author #reading <link>".
+// Each heading and list stays hidden until it has something to show, so a failed request or an empty feed leaves the
+// page as it was.
 (function () {
   var box = document.querySelector('.reading[data-handle]');
   if (!box || !window.fetch) return;
   var handle = box.dataset.handle, tag = (box.dataset.tag || '').toLowerCase(), LIMIT = 7;
-  var url = 'https://public.api.bsky.app/xrpc/app.bsky.feed.getAuthorFeed?filter=posts_no_replies&limit=100&actor=' +
+  var doneTag = (box.dataset.doneTag || '').toLowerCase(), books = document.querySelector('.books');
+  var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  var FEED = 'https://public.api.bsky.app/xrpc/app.bsky.feed.getAuthorFeed?filter=posts_no_replies&limit=100&actor=' +
     encodeURIComponent(handle);
+  var PAGES = 10;  // up to 1000 posts back, so finished books stay in the library
 
   function feature(f) { return f.features && f.features[0] || {}; }
-  function isTag(f) {
-    var t = feature(f);
-    return t.$type === 'app.bsky.richtext.facet#tag' && String(t.tag).toLowerCase() === tag;
-  }
-  // The post text without the tag and without link text (Bluesky shows links shortened, e.g. "arxiv.org/abs/24…").
+  function isTag(f) { return feature(f).$type === 'app.bsky.richtext.facet#tag'; }
+  // The post text without hashtags and without link text (Bluesky shows links shortened, e.g. "arxiv.org/abs/24…").
   // Facet offsets are UTF-8 byte offsets, so cut on the encoded bytes.
   function note(rec) {
     var bytes = new TextEncoder().encode(rec.text || ''), cuts = (rec.facets || []).filter(function (f) {
@@ -26,9 +29,10 @@
     var dec = new TextDecoder();
     return parts.map(function (p) { return dec.decode(p); }).join('').replace(/\s+/g, ' ').trim();
   }
-  function tagged(rec) {
-    if ((rec.facets || []).some(isTag)) return true;
-    return (rec.tags || []).some(function (t) { return String(t).toLowerCase() === tag; });
+  function tagged(rec, name) {
+    if (!name) return false;
+    if ((rec.facets || []).some(function (f) { return isTag(f) && String(feature(f).tag).toLowerCase() === name; })) return true;
+    return (rec.tags || []).some(function (t) { return String(t).toLowerCase() === name; });
   }
   // Where a paper link comes from, by host; the longest match wins, so PubMed beats the wider ncbi.nlm.nih.gov.
   var SOURCES = {
@@ -95,15 +99,40 @@
   }
   // What the post points at: its link card, else the first link in the text.
   function target(post) {
-    var e = post.embed || {};
-    var ext = e.external || (e.media && e.media.external);
+    var l = linkOf(post);
+    if (!l.u) return null;
+    var src = source(l.u);
+    return { uri: l.uri, source: src, title: usableTitle(l.card, src) || fallbackTitle(l.u) };
+  }
+  // Book pages. A book is keyed by its Goodreads id where there is one, so the start and finish posts pair up even
+  // when one link carries a title slug or tracking parameters and the other does not.
+  var BOOK_HOSTS = /(^|\.)(goodreads\.com|thestorygraph\.com|openlibrary\.org)$|^books\.google\./;
+  function bookKey(u) {
+    if (!u || !BOOK_HOSTS.test(u.hostname)) return null;
+    var gr = u.pathname.match(/\/book\/show\/(\d+)/);
+    return gr ? 'gr:' + gr[1] : (u.hostname.replace(/^www\./, '') + u.pathname).replace(/\/$/, '');
+  }
+  function linkOf(post) {
+    var e = post.embed || {}, ext = e.external || (e.media && e.media.external);
     var uri = ext ? ext.uri : ((post.record.facets || []).map(feature).filter(function (t) {
       return t.$type === 'app.bsky.richtext.facet#link';
     })[0] || {}).uri;
-    var u = uri && parse(uri);
-    if (!u) return null;
-    var src = source(u);
-    return { uri: uri, source: src, title: usableTitle(ext && ext.title, src) || fallbackTitle(u) };
+    return { uri: uri, u: uri && parse(uri), card: ext && ext.title };
+  }
+  // "Title by Author" from the post text; else the link card's title. Subtitles go: "The Gene", not
+  // "The Gene: An Intimate History".
+  function bookName(text, card) {
+    var m = (text || '').match(/^(.*\S)\s+by\s+(.+)$/i);
+    var title = m ? m[1] : (text || usableTitle(card, '') || '');
+    return { title: title.split(/:\s|\s[-–—]\s/)[0].replace(/[.…]+$/, '').trim(), author: m ? m[2].trim() : '' };
+  }
+  function month(d) { return MONTHS[d.getMonth()] + " '" + String(d.getFullYear() % 100).padStart(2, '0'); }
+  // "since Jun '26" while reading; "Jun–Sep '26", "Sep '26" or "Dec '25–Feb '26" once finished.
+  function span(start, end) {
+    if (!end) return start ? 'since ' + month(start) : '';
+    if (!start || month(start) === month(end)) return month(end);
+    if (start.getFullYear() === end.getFullYear()) return MONTHS[start.getMonth()] + '–' + month(end);
+    return month(start) + '–' + month(end);
   }
   // "Today", "Yesterday", then dd/mm/yy ("15/07/26"). Days are the reader's local days.
   function shownDate(d) {
@@ -127,13 +156,30 @@
     return a;
   }
 
-  fetch(url).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
-    var posts = (d && d.feed || []).map(function (f) { return f.post; }).filter(function (p) {
-      return p && p.author && p.author.handle === handle && tagged(p.record);  // skip reposts of other people's posts
-    }).slice(0, LIMIT);
-    if (!posts.length) return;
+  // Pages through the feed with Bluesky's cursor; returns this account's own posts, newest first.
+  function fetchPosts() {
+    var all = [];
+    function page(cursor, n) {
+      return fetch(FEED + (cursor ? '&cursor=' + encodeURIComponent(cursor) : '')).then(function (r) {
+        return r.ok ? r.json() : null;
+      }).then(function (d) {
+        (d && d.feed || []).forEach(function (f) {
+          if (f.post && f.post.author && f.post.author.handle === handle) all.push(f.post);  // skip reposts
+        });
+        return d && d.cursor && n + 1 < PAGES ? page(d.cursor, n + 1) : all;
+      });
+    }
+    return page(null, 0);
+  }
+  function reveal(section, id) {
+    section.hidden = false;
+    var h = document.getElementById(id);
+    if (h) h.hidden = false;
+  }
+
+  function showPapers(posts) {
     var list = box.querySelector('.reading-list');
-    posts.forEach(function (p) {
+    posts.filter(function (p) { return tagged(p.record, tag) && !bookKey(linkOf(p).u); }).slice(0, LIMIT).forEach(function (p) {
       var postUrl = 'https://bsky.app/profile/' + handle + '/post/' + p.uri.split('/').pop();
       var when = shownDate(new Date(p.record.createdAt || p.indexedAt));
       var item = el('div', 'news-item reading-item');
@@ -146,8 +192,44 @@
       item.appendChild(body);
       list.appendChild(item);
     });
-    box.hidden = false;
-    var h = document.getElementById('reading');
-    if (h) h.hidden = false;
+    if (list.children.length) reveal(box, 'reading');
+  }
+
+  function showBooks(posts) {
+    if (!books) return;
+    var byKey = {}, order = [];
+    // Oldest first, so a later post's wording (say, a fixed typo) wins.
+    posts.slice().reverse().forEach(function (p) {
+      var started = tagged(p.record, tag), finished = tagged(p.record, doneTag);
+      var l = linkOf(p), key = (started || finished) && bookKey(l.u);
+      if (!key) return;
+      var b = byKey[key] || (byKey[key] = { uri: l.uri, start: null, end: null, name: null });
+      var d = new Date(p.record.createdAt || p.indexedAt), name = bookName(note(p.record), l.card);
+      if (name.title && (name.author || !b.name || !b.name.author)) b.name = name;
+      if (started && (!b.start || d < b.start)) b.start = d;
+      if (finished && (!b.end || d > b.end)) b.end = d;
+      if (order.indexOf(key) === -1) order.push(key);
+    });
+    // Books in progress first (newest start first), then finished ones, most recently finished first.
+    var list = order.map(function (k) { return byKey[k]; }).filter(function (b) { return b.name; }).sort(function (a, b) {
+      if (!a.end !== !b.end) return a.end ? 1 : -1;
+      return (b.end || b.start) - (a.end || a.start);
+    });
+    var box2 = books.querySelector('.books-list');
+    list.forEach(function (b) {
+      var item = el('div', 'news-item reading-item' + (b.end ? '' : ' is-current'));
+      item.appendChild(el('span', 'news-date', span(b.start, b.end)));
+      var body = el('span', 'reading-body');
+      body.appendChild(link(b.uri, b.name.title));
+      if (b.name.author) body.appendChild(el('span', 'reading-src', b.name.author));
+      item.appendChild(body);
+      box2.appendChild(item);
+    });
+    if (box2.children.length) reveal(books, 'books');
+  }
+
+  fetchPosts().then(function (posts) {
+    showPapers(posts);
+    showBooks(posts);
   }).catch(function () {});
 })();
