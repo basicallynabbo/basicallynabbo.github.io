@@ -319,6 +319,12 @@
   margin-bottom: 0.6rem;
 }
 
+#chart-matrix .pk-legend,
+#chart-matrix figcaption {
+  justify-content: center;
+  text-align: center;
+}
+
 .pk-key {
   display: inline-flex;
   align-items: center;
