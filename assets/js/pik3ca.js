@@ -615,28 +615,56 @@
       function unit(u) { var n = Math.hypot(u[0], u[1], u[2]) || 1; return u.map(function (t) { return t / n; }); }
       function perp(u, z) { var d = dot3(u, z); return [u[0] - d * z[0], u[1] - d * z[1], u[2] - d * z[2]]; }
       var z = unit([P.c[0] - bulk[0] / nb, P.c[1] - bulk[1] / nb, P.c[2] - bulk[2] / nb]);
-      var gap = null, x;
+      var gap = null, x, exposedMode = clearSight === 'exposed';
       if (crys.length && pred.length) {
         var cm = mean(crys), pm = mean(pred);
         gap = [cm[0] - pm[0], cm[1] - pm[1], cm[2] - pm[2]];
       }
-      if (gap && Math.hypot(gap[0], gap[1], gap[2]) > 6) {
-        // Far-apart crystal and predicted poses (the allosteric cases) define the horizontal.
+      // 'exposed': the share of ligand atoms that have a protein C-alpha within 4.5 A of the line from the atom to the
+      // reader. The camera angle with the smallest share is the one with the clearest path to the ligands.
+      var probe = exposedMode ? lig.filter(function (q, j) { return j % 2 === 0; }) : null;
+      function hiddenShare(d) {
+        var hidden = 0;
+        for (var a = 0; a < probe.length; a++) {
+          for (var k = 0; k < cas.length; k++) {
+            var ux = cas[k][0] - probe[a][0], uy = cas[k][1] - probe[a][1], uz = cas[k][2] - probe[a][2], tt = ux * d[0] + uy * d[1] + uz * d[2];
+            if (tt > 2.5 && ux * ux + uy * uy + uz * uz - tt * tt < 20.25) { hidden++; break; }
+          }
+        }
+        return hidden / probe.length;
+      }
+      function direction(i, n) { var yy = 1 - 2 * (i + 0.5) / n, rr = Math.sqrt(1 - yy * yy), th = i * 2.399963; return [Math.cos(th) * rr, yy, Math.sin(th) * rr]; }
+      var far = gap && Math.hypot(gap[0], gap[1], gap[2]) > 6;
+      if (far) {
+        // Far-apart crystal and predicted poses (the allosteric cases) define the horizontal. In exposed mode the camera
+        // also looks along the clearest path to all of them, as long as the two groups still sit side by side on screen.
+        if (exposedMode) {
+          var gu = unit(gap), bestHid = 1e9;
+          for (var j = 0; j < 300; j++) {
+            var dj = direction(j, 300);
+            if (Math.abs(dot3(dj, gu)) > 0.8) continue;
+            var sh = hiddenShare(dj);
+            if (sh < bestHid) { bestHid = sh; z = dj; }
+          }
+        }
         x = perp(gap, z);
       } else {
-        // A compact ligand group (the orthosteric drugs): try many camera directions and take the one with the fewest protein
-        // atoms between the reader and the ligand, preferring a view onto its flat side, so the docking pose is not hidden
-        // behind helices.
+        // A compact ligand group (the orthosteric drugs): try many camera directions and score them, so the docking pose is
+        // not hidden behind helices.
         var flat = P.axes[2], bestScore = 1e9, n = 300;
         for (var i = 0; i < n; i++) {
-          var yy = 1 - 2 * (i + 0.5) / n, rr = Math.sqrt(1 - yy * yy), th = i * 2.399963;
-          var d = [Math.cos(th) * rr, yy, Math.sin(th) * rr], blocked = 0;
-          for (var k = 0; k < cas.length; k++) {
-            var vx = cas[k][0] - P.c[0], vy = cas[k][1] - P.c[1], vz = cas[k][2] - P.c[2], t = vx * d[0] + vy * d[1] + vz * d[2];
-            if (t > 3 && vx * vx + vy * vy + vz * vz - t * t < 64) blocked++;
+          var d = direction(i, n), score;
+          if (exposedMode) {
+            score = 80 * hiddenShare(d) + 8 * (1 - Math.abs(dot3(d, flat)));
+          } else {
+            var blocked = 0;
+            for (var m = 0; m < cas.length; m++) {
+              var vx = cas[m][0] - P.c[0], vy = cas[m][1] - P.c[1], vz = cas[m][2] - P.c[2], t = vx * d[0] + vy * d[1] + vz * d[2];
+              if (t > 3 && vx * vx + vy * vy + vz * vz - t * t < 64) blocked++;
+            }
+            // For idelalisib, how clear the line of sight counts for more than facing the flat side of the ligand.
+            score = (clearSight ? 12 : 3) * blocked + (clearSight ? 12 : 40) * (1 - Math.abs(dot3(d, flat)));
           }
-          // For idelalisib, how clear the line of sight is counts for more than facing the flat side of the ligand.
-          var score = (clearSight ? 12 : 3) * blocked + (clearSight ? 12 : 40) * (1 - Math.abs(dot3(d, flat)));
           if (score < bestScore) { bestScore = score; z = d; }
         }
         x = perp(P.axes[0], z);
@@ -645,18 +673,26 @@
       x = unit(x);
       var y = cross3(z, x);
       var bc = [bulk[0] / nb, bulk[1] / nb, bulk[2] / nb];
-      return { M: [x, y, z], gap: gap, protein: { c: bc, pts: cas } };
+      // The crystal-on-the-right check afterwards is only for the views that were not chosen by exposure.
+      return { M: [x, y, z], gap: exposedMode ? null : gap, exposed: exposedMode, protein: { c: bc, pts: cas } };
     }
     function home() {
       v.clip(null);
       v.orient({ type: 'L', animate: false });
-      var lv = ligandView(wrap.id === 'viewer-idel');
+      var lv = ligandView(poseMeta[ref].site === 'allosteric' || ref === '7PG6' ? 'exposed' : wrap.id === 'viewer-idel');
       if (lv) v.viewerState.rotation = lv.M;
       v.viewerState.zoom = POSE_ZOOM;
       v.render('poses home');
       // The viewer can hand back a turned copy of the rotation it was given, so check the result and, if the crystal pose
       // ended up on the left, half-turn about the vertical axis.
       var R = v.viewerState.rotation;
+      // The viewer can also hand back the rotation half-turned (camera on the far side), which would put the drug behind the
+      // protein; for the exposure-chosen view, make sure the camera really sits where the angle was chosen.
+      if (lv && lv.exposed && dot3(R[2], lv.M[2]) < 0) {
+        v.viewerState.rotation = [R[0].map(function (t) { return -t; }), R[1].slice(), R[2].map(function (t) { return -t; })];
+        v.render('poses home');
+        R = v.viewerState.rotation;
+      }
       if (lv && lv.gap && dot3(lv.gap, R[0]) < 0) {
         v.viewerState.rotation = [R[0].map(function (t) { return -t; }), R[1].slice(), R[2].map(function (t) { return -t; })];
         v.render('poses home');
