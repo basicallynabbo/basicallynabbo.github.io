@@ -23,7 +23,7 @@
     cofold: { label: 'Co-folding', color: '--pk-c1' },
     dock: { label: 'Docking', color: '--pk-c2' },
     rescore: { label: 'Rescoring', color: '--pk-c3' },
-    seq: { label: 'Sequence only', color: '--pk-c4' }
+    seq: { label: 'Sequence in, no pose', color: '--pk-c4' }
   };
   var POSE_TOOLS = [
     { tool: 'Boltz-2', color: '--pk-c1' },
@@ -220,6 +220,85 @@
     });
   }
 
+  // ---------- charts: ligand similarity ----------
+  var SUBTYPE = {
+    'PI3Ka orthosteric': { label: 'PI3Kα orthosteric', color: '--pk-c1', shape: 'circle' },
+    'PI3Ka allosteric': { label: 'PI3Kα allosteric', color: '--pk-c2', shape: 'diamond' },
+    'Pan-PI3K': { label: 'Pan-PI3K', color: '--pk-c3', shape: 'square' },
+    'PI3Kd/g selective': { label: 'PI3Kδ/γ-selective', color: '--pk-c4', shape: 'triangle' },
+    'Kinase decoy': { label: 'Kinase decoy', color: '--ink-soft', shape: 'plus' },
+    'Easy decoy': { label: 'Non-kinase decoy', color: '--ink-soft', shape: 'cross' }
+  };
+  function marker(parent, shape, cx, cy, r, style) {
+    var d;
+    if (shape === 'circle') return svgEl('circle', { cx: cx, cy: cy, r: r, class: 'dot', style: style }, parent);
+    if (shape === 'square') d = 'M' + (cx - r) + ' ' + (cy - r) + 'h' + 2 * r + 'v' + 2 * r + 'h' + -2 * r + 'z';
+    if (shape === 'diamond') d = 'M' + cx + ' ' + (cy - r * 1.25) + 'l' + r * 1.25 + ' ' + r * 1.25 + 'l' + -r * 1.25 + ' ' + r * 1.25 + 'l' + -r * 1.25 + ' ' + -r * 1.25 + 'z';
+    if (shape === 'triangle') d = 'M' + cx + ' ' + (cy - r * 1.2) + 'L' + (cx + r * 1.15) + ' ' + (cy + r * 0.9) + 'L' + (cx - r * 1.15) + ' ' + (cy + r * 0.9) + 'z';
+    if (shape === 'plus') d = 'M' + (cx - r) + ' ' + cy + 'h' + 2 * r + 'M' + cx + ' ' + (cy - r) + 'v' + 2 * r;
+    if (shape === 'cross') d = 'M' + (cx - r * 0.8) + ' ' + (cy - r * 0.8) + 'l' + 1.6 * r + ' ' + 1.6 * r + 'M' + (cx + r * 0.8) + ' ' + (cy - r * 0.8) + 'l' + -1.6 * r + ' ' + 1.6 * r;
+    var stroke = shape === 'plus' || shape === 'cross';
+    return svgEl('path', { d: d, class: stroke ? 'mark-line' : 'dot', style: style }, parent);
+  }
+
+  function drawTanimoto(node, d) {
+    var s = d.similarity, n = s.ligands.length, W = widthOf(node);
+    var left = 86, top = 82;
+    var cell = Math.min(22, Math.floor((W - left - 4) / n));
+    var w = left + cell * n + 4, h = top + cell * n + 4;
+    var svg = newSvg(node, w, h);
+    var breaks = [4, 6, 10, 13];  // class boundaries: orthosteric | allosteric | pan-PI3K | δ/γ | decoys
+    s.ligands.forEach(function (l, j) {
+      var cx = left + j * cell + cell / 2;
+      text(svg, cx, top - 6, l, { transform: 'rotate(-60 ' + cx + ' ' + (top - 6) + ')', 'font-size': 9.5 });
+    });
+    s.ligands.forEach(function (a, i) {
+      var y = top + i * cell;
+      text(svg, left - 6, y + cell / 2 + 3.5, a, { 'text-anchor': 'end', 'font-size': 9.5 });
+      s.ligands.forEach(function (b, j) {
+        var v = s.matrix[i][j];
+        var r = svgEl('rect', {
+          x: left + j * cell + 0.5, y: y + 0.5, width: cell - 1, height: cell - 1,
+          class: i === j ? 'cell c-excluded' : 'cell',
+          style: i === j ? null : 'fill:var(--pk-c3);fill-opacity:' + Math.min(1, 0.06 + v / 0.55).toFixed(3)
+        }, svg);
+        if (i !== j) hover(r, '<b>' + a + ' · ' + b + '</b><br>Tanimoto ' + v.toFixed(2));
+      });
+    });
+    breaks.forEach(function (k) {
+      svgEl('line', { x1: left + k * cell, x2: left + k * cell, y1: top, y2: top + n * cell, class: 'divider' }, svg);
+      svgEl('line', { x1: left, x2: left + n * cell, y1: top + k * cell, y2: top + k * cell, class: 'divider' }, svg);
+    });
+  }
+
+  function drawPca(node, d) {
+    var s = d.similarity, W = widthOf(node);
+    var h = Math.round(Math.min(380, Math.max(280, W * 0.78)));
+    var m = { l: 40, r: 12, t: 12, b: 40 };
+    var svg = newSvg(node, W, h);
+    var x = lin(-0.55, 0.75, m.l, W - m.r), y = lin(-0.45, 0.7, h - m.b, m.t);
+    [-0.4, -0.2, 0, 0.2, 0.4, 0.6].forEach(function (t) {
+      svgEl('line', { x1: x(t), x2: x(t), y1: m.t, y2: h - m.b, class: t === 0 ? 'zero' : 'grid' }, svg);
+      text(svg, x(t), h - m.b + 15, fmt(t, 1), { 'text-anchor': 'middle' });
+    });
+    [-0.4, -0.2, 0, 0.2, 0.4, 0.6].forEach(function (t) {
+      svgEl('line', { x1: m.l, x2: W - m.r, y1: y(t), y2: y(t), class: t === 0 ? 'zero' : 'grid' }, svg);
+      text(svg, m.l - 6, y(t) + 4, fmt(t, 1), { 'text-anchor': 'end' });
+    });
+    text(svg, (m.l + W - m.r) / 2, h - 4, 'PC1 (' + s.var[0] + '%)', { 'text-anchor': 'middle' });
+    text(svg, m.l + 4, m.t + 10, 'PC2 (' + s.var[1] + '%)', {});
+    s.pca.forEach(function (p) {
+      var st = SUBTYPE[p.subtype], cx = x(p.x), cy = y(p.y);
+      var g = svgEl('g', {}, svg);
+      var col = 'var(' + st.color + ')';
+      marker(g, st.shape, cx, cy, 5.5, st.shape === 'plus' || st.shape === 'cross' ? 'stroke:' + col : 'fill:' + col);
+      // RLY-2608 and STX-478 sit almost on top of each other, so one label goes below.
+      if (W > 460 || /PI3Ka/.test(p.subtype)) text(g, cx + 8, cy + (p.ligand === 'STX-478' ? 15 : 3.5), p.ligand, { 'font-size': 9.5 });
+      svgEl('circle', { cx: cx, cy: cy, r: 11, class: 'hit' }, g);
+      hover(g, '<b>' + p.ligand + '</b><br>' + st.label + '<br>PC1 ' + fmt(p.x) + ' · PC2 ' + fmt(p.y));
+    });
+  }
+
   // ---------- pose charts (shared frame) ----------
   function poseFrame(node, rowH, xDom, ticks) {
     var W = widthOf(node), narrow = W < 520;
@@ -347,27 +426,81 @@
     });
   }
 
-  function initRly(wrap) {
+  // Pose explorer: one reference structure at a time, every tool's top pose fitted into its frame
+  // (assets/data/pik3ca/poses, built by PIK3K_bench/scripts/audit/build_pose_views.py).
+  // Chains: A protein, C crystal ligand, O ATP-site marker (alpelisib from 7PG6), then one chain per tool.
+  var POSE_CHAIN = { 'Boltz-2': 'B', 'DiffDock-L': 'D', 'Protenix': 'X', 'FlowDock': 'F' };
+  var poseMeta = null;
+  function initPoses(wrap) {
     var node = wrap.querySelector('.pk-viewer');
-    viewerMsg(node, 'Loading structures…');
-    return Promise.all([getText('8tsd_crystal.pdb'), getText('rly2608_boltz2.pdb')]).then(function (txt) {
-      viewerMsg(node, '');
-      var prot = atoms(txt[0], 'ATOM', 'A').filter(function (l) { return l[21] === 'A'; });
-      var pdb = prot.concat(['TER'], atoms(txt[0], 'HETATM', 'C'), atoms(txt[1], 'HETATM', 'P'), ['END']).join('\n');
-      var v;
-      function build() {
-        v = showMol(node, pdb);
-        colourParts(v);
-        home();
-      }
-      function home() {
-        v.orient({ near: { type: 'L' }, angstroms: 14 }, { animate: false });
-        v.clip({ near: { type: 'L' }, angstroms: 4 });  // a slab through both pockets, refitted as the reader turns it
-      }
-      build();
-      wrap.querySelector('[data-action="reset"]').addEventListener('click', home);
-      rebuildOn(node, build);
+    var refBtns = wrap.querySelectorAll('[data-ref]'), toolBtns = wrap.querySelectorAll('[data-show]');
+    var readout = wrap.querySelector('[data-out="lrmsd"]');
+    var cache = {}, v = null, ref = wrap.querySelector('[data-ref].is-on').dataset.ref, text = null;
+    var on = {};
+    toolBtns.forEach(function (b) { on[b.dataset.show] = b.getAttribute('aria-pressed') === 'true'; });
+
+    function chainOf(key) { return POSE_CHAIN[key] || key; }
+    function present(key) {
+      if (key === 'O') return poseMeta[ref].site === 'allosteric';
+      return key in poseMeta[ref].lrmsd;
+    }
+    function colour() {
+      v.setColor(cssVar('--pk-cartoon'), 'A');
+      v.setColor(cssVar('--ink'), 'C');
+      v.setColor(cssVar('--pk-pocket'), 'O');
+      POSE_TOOLS.forEach(function (t) { v.setColor(cssVar(t.color), POSE_CHAIN[t.tool]); });
+      v.hideElements({ type: 'L' });
+    }
+    function apply() {
+      toolBtns.forEach(function (b) {
+        var key = b.dataset.show, has = present(key);
+        b.disabled = !has;
+        b.setAttribute('aria-pressed', on[key] && has ? 'true' : 'false');
+        b.classList.toggle('is-on', on[key] && has);
+        if (!v || !has) return;
+        if (on[key]) v.show({ chain: chainOf(key) }); else v.hide({ chain: chainOf(key) });
+      });
+      var parts = Object.keys(poseMeta[ref].lrmsd).filter(function (t) { return on[t]; })
+        .map(function (t) { return t + ' ' + poseMeta[ref].lrmsd[t].toFixed(1) + ' Å'; });
+      readout.textContent = parts.length ? 'LRMSD to crystal: ' + parts.join(' · ') : '';
+    }
+    function home() {
+      v.orient({ near: { type: 'L' }, angstroms: 12 }, { animate: false });
+      v.clip({ near: { type: 'L' }, angstroms: 4 });  // a slab through the pockets, refitted as the reader turns it
+    }
+    function build() {
+      if (!text) return;
+      v = showMol(node, text);
+      colour();
+      apply();
+      home();
+    }
+    function load(r) {
+      ref = r;
+      viewerMsg(node, 'Loading structure…');
+      var get = cache[r] || (cache[r] = getText('poses/' + r + '.pdb'));
+      return get.then(function (t) {
+        viewerMsg(node, '');
+        text = t;
+        build();
+      });
+    }
+    refBtns.forEach(function (b) {
+      b.addEventListener('click', function () {
+        setPressed(b.parentNode, b);
+        load(b.dataset.ref);
+      });
     });
+    toolBtns.forEach(function (b) {
+      b.addEventListener('click', function () {
+        on[b.dataset.show] = !on[b.dataset.show];
+        apply();
+      });
+    });
+    wrap.querySelector('[data-action="reset"]').addEventListener('click', home);
+    rebuildOn(node, build);
+    var meta = poseMeta ? Promise.resolve(poseMeta) : fetch(DATA + 'poses/poses.json').then(function (r) { return r.json(); });
+    return meta.then(function (m) { poseMeta = m; return load(ref); });
   }
 
   function initTraj(wrap, d) {
@@ -498,6 +631,8 @@
 
     function drawAll() {
       drawMatrix(q('[data-chart="matrix"]'), d);
+      drawTanimoto(q('[data-chart="tanimoto"]'), d);
+      drawPca(q('[data-chart="pca"]'), d);
       drawRank(q('[data-chart="rank"]'), d, state.metric);
       drawDp(q('[data-chart="dp"]'), d, state.tool);
       drawLrmsd(q('[data-chart="lrmsd"]'), d);
@@ -512,6 +647,10 @@
       { label: MATRIX_LABEL.negative + ' (' + counts.negative + ')', color: 'var(--pk-c2-soft)' },
       { label: 'Excluded (' + counts.excluded + ')', color: 'var(--surface)', style: 'box-shadow: inset 0 0 0 1px var(--line)' }
     ]);
+    legend(q('[data-legend="subtype"]'), Object.keys(SUBTYPE).map(function (k) {
+      var st = SUBTYPE[k];
+      return { label: st.label, color: 'var(' + st.color + ')', shape: st.shape === 'circle' ? 'dot' : st.shape };
+    }));
     legend(q('[data-legend="family"]'), Object.keys(FAMILY).map(function (k) {
       return { label: FAMILY[k].label, color: 'var(' + FAMILY[k].color + ')', shape: 'dot' };
     }));
@@ -548,7 +687,7 @@
       rt = setTimeout(drawAll, 150);
     });
 
-    startViewer(q('#viewer-rly'), initRly);
+    document.querySelectorAll('[data-viewer="poses"]').forEach(function (n) { startViewer(n.closest('figure'), initPoses); });
     startViewer(q('#viewer-traj'), function (wrap) { return initTraj(wrap, d); });
   });
 })();

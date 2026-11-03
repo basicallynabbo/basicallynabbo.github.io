@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "PIK3CA benchmark"
-description: "A 300-pair benchmark of co-folding, docking and affinity tools on clinical PIK3CA variants. Affinity ranking works; the allosteric pocket is missed by every tool."
+description: "A 300-pair benchmark of co-folding, docking and affinity tools on clinical PIK3CA variants. Affinity ranking works; every pose tool misses the allosteric pocket."
 permalink: /projects/pik3ca-benchmark/
 show_title: false
 extra_css: /assets/css/pik3ca.css
@@ -12,7 +12,7 @@ extra_js:
 <div class="pk-hero">
   <p class="pk-kicker">M.Tech thesis · CSIR-IGIB · 2025–26</p>
   <h1 class="pk-title">Can AI binding models see what a cancer mutation changes?</h1>
-  <p class="pk-dek">I tested co-folding, docking and affinity-prediction tools on 300 pairs of PIK3CA variants and inhibitors. They rank known inhibitors well. All of them miss the allosteric pocket that the newest mutant-selective drugs bind.</p>
+  <p class="pk-dek">I tested co-folding, docking and affinity-prediction tools on 300 pairs of PIK3CA variants and inhibitors. They rank known inhibitors well. Every tool that builds a pose misses the allosteric pocket that the newest mutant-selective drugs bind.</p>
   <p class="pk-byline">Nabajit Kumar Borah · supervised by Dr. Lipi Thukral (CSIR-IGIB) and Dr. Abhishek Sengupta (Amity University)</p>
   <ul class="pk-links">
     <li><a class="pk-pill" href="{{ '/assets/thesis.pdf' | relative_url }}">Thesis PDF</a></li>
@@ -23,18 +23,34 @@ extra_js:
 <div class="pk-stats" role="list">
   <div class="pk-stat" role="listitem"><span class="pk-stat-num">300</span><span class="pk-stat-label">variant–ligand pairs<br>15 variants × 20 ligands</span></div>
   <div class="pk-stat" role="listitem"><span class="pk-stat-num">ρ 0.85</span><span class="pk-stat-label">affinity ranking<br>GatorAffinity on Boltz-2 poses</span></div>
-  <div class="pk-stat" role="listitem"><span class="pk-stat-num">≈ 20 Å</span><span class="pk-stat-label">pose error for allosteric<br>inhibitors, every tool</span></div>
+  <div class="pk-stat" role="listitem"><span class="pk-stat-num">≈ 20 Å</span><span class="pk-stat-label">pose error for allosteric<br>inhibitors, every pose tool</span></div>
   <div class="pk-stat" role="listitem"><span class="pk-stat-num">15 → 0</span><span class="pk-stat-label">PoseBusters failures with<br>guidance <span class="pk-tag">after thesis</span></span></div>
 </div>
 
-<figure class="pk-figure pk-viewer-wrap" id="viewer-rly">
-  <div class="pk-viewer" data-viewer="rly" role="img" aria-label="3D view of p110α. The crystal pose of RLY-2608 sits in the allosteric pocket; the Boltz-2 prediction sits in the ATP pocket about 20 Å away."></div>
+<figure class="pk-figure pk-viewer-wrap" id="viewer-poses">
+  <div class="pk-controls" role="group" aria-label="Crystal structure">
+    <button type="button" class="pk-btn is-on" data-ref="8TSD" aria-pressed="true">RLY-2608 · 8TSD</button>
+    <button type="button" class="pk-btn" data-ref="8TDU" aria-pressed="false">STX-478 · 8TDU</button>
+    <button type="button" class="pk-btn" data-ref="8TGD" aria-pressed="false">STX-478 H1047R · 8TGD</button>
+    <button type="button" class="pk-btn" data-ref="7PG6" aria-pressed="false">Alpelisib · 7PG6</button>
+    <button type="button" class="pk-btn" data-ref="8AM0" aria-pressed="false">Inavolisib · 8AM0</button>
+    <button type="button" class="pk-btn" data-ref="8EXL" aria-pressed="false">Taselisib · 8EXL</button>
+  </div>
+  <div class="pk-controls pk-controls--tools" role="group" aria-label="Poses to show">
+    <span class="pk-controls-label">Show</span>
+    <button type="button" class="pk-btn is-on" data-show="Boltz-2" aria-pressed="true"><i class="pk-sw" style="--sw: var(--pk-c1)"></i>Boltz-2</button>
+    <button type="button" class="pk-btn is-on" data-show="DiffDock-L" aria-pressed="true"><i class="pk-sw" style="--sw: var(--pk-c2)"></i>DiffDock-L</button>
+    <button type="button" class="pk-btn is-on" data-show="Protenix" aria-pressed="true"><i class="pk-sw" style="--sw: var(--pk-c3)"></i>Protenix</button>
+    <button type="button" class="pk-btn is-on" data-show="FlowDock" aria-pressed="true"><i class="pk-sw" style="--sw: var(--pk-c4)"></i>FlowDock</button>
+    <button type="button" class="pk-btn is-on" data-show="O" aria-pressed="true"><i class="pk-sw pk-sw--pocket"></i>ATP site</button>
+  </div>
+  <div class="pk-viewer" data-viewer="poses" role="img" aria-label="3D view of p110α with the crystal ligand and each tool's top-ranked pose. For the allosteric inhibitors every predicted pose sits in the ATP pocket, about 20 Å from the crystal pose."></div>
   <div class="pk-viewer-bar">
-    <span class="pk-key"><i class="pk-sw pk-sw--crystal"></i>Crystal pose (8TSD)</span>
-    <span class="pk-key"><i class="pk-sw pk-sw--pred"></i>Boltz-2 prediction</span>
+    <span class="pk-key"><i class="pk-sw pk-sw--crystal-ink"></i>Crystal pose</span>
+    <span class="pk-readout" data-out="lrmsd"></span>
     <button type="button" class="pk-btn" data-action="reset">Reset view</button>
   </div>
-  <figcaption>RLY-2608, a mutant-selective allosteric inhibitor, on wild-type p110α. The crystal structure puts it in the allosteric pocket. Boltz-2 puts it in the ATP pocket, about 20 Å away. Drag to rotate, scroll to zoom. Drawn with <a href="https://github.com/sokrypton/py2Dmol">py2Dmol</a>.</figcaption>
+  <figcaption>Each tool's top-ranked pose, fitted onto the crystal structure through the pocket. For RLY-2608 and STX-478 every pose sits in the ATP pocket (grey, where alpelisib binds), not in the allosteric pocket the crystal shows. Boltz-2 gave its RLY-2608 pose a confidence of 0.91. Pick a structure above; drag to rotate, scroll to zoom. Drawn with <a href="https://github.com/sokrypton/py2Dmol">py2Dmol</a>.</figcaption>
 </figure>
 
 ## The question
@@ -57,7 +73,7 @@ The matrix crosses 15 p110α sequences (wild type and 14 clinical variants) with
 
 Labels came from literature mining. 52 pairs have binding evidence, 19 of them with a measured IC₅₀ or Kᵢ. These 19 are used for ranking. 150 pairs are negative controls. The remaining pairs had no usable evidence and were left out of scoring.
 
-Structures came from co-folding (Boltz-2, Protenix), docking (DiffDock-L, FlowDock, GNINA, Vina, TankBind) and a sequence-only model (PLAPT). Affinity rescorers (GatorAffinity, CheapNet, GIGN, DualBind) were run on both Boltz-2 and DiffDock-L poses.
+Structures came from co-folding (Boltz-2, Protenix) and docking (DiffDock-L, FlowDock, GNINA, Vina, TankBind). Affinity rescorers (GatorAffinity, CheapNet, GIGN, DualBind) were run on both Boltz-2 and DiffDock-L poses. PLAPT predicts affinity from sequence and SMILES alone, with no structure.
 
 </div>
 <figure class="pk-figure pk-figure--paper">
@@ -72,11 +88,28 @@ Structures came from co-folding (Boltz-2, Protenix), docking (DiffDock-L, FlowDo
   <figcaption>The label for each pair. Hover a cell for details.</figcaption>
 </figure>
 
+The ligands are chemically diverse. Their mean pairwise Tanimoto similarity is 0.13, and only one pair, duvelisib and idelalisib, is above 0.4 (0.53). A tool cannot score well here by recognising near-copies of the same scaffold.
+
+<figure class="pk-figure pk-chart" id="chart-similarity">
+  <div class="pk-two">
+    <div>
+      <h4>Pairwise Tanimoto similarity</h4>
+      <div class="pk-plot" data-chart="tanimoto" role="img" aria-label="20 by 20 heatmap of ligand Tanimoto similarity; almost all pairs are below 0.2"></div>
+    </div>
+    <div>
+      <h4>Ligands in similarity space</h4>
+      <div class="pk-legend" data-legend="subtype"></div>
+      <div class="pk-plot" data-chart="pca" role="img" aria-label="PCA of the ligand similarity space; the ligand classes form separate groups"></div>
+    </div>
+  </div>
+  <figcaption>Left: Morgan fingerprint (radius 2) Tanimoto similarity, darker is more similar; lines separate the ligand classes. Right: the first two principal components of the same fingerprints, which together explain about 23% of the variance. Hover for values.</figcaption>
+</figure>
+
 ## Ranking affinities
 
-Co-folding followed by rescoring ranked the 19 measured affinities well. GatorAffinity on Boltz-2 poses reached Spearman ρ = 0.85 (95% CI 0.63–0.93), and Boltz-2's own affinity head reached 0.80. Nesso-1, a newer co-folding model with an affinity head, run after submission, reached 0.83 and gave the best binder-versus-control separation (AUROC 0.93).
+Co-folding followed by rescoring ranked the 19 measured affinities well. GatorAffinity on Boltz-2 poses reached Spearman ρ = 0.85 (95% CI 0.63–0.93), and Boltz-2's own affinity head reached 0.80. Nesso-1, which Recursion and Valence Labs describe as “a fast, structure-based protein–ligand binding-affinity model”, reached 0.83 and gave the best binder-versus-control separation (AUROC 0.93). It was run after submission.
 
-The pose source mattered as much as the scorer. The same GatorAffinity model dropped to ρ = 0.62 on DiffDock-L poses. Docking scores (GNINA, Vina) and the sequence-only model were weaker still.
+The pose source mattered as much as the scorer. The same GatorAffinity model dropped to ρ = 0.62 on DiffDock-L poses. Docking scores (GNINA, Vina) and PLAPT were weaker still.
 
 <figure class="pk-figure pk-chart" id="chart-rank">
   <div class="pk-controls" role="group" aria-label="Metric">
@@ -85,10 +118,30 @@ The pose source mattered as much as the scorer. The same GatorAffinity model dro
   </div>
   <div class="pk-legend" data-legend="family"></div>
   <div class="pk-plot" data-chart="rank" role="img" aria-label="Ranking of 16 tools by Spearman correlation or AUROC"></div>
-  <figcaption>Each row is a tool. For ρ the line shows the 95% bootstrap interval. “A | B” means scorer A on poses from B.</figcaption>
+  <figcaption>Each row is a tool. For ρ the line shows the 95% bootstrap interval. “A | B” means scorer A on poses from B.<span class="pk-narrow-only"> Gator = GatorAffinity, DD-L = DiffDock-L.</span></figcaption>
 </figure>
 
 There is a catch. If every pair's Boltz-2 score is replaced by that ligand's average over all 15 variants, ρ rises to 0.83, above the per-pair score. For GatorAffinity the same baseline gives 0.79. Most of the ranking signal says which ligand it is, not which variant it is binding.
+
+### A right pose is not a right answer
+
+Idelalisib is a PI3Kδ drug and weakly active on PI3Kα, so the benchmark uses it as a control. Boltz-2 placed it in the PI3Kα ATP pocket in almost exactly the pose idelalisib takes in its PI3Kδ crystal structure (4XE0): 0.5 Å after fitting the two pockets. It gave that pose a confidence of 0.92 and predicted strong binding (p-scale 6.59). DiffDock-L also used the pocket, 3.4 Å off the PI3Kδ pose, but with a low confidence of −1.43. A plausible pose in a conserved pocket says little about whether the drug binds this isoform.
+
+<figure class="pk-figure pk-viewer-wrap" id="viewer-idel">
+  <div class="pk-controls"><button type="button" class="pk-btn is-on" data-ref="4XE0" aria-pressed="true">Idelalisib · 4XE0</button></div>
+  <div class="pk-controls pk-controls--tools" role="group" aria-label="Poses to show">
+    <span class="pk-controls-label">Show</span>
+    <button type="button" class="pk-btn is-on" data-show="Boltz-2" aria-pressed="true"><i class="pk-sw" style="--sw: var(--pk-c1)"></i>Boltz-2</button>
+    <button type="button" class="pk-btn is-on" data-show="DiffDock-L" aria-pressed="true"><i class="pk-sw" style="--sw: var(--pk-c2)"></i>DiffDock-L</button>
+  </div>
+  <div class="pk-viewer pk-viewer--short" data-viewer="poses" role="img" aria-label="PI3Kδ crystal structure with idelalisib, and the Boltz-2 and DiffDock-L poses predicted on PI3Kα fitted into it"></div>
+  <div class="pk-viewer-bar">
+    <span class="pk-key"><i class="pk-sw pk-sw--crystal-ink"></i>Crystal pose in PI3Kδ</span>
+    <span class="pk-readout" data-out="lrmsd"></span>
+    <button type="button" class="pk-btn" data-action="reset">Reset view</button>
+  </div>
+  <figcaption>PI3Kδ with idelalisib (4XE0). The two poses were predicted on PI3Kα and fitted onto PI3Kδ through the aligned pocket residues (49% sequence identity overall).</figcaption>
+</figure>
 
 ## Mutation response
 
@@ -107,9 +160,11 @@ All five shifts larger than 0.3 log units are potency gains. A constant “mutan
 
 ## The wrong pocket
 
-Six crystal structures gave a direct check of pose. The three orthosteric ligands are alpelisib (7PG6), inavolisib (8AM0) and taselisib (8EXL). The allosteric ones are RLY-2608 (8TSD) and STX-478 on wild type (8TDU) and H1047R (8TGD). Boltz-2, Protenix and DiffDock-L placed the orthosteric ligands within 2 Å. FlowDock landed 8–10 Å away: near the right pocket, but not in the crystal pose.
+Six crystal structures gave a direct check of pose. The three orthosteric ligands are alpelisib (7PG6), inavolisib (8AM0) and taselisib (8EXL). The allosteric ones are RLY-2608 (8TSD) and STX-478 on wild type (8TDU) and H1047R (8TGD). Boltz-2, Protenix and DiffDock-L placed the orthosteric ligands within 2 Å. FlowDock's top poses landed 8–10 Å away: near the right pocket, but not in the crystal pose.
 
-Every tool put both allosteric inhibitors in the ATP pocket, 20–27 Å from where they bind. Several did so with high confidence. Allosteric PIK3CA structures are almost absent from the training data, and the models fall back on the pocket they have seen thousands of times.
+No tool recovered the allosteric pocket. All twelve allosteric poses were 20–27 Å from the crystal pose, and I checked where they went instead. Eleven sit in the ATP pocket: their centre is within 5 Å of where alpelisib binds, and they come within about 4 Å of the hinge residue Val851. FlowDock's RLY-2608 pose sits at the edge of that pocket, 6.6 Å out. Boltz-2 reported its RLY-2608 pose with a confidence of 0.91. Allosteric PIK3CA structures are almost absent from the training data, and the models fall back on the pocket they have seen thousands of times.
+
+Nesso-1 and PLAPT predict affinity without building an atomic pose, so they have nothing to check here.
 
 <figure class="pk-figure pk-chart" id="chart-lrmsd">
   <div class="pk-legend" data-legend="pose"></div>
@@ -119,7 +174,7 @@ Every tool put both allosteric inhibitors in the ATP pocket, 20–27 Å from whe
 
 ### Watching FlowDock place a ligand
 
-FlowDock builds a pose by flowing the ligand and pocket from a random start to a final structure. The trajectories show where it commits. Inavolisib settles within about 1 Å of the crystal ligand, and alpelisib within about 3 Å. RLY-2608 goes straight to the ATP pocket and stays there.
+FlowDock builds a pose by flowing the ligand and pocket from a random start to a final structure. These trajectories come from a separate sampling run with FlowDock's default predicted apo structure as the starting protein. In that run inavolisib was FlowDock's one good pose: it settles within about 1 Å of the crystal ligand (1.6 Å LRMSD), the only FlowDock pose under 2 Å. Alpelisib's centre stays about 3 Å out. RLY-2608 goes straight to the ATP pocket and stays there.
 
 <figure class="pk-figure pk-viewer-wrap" id="viewer-traj">
   <div class="pk-controls" role="group" aria-label="Ligand">
@@ -139,7 +194,7 @@ FlowDock builds a pose by flowing the ligand and pocket from a random start to a
     <span class="pk-key"><i class="pk-sw pk-sw--pred"></i>FlowDock ligand</span>
     <span class="pk-key"><i class="pk-sw pk-sw--pocket"></i>Pocket residues</span>
   </div>
-  <figcaption>FlowDock sampling run, rank-1 sample, shown in the crystal frame. The line below the viewer tracks the distance from the ligand centroid to the crystal ligand centroid.</figcaption>
+  <figcaption>FlowDock sampling run with the predicted apo structure as the start, rank-1 sample, shown in the crystal frame. The line below the viewer tracks the distance from the ligand centroid to the crystal ligand centroid.</figcaption>
 </figure>
 
 ## Guidance fixes geometry, not placement <span class="pk-tag">after thesis</span>
@@ -158,7 +213,7 @@ TFG fixed the geometry. The top pose passed every PoseBusters check in 30 of 30 
 
 - **Ranking known PI3Kα ligands works**, using co-folding plus rescoring, but most of the signal is ligand identity. A good ρ here is not evidence that the model reads the mutation.
 - **Mutation effects are unresolved.** Nine measured shifts, all in one direction, cannot separate a model that understands the mutation from one that guesses “tighter”.
-- **No tool finds the allosteric pocket unprompted.** For an allosteric series, check where the ligand landed before trusting any affinity number built on that pose.
+- **Pocket blindness with overconfidence.** No tool finds the allosteric pocket; every pose lands in or at the ATP pocket, sometimes at high confidence. For an allosteric series, check where the ligand landed before trusting any affinity number built on that pose.
 - **Physical validity is cheap to fix and is not the bottleneck.** Guidance cleans up geometry for about a quarter more compute. It does not fix placement.
 
 ## Thesis, corrections and reruns {#thesis}
@@ -170,11 +225,12 @@ TFG fixed the geometry. The top pose passed every PoseBusters check in 30 of 30 
   </a>
 </div>
 
-In November 2026 every reported result was recomputed from the raw tool outputs. The tool runs and figure values reproduced. A few numbers in the text did not, and the PDF now opens with an errata page. The main changes:
+In November 2026 every reported result was recomputed from the raw tool outputs. The tool runs and figure values reproduced. A few numbers in the text did not. They are corrected in the PDF above, and an errata page at the front lists every change. The main ones:
 
 - **Mutation response.** The text gave ρ = 0.90 for GatorAffinity. The data give 0.67, and the best tool is CheapNet on Boltz-2 poses at 0.75.
 - **Protenix PoseBusters rate.** The text gave a 94.7% failure rate. The correct figure is 35.5% of top poses failing at least one check, against 3.5% for Boltz-2.
-- **FlowDock** was missing from the pose figure. It is included above.
+- **FlowDock** was missing from the pose figure. It is included in the charts above.
+- **Idelalisib** is weakly active on PI3Kα, not inactive, and the taselisib potency comes from Ndubaku et al. (2013).
 - **Serabelisib.** The Boltz-2 affinity runs for serabelisib had used the wrong molecule. After correction Boltz-2 gives ρ = 0.80 (was 0.79).
 
 Two sets of runs postdate the thesis and are tagged <span class="pk-tag">after thesis</span> on this page: Nesso-1 on all 300 pairs, and Protenix v2 with and without guidance across five seeds.

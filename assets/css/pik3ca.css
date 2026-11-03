@@ -596,3 +596,84 @@
   position: absolute;
   inset: 0;
 }
+
+/* Pose explorer and similarity charts */
+.pk-controls--tools .pk-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.pk-controls--tools .pk-btn.is-on {
+  border-color: var(--ink-soft);
+  color: var(--ink);
+  background: var(--surface);
+}
+
+.pk-controls--tools .pk-btn:not(.is-on) .pk-sw {
+  opacity: 0.25;
+}
+
+.pk-btn[disabled] {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.pk-controls-label {
+  align-self: center;
+  margin-right: 2px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.pk-sw--crystal-ink { --sw: var(--ink); }
+.pk-sw--square { border-radius: 1px; }
+.pk-sw--diamond { width: 10px; height: 10px; border-radius: 1px; transform: rotate(45deg); }
+.pk-sw--triangle { border-radius: 0; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.pk-sw--plus { border-radius: 0; clip-path: polygon(38% 0, 62% 0, 62% 38%, 100% 38%, 100% 62%, 62% 62%, 62% 100%, 38% 100%, 38% 62%, 0 62%, 0 38%, 38% 38%); }
+.pk-sw--cross { border-radius: 0; transform: rotate(45deg); clip-path: polygon(38% 0, 62% 0, 62% 38%, 100% 38%, 100% 62%, 62% 62%, 62% 100%, 38% 100%, 38% 62%, 0 62%, 0 38%, 38% 38%); }
+
+.pk-plot .divider {
+  stroke: var(--paper);
+  stroke-width: 2;
+}
+
+.pk-plot .mark-line {
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.pk-two {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.pk-two h4 {
+  margin: 0 0 0.6rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.pk-narrow-only {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .pk-two {
+    grid-template-columns: 1fr;
+  }
+
+  .pk-narrow-only {
+    display: inline;
+  }
+}
