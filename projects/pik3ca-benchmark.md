@@ -201,7 +201,7 @@ TFG fixed the geometry. The top pose passed every PoseBusters check in 30 of 30 
     <button type="button" class="pk-btn is-on" data-tool="Protenix v2" data-note="RLY-2608 binds the allosteric site, which every model here misses. On the ATP-pocket drugs, Protenix v2 lands within 2 Å." aria-pressed="true">Protenix v2 + TFG · RLY-2608</button>
     <button type="button" class="pk-btn" data-tool="Boltz-2" data-note="Alpelisib binds the ATP pocket. Boltz-2 lands within 1 Å of the crystal pose." aria-pressed="false">Boltz-2 · alpelisib</button>
     <button type="button" class="pk-btn" data-tool="FlowDock" data-note="FlowDock's best case: inavolisib settles within 2 Å while the pocket moves around it." aria-pressed="false">FlowDock · inavolisib</button>
-    <button type="button" class="pk-btn" data-tool="DiffDock-L" data-note="Idelalisib is a PI3Kδ drug. DiffDock-L docks it into the pocket but gives it a low confidence, as it should." aria-pressed="false">DiffDock-L · idelalisib</button>
+    <button type="button" class="pk-btn" data-tool="DiffDock-L" data-note="Idelalisib is selective for PI3Kδ, the sister isoform, and only weakly active on PI3Kα. DiffDock-L docks it into the pocket but gives it a low confidence, as it should." aria-pressed="false">DiffDock-L · idelalisib</button>
   </div>
   <div class="pk-viewer pk-viewer--short" data-viewer="traj" role="img" aria-label="Animated sampling trajectory of the chosen model in the p110α pocket, with the crystal ligand shown for comparison"></div>
   <div class="pk-viewer-bar">
