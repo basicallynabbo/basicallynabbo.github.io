@@ -51,7 +51,7 @@ Structure-based AI tools are now used to triage compounds like these. For them t
     <div class="pk-mutgroup"><span class="pk-key"><i class="pk-sw" style="--sw: var(--pk-dom-kinase)"></i><b>Kinase</b></span><button type="button" class="pk-mutbtn" data-site="726" aria-pressed="false">E726K</button><button type="button" class="pk-mutbtn" data-site="780" aria-pressed="false">W780R</button><button type="button" class="pk-mutbtn" data-site="859" aria-pressed="false">Q859H/K</button><button type="button" class="pk-mutbtn" data-site="1043" aria-pressed="false">M1043I</button><button type="button" class="pk-mutbtn" data-site="1047" aria-pressed="false">H1047L/R</button><button type="button" class="pk-mutbtn" data-site="1049" aria-pressed="false">G1049R</button></div>
     <button type="button" class="pk-btn" data-action="reset">Reset view</button>
   </div>
-  <figcaption>AlphaFold model of p110α. Mutations in red; tap one to find it, drag to rotate.</figcaption>
+  <figcaption>AlphaFold model of p110α. Mutations in red; tap one to find it, drag to rotate, scroll to zoom.</figcaption>
 </figure>
 
 The matrix crosses 15 p110α sequences (wild type and 14 clinical variants) with 20 ligands: approved and clinical PI3Kα inhibitors, the two allosteric compounds, pan-PI3K and isoform-selective inhibitors, and drugs for unrelated targets as negative controls. Every one of the 300 pairs went through every tool.
@@ -69,18 +69,16 @@ Structures came from co-folding (Boltz-2, Protenix) and docking (DiffDock-L, Flo
 The ligands are chemically diverse. Their mean pairwise Tanimoto similarity is 0.13, and only one pair, duvelisib and idelalisib, is above 0.4 (0.53). A tool cannot score well here by recognising near-copies of the same scaffold.
 
 <figure class="pk-figure pk-chart" id="chart-similarity">
-  <div class="pk-two">
-    <div>
-      <h4>Pairwise Tanimoto similarity</h4>
-      <div class="pk-plot" data-chart="tanimoto" role="img" aria-label="20 by 20 heatmap of ligand Tanimoto similarity; almost all pairs are below 0.2"></div>
-    </div>
-    <div>
-      <h4>Ligands in similarity space</h4>
-      <div class="pk-legend" data-legend="subtype"></div>
-      <div class="pk-plot" data-chart="pca" role="img" aria-label="PCA of the ligand similarity space; the ligand classes form separate groups"></div>
-    </div>
+  <div class="pk-sim-plot">
+    <h4>Pairwise Tanimoto similarity</h4>
+    <div class="pk-plot" data-chart="tanimoto" role="img" aria-label="20 by 20 heatmap of ligand Tanimoto similarity; almost all pairs are below 0.2"></div>
   </div>
-  <figcaption>Left: Morgan fingerprint (radius 2) Tanimoto similarity, darker is more similar; lines separate the ligand classes. Right: the first two principal components of the same fingerprints, which together explain about 23% of the variance. Hover for values.</figcaption>
+  <div class="pk-sim-plot">
+    <h4>Ligands in similarity space</h4>
+    <div class="pk-legend" data-legend="subtype"></div>
+    <div class="pk-plot" data-chart="pca" role="img" aria-label="PCA of the ligand similarity space; the ligand classes form separate groups"></div>
+  </div>
+  <figcaption>Top: Morgan fingerprint (radius 2) Tanimoto similarity, darker is more similar; lines separate the ligand classes. Bottom: the first two principal components of the same fingerprints, which together explain about 23% of the variance. Hover a cell, a label or a point to find the same ligand in both plots.</figcaption>
 </figure>
 
 ## Ranking affinities
@@ -128,12 +126,9 @@ The harder test is whether a tool's prediction moves when a mutation changes pot
 All five shifts larger than 0.3 log units are potency gains. A constant “mutant binds tighter” guess also gets all five signs right, so a correct sign alone shows nothing. I treat this result as preliminary.
 
 <figure class="pk-figure pk-chart" id="chart-dp">
-  <div class="pk-controls" role="group" aria-label="Tool">
-    <button type="button" class="pk-btn is-on" data-tool="CheapNet | Boltz-2" aria-pressed="true">CheapNet | Boltz-2</button>
-    <button type="button" class="pk-btn" data-tool="GatorAffinity | Boltz-2" aria-pressed="false">GatorAffinity | Boltz-2</button>
-  </div>
-  <div class="pk-plot" data-chart="dp" role="img" aria-label="Scatter of measured against predicted mutation shifts for 9 pairs"></div>
-  <figcaption>Measured Δp (mutant minus wild type) against the predicted change. Shaded quadrants are where the predicted sign is right. Allosteric ligands are drawn as diamonds.</figcaption>
+  <div class="pk-controls" data-legend="dp" role="group" aria-label="Tools"></div>
+  <div class="pk-plot" data-chart="dp" role="img" aria-label="Scatter of measured against predicted mutation shifts for 9 pairs, with predictions from CheapNet and GatorAffinity joined by a line"></div>
+  <figcaption>Measured Δp (mutant minus wild type) against the predicted change. Each measured shift has one dot per tool, joined by a line, so the line length is how much the two tools disagree. Diamonds are allosteric ligands. Shaded quadrants are where the predicted sign is right. Click a tool to hide or show it.</figcaption>
 </figure>
 
 ## The wrong pocket
@@ -176,7 +171,7 @@ Use **Show** to turn each tool, or the ATP-site marker, on or off.
     <span class="pk-readout" data-out="lrmsd"></span>
     <button type="button" class="pk-btn" data-action="reset">Reset view</button>
   </div>
-  <figcaption>Drag to rotate; hold Ctrl or ⌘ and scroll, or pinch, to zoom. Reset view brings back the starting angle. Drawn with <a href="https://github.com/sokrypton/py2Dmol">py2Dmol</a>.</figcaption>
+  <figcaption>Drag to rotate, scroll or pinch to zoom. Reset view brings back the starting angle. Drawn with <a href="https://github.com/sokrypton/py2Dmol">py2Dmol</a>.</figcaption>
 </figure>
 
 <figure class="pk-figure pk-chart" id="chart-lrmsd">
@@ -219,7 +214,7 @@ TFG fixed the geometry. The top pose passed every PoseBusters check in 30 of 30 
 <figure class="pk-figure pk-chart" id="chart-tfg">
   <div class="pk-legend" data-legend="tfg"></div>
   <div class="pk-plot" data-chart="tfg" role="img" aria-label="Ligand RMSD for five seeds per crystal pair, with and without guidance, marking which poses pass PoseBusters"></div>
-  <figcaption>Top-ranked Protenix v2 pose per seed (5 seeds), log scale. Filled dots pass all PoseBusters checks; open dots fail at least one.</figcaption>
+  <figcaption>Top-ranked Protenix v2 pose per seed (5 seeds), log scale. Each dot is one seed. Filled dots pass all PoseBusters checks; open dots fail at least one.</figcaption>
 </figure>
 
 ## What it means

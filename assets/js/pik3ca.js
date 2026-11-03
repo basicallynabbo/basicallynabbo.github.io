@@ -182,14 +182,20 @@
   }
 
   // ---------- chart: mutation response ----------
-  function drawDp(node, d, tool) {
+  // Both affinity rescorers on one chart: colour is the tool, shape is the ligand type, and a line joins each pair of predictions.
+  var DP_TOOLS = [
+    { tool: 'CheapNet | Boltz-2', short: 'CheapNet', color: '--pk-c1', dx: -5 },
+    { tool: 'GatorAffinity | Boltz-2', short: 'GatorAffinity', color: '--pk-c3', dx: 5 }
+  ];
+  function drawDp(node, d, hidden) {
     var pts = d.dp_points, W = widthOf(node);
-    var stats = d.tools.filter(function (t) { return t.tool === tool; })[0];
+    var shown = DP_TOOLS.filter(function (t) { return !hidden[t.tool]; });
     var h = Math.round(Math.min(380, Math.max(260, W * 0.6)));
     var m = { l: 48, r: 16, t: 28, b: 40 };
     var svg = newSvg(node, W, h);
-    var ys = pts.map(function (p) { return p[tool]; });
-    var yMax = Math.max(0.4, Math.max.apply(null, ys.map(Math.abs))) * 1.15;
+    var all = [];
+    pts.forEach(function (p) { DP_TOOLS.forEach(function (t) { all.push(Math.abs(p[t.tool])); }); });
+    var yMax = Math.max(0.4, Math.max.apply(null, all)) * 1.15;  // one scale for both tools
     var x = lin(-0.3, 1.3, m.l, W - m.r), y = lin(-yMax, yMax, h - m.b, m.t);
     // Quadrants where the predicted sign matches the measured one.
     svgEl('rect', { x: x(0), y: m.t, width: x(1.3) - x(0), height: y(0) - m.t, class: 'q-ok' }, svg);
@@ -206,18 +212,37 @@
     }
     text(svg, (m.l + W - m.r) / 2, h - 4, 'Measured Δp (mutant − WT, log units)', { 'text-anchor': 'middle' });
     text(svg, m.l, m.t - 10, 'Predicted change', {});
-    text(svg, W - m.r, m.t - 10, 'ρ = ' + fmt(stats.dp_rho) + ' · p = ' + stats.dp_p.toFixed(2), { 'text-anchor': 'end', class: 't-strong' });
     pts.forEach(function (p) {
-      var cx = x(p.exp), cy = y(p[tool]);
-      var g = svgEl('g', {}, svg);
-      if (p.allosteric) {
-        svgEl('path', { d: 'M' + cx + ' ' + (cy - 7) + 'l7 7l-7 7l-7 -7z', class: 'dot f-rescore' }, g);
-      } else {
-        svgEl('circle', { cx: cx, cy: cy, r: 6, class: 'dot f-rescore' }, g);
+      var cx = x(p.exp), g = svgEl('g', {}, svg);
+      if (shown.length > 1) svgEl('line', { x1: cx, x2: cx, y1: y(p[shown[0].tool]), y2: y(p[shown[1].tool]), class: 'dp-link' }, g);
+      shown.forEach(function (tl) {
+        var mx = shown.length > 1 ? cx + tl.dx : cx, my = y(p[tl.tool]), st = 'fill:var(' + tl.color + ')';
+        if (p.allosteric) svgEl('path', { d: 'M' + mx + ' ' + (my - 7.5) + 'l7.5 7.5l-7.5 7.5l-7.5 -7.5z', class: 'dot', style: st }, g);
+        else svgEl('circle', { cx: mx, cy: my, r: 6, class: 'dot', style: st }, g);
+      });
+      if (Math.abs(p.exp) > 1) {
+        var top = Math.min.apply(null, shown.map(function (tl) { return y(p[tl.tool]); }));
+        text(g, cx - 14, top + 4, p.variant + ' · ' + p.ligand, { 'text-anchor': 'end', 'font-size': 10 });
       }
-      if (Math.abs(p.exp) > 1) text(g, cx - 10, cy + 4, p.variant + ' · ' + p.ligand, { 'text-anchor': 'end', 'font-size': 10 });
-      svgEl('circle', { cx: cx, cy: cy, r: 12, class: 'hit' }, g);
-      hover(g, '<b>' + p.ligand + ' · ' + p.variant + '</b><br>measured ' + fmt(p.exp) + '<br>predicted ' + fmt(p[tool]));
+      svgEl('rect', { x: cx - 14, y: m.t, width: 28, height: h - m.t - m.b, class: 'hit' }, g);
+      hover(g, function () {
+        return '<b>' + p.ligand + ' · ' + p.variant + '</b><br>measured ' + fmt(p.exp) + shown.map(function (tl) {
+          return '<br>' + tl.short + ' ' + fmt(p[tl.tool]);
+        }).join('');
+      });
+    });
+  }
+  function dpLegend(node, d, hidden, onToggle) {
+    node.textContent = '';
+    DP_TOOLS.forEach(function (tl) {
+      var st = d.tools.filter(function (t) { return t.tool === tl.tool; })[0];
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'pk-tool' + (hidden[tl.tool] ? '' : ' is-on');
+      b.setAttribute('aria-pressed', hidden[tl.tool] ? 'false' : 'true');
+      b.innerHTML = '<i class="pk-sw" style="--sw: var(' + tl.color + ')"></i>' + tl.short + '<span>ρ = ' + fmt(st.dp_rho) + ' · p = ' + st.dp_p.toFixed(2) + '</span>';
+      b.addEventListener('click', function () { onToggle(tl.tool); });
+      node.appendChild(b);
     });
   }
 
@@ -242,20 +267,40 @@
     return svgEl('path', { d: d, class: stroke ? 'mark-line' : 'dot', style: style }, parent);
   }
 
+  // The heatmap and the scatter highlight each other: hovering a cell, a label or a point lights the same ligand(s) in both.
+  var SIM = { rows: [], cols: [], pts: {} };
+  function simLink(a, b) {
+    var fig = document.getElementById('chart-similarity');
+    if (!fig) return;
+    var names = [a, b].filter(Boolean);
+    fig.classList.toggle('has-lk', names.length > 0);
+    Object.keys(SIM.pts).forEach(function (k) { SIM.pts[k].classList.toggle('is-lk', names.indexOf(k) >= 0); });
+    SIM.rows.forEach(function (t) { t.node.classList.toggle('is-lk', t.name === a); });
+    SIM.cols.forEach(function (t) { t.node.classList.toggle('is-lk', t.name === b); });
+  }
+
   function drawTanimoto(node, d) {
     var s = d.similarity, n = s.ligands.length, W = widthOf(node);
-    var left = 86, top = 82;
-    var cell = Math.min(22, Math.floor((W - left - 4) / n));
+    var left = 96, top = 92;
+    var cell = Math.min(26, Math.floor((W - left - 4) / n));
     var w = left + cell * n + 4, h = top + cell * n + 4;
     var svg = newSvg(node, w, h);
+    svg.style.maxWidth = w + 'px';
     var breaks = [4, 6, 10, 13];  // class boundaries: orthosteric | allosteric | pan-PI3K | δ/γ | decoys
+    SIM.rows = []; SIM.cols = [];
     s.ligands.forEach(function (l, j) {
       var cx = left + j * cell + cell / 2;
-      text(svg, cx, top - 6, l, { transform: 'rotate(-60 ' + cx + ' ' + (top - 6) + ')', 'font-size': 9.5 });
+      var t = text(svg, cx, top - 6, l, { transform: 'rotate(-55 ' + cx + ' ' + (top - 6) + ')', 'font-size': 10, class: 'lk-label' });
+      SIM.cols.push({ name: l, node: t });
+      t.addEventListener('pointerenter', function () { simLink(l, l); });
+      t.addEventListener('pointerleave', function () { simLink(null, null); });
     });
     s.ligands.forEach(function (a, i) {
       var y = top + i * cell;
-      text(svg, left - 6, y + cell / 2 + 3.5, a, { 'text-anchor': 'end', 'font-size': 9.5 });
+      var t = text(svg, left - 7, y + cell / 2 + 3.5, a, { 'text-anchor': 'end', 'font-size': 10, class: 'lk-label' });
+      SIM.rows.push({ name: a, node: t });
+      t.addEventListener('pointerenter', function () { simLink(a, a); });
+      t.addEventListener('pointerleave', function () { simLink(null, null); });
       s.ligands.forEach(function (b, j) {
         var v = s.matrix[i][j];
         var r = svgEl('rect', {
@@ -263,7 +308,11 @@
           class: i === j ? 'cell c-excluded' : 'cell',
           style: i === j ? null : 'fill:var(--pk-c3);fill-opacity:' + Math.min(1, 0.06 + v / 0.55).toFixed(3)
         }, svg);
-        if (i !== j) hover(r, '<b>' + a + ' · ' + b + '</b><br>Tanimoto ' + v.toFixed(2));
+        if (i !== j) {
+          hover(r, '<b>' + a + ' · ' + b + '</b><br>Tanimoto ' + v.toFixed(2));
+          r.addEventListener('pointerenter', function () { simLink(a, b); });
+          r.addEventListener('pointerleave', function () { simLink(null, null); });
+        }
       });
     });
     breaks.forEach(function (k) {
@@ -274,7 +323,7 @@
 
   function drawPca(node, d) {
     var s = d.similarity, W = widthOf(node);
-    var h = Math.round(Math.min(380, Math.max(280, W * 0.78)));
+    var h = Math.round(Math.min(360, Math.max(280, W * 0.6)));
     var m = { l: 40, r: 12, t: 12, b: 40 };
     var svg = newSvg(node, W, h);
     var x = lin(-0.55, 0.75, m.l, W - m.r), y = lin(-0.45, 0.7, h - m.b, m.t);
@@ -288,15 +337,20 @@
     });
     text(svg, (m.l + W - m.r) / 2, h - 4, 'PC1 (' + s.var[0] + '%)', { 'text-anchor': 'middle' });
     text(svg, m.l + 4, m.t + 10, 'PC2 (' + s.var[1] + '%)', {});
+    SIM.pts = {};
     s.pca.forEach(function (p) {
       var st = SUBTYPE[p.subtype], cx = x(p.x), cy = y(p.y);
-      var g = svgEl('g', {}, svg);
+      var g = svgEl('g', { class: 'lk-pt' }, svg);
+      SIM.pts[p.ligand] = g;
       var col = 'var(' + st.color + ')';
       marker(g, st.shape, cx, cy, 5.5, st.shape === 'plus' || st.shape === 'cross' ? 'stroke:' + col : 'fill:' + col);
-      // RLY-2608 and STX-478 sit almost on top of each other, so one label goes below.
-      if (W > 460 || /PI3Ka/.test(p.subtype)) text(g, cx + 8, cy + (p.ligand === 'STX-478' ? 15 : 3.5), p.ligand, { 'font-size': 9.5 });
+      // Only the PI3Kα series is always named; every other label appears when its point is lit. RLY-2608 and STX-478 sit
+      // almost on top of each other, so one label goes below.
+      text(g, cx + 8, cy + (p.ligand === 'STX-478' ? 15 : 3.5), p.ligand, { 'font-size': 10, class: /PI3Ka/.test(p.subtype) ? 'lk-name always' : 'lk-name' });
       svgEl('circle', { cx: cx, cy: cy, r: 11, class: 'hit' }, g);
       hover(g, '<b>' + p.ligand + '</b><br>' + st.label + '<br>PC1 ' + fmt(p.x) + ' · PC2 ' + fmt(p.y));
+      g.addEventListener('pointerenter', function () { simLink(p.ligand, p.ligand); });
+      g.addEventListener('pointerleave', function () { simLink(null, null); });
     });
   }
 
@@ -337,18 +391,26 @@
   }
 
   function drawTfg(node, d) {
-    var f = poseFrame(node, 64, [0.1, 40], [0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 40]);
-    var modes = [{ mode: 'notfg', label: 'Without TFG', color: '--pk-c2', dy: -14 }, { mode: 'tfg', label: 'With TFG', color: '--pk-c1', dy: 14 }];
+    var f = poseFrame(node, 72, [0.1, 40], [0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 40]);
+    var modes = [{ mode: 'notfg', label: 'Without TFG', color: '--pk-c2', dy: -18 }, { mode: 'tfg', label: 'With TFG', color: '--pk-c1', dy: 18 }];
+    text(f.svg, f.x(2) - 6, f.top - 1, '← crystal-like', { 'text-anchor': 'end', 'font-size': 9.5, class: 'tfg-note' });
     REFS.forEach(function (r, i) {
       var y0 = f.top + i * f.rowH + f.rowH / 2;
       modes.forEach(function (mo) {
-        var poses = d.tfg.poses.filter(function (p) { return p.mode === mo.mode && p.ligand === r.ligand && p.variant === r.variant; });
-        poses.forEach(function (p, s) {
-          // Seeds are spread vertically within the mode's lane so near-identical poses stay visible.
-          var cx = f.x(p.lrmsd), cy = y0 + mo.dy + (s - 2) * 3.5;
+        var poses = d.tfg.poses.filter(function (p) { return p.mode === mo.mode && p.ligand === r.ligand && p.variant === r.variant; })
+          .sort(function (p, q) { return p.lrmsd - q.lrmsd; });
+        // Seeds with near-identical RMSD are fanned out vertically within the mode's lane so every dot shows.
+        var placed = [], offs = [0, -7, 7, -14, 14];
+        poses.forEach(function (p) {
+          var cx = f.x(p.lrmsd), cy = y0 + mo.dy;
+          for (var o = 0; o < offs.length; o++) {
+            var free = placed.every(function (q) { return Math.abs(q.cx - cx) >= 9 || Math.abs(q.cy - (y0 + mo.dy + offs[o])) >= 7; });
+            if (free) { cy = y0 + mo.dy + offs[o]; break; }
+          }
+          placed.push({ cx: cx, cy: cy });
           var g = svgEl('g', {}, f.svg);
           var st = p.pb ? 'fill:var(' + mo.color + ')' : 'stroke:var(' + mo.color + ')';
-          svgEl('circle', { cx: cx, cy: cy, r: 5, class: 'dot' + (p.pb ? '' : ' open'), style: st }, g);
+          svgEl('circle', { cx: cx, cy: cy, r: p.pb ? 4.8 : 4.4, class: 'dot' + (p.pb ? '' : ' open tfg-fail'), style: st }, g);
           svgEl('circle', { cx: cx, cy: cy, r: 9, class: 'hit' }, g);
           hover(g, '<b>' + mo.label + ', seed ' + p.seed + '</b><br>' + r.ligand + ' (' + r.pdb + ')<br>LRMSD ' + p.lrmsd.toFixed(2) + ' Å<br>PoseBusters ' + (p.pb ? 'pass' : 'fail'));
         });
@@ -393,13 +455,51 @@
       return el !== 'H';
     }).map(function (l) { return chain ? l.slice(0, 21) + chain + l.slice(22) : l; });
   }
+  // Zoom-out limit: a viewer can be zoomed out no further than its whole protein. The viewer animates its zoom, so the
+  // clamp runs a few times after each wheel or pinch; at the limit the view recentres on the protein.
+  function setZoomLimit(node, min, center) { node._lim = { min: min, center: center }; }
+  // The zoom at which a point cloud, seen along the viewer's current rotation and centred on c, just fits the viewer. The
+  // viewer scales its view to the tighter of width and height from its fitted extent, so work from that.
+  function fitZoom(node, v, pts, c) {
+    var st = v.viewerState, R = st.rotation, asp = st.extentAspect || { x: 1, y: 1 }, ext = st.extent;
+    if (!ext || !R) return null;
+    var hw = 1, hh = 1;
+    pts.forEach(function (q) {
+      var d = [q[0] - c[0], q[1] - c[1], q[2] - c[2]];
+      hw = Math.max(hw, Math.abs(dot3(d, R[0]))); hh = Math.max(hh, Math.abs(dot3(d, R[1])));
+    });
+    var W = node.clientWidth, H = node.clientHeight;
+    var base = Math.min((W / 2) / (ext * asp.x), (H / 2) / (ext * asp.y));
+    return 0.92 * Math.min((W / 2) / (hw * base), (H / 2) / (hh * base));
+  }
+  function clampZoom(node) {
+    var v = node._mol, L = node._lim;
+    if (!v || !L || !v.viewerState || !(v.viewerState.zoom < L.min)) return;
+    v.viewerState.zoom = L.min;
+    if (L.center) v.viewerState.center = { x: L.center.x, y: L.center.y, z: L.center.z };
+    v.render('zoom limit');
+  }
+  function clampSoon(node) { [0, 70, 160, 320, 600].forEach(function (ms) { setTimeout(function () { clampZoom(node); }, ms); }); }
   // py2Dmol.show() replaces the contents of its target, so the canvas lives in its own child.
   function molHost(node) {
     var host = node.querySelector('.pk-mol');
     if (!host) {
       host = document.createElement('div'); host.className = 'pk-mol'; node.insertBefore(host, node.firstChild);
-      // A plain scroll wheel scrolls the page; Ctrl/Cmd + scroll (and trackpad pinch, which sends ctrlKey) zooms.
-      node.addEventListener('wheel', function (e) { if (!e.ctrlKey && !e.metaKey) e.stopPropagation(); }, true);
+      // Scrolling over a viewer zooms it. The viewer itself only zooms on Ctrl/Cmd + scroll (which is also what a trackpad
+      // pinch sends), so a plain wheel is turned into that and the page is kept from scrolling underneath.
+      node.addEventListener('wheel', function (e) {
+        clampSoon(node);
+        if (e.ctrlKey || e.metaKey) return;
+        e.preventDefault();
+        e.stopPropagation();
+        var c = node.querySelector('canvas');
+        if (!c) return;
+        c.dispatchEvent(new WheelEvent('wheel', {
+          deltaY: e.deltaY, deltaMode: e.deltaMode, ctrlKey: true, clientX: e.clientX, clientY: e.clientY,
+          bubbles: true, cancelable: true
+        }));
+      }, { capture: true, passive: false });
+      node.addEventListener('touchend', function () { clampSoon(node); }, { passive: true });
     }
     return host;
   }
@@ -415,6 +515,7 @@
       style: 'richardson', bg: dark ? 'black' : 'white', box: false, biounit: false, select: false, controls: false,
       name: wrapId(node)  // py2Dmol keeps colours per object name across viewers; the default "structure" would be shared
     }, opts || {}));
+    node._mol = v;
     v.setClearColor(true);  // transparent canvas: the page surface shows through (bg only sets the shading base)
     return v;
   }
@@ -441,6 +542,30 @@
   // Chains: A protein, C crystal ligand, O ATP-site marker (alpelisib from 7PG6), then one chain per tool.
   var POSE_CHAIN = { 'Boltz-2': 'B', 'DiffDock-L': 'D', 'Protenix': 'X', 'FlowDock': 'F' };
   var poseMeta = null;
+  // Principal axes of a point cloud (Jacobi on the covariance), longest first: { c: centroid, axes: [e1, e2, e3] }.
+  function pcaAxes(pts) {
+    var c = [0, 0, 0], i, j, k;
+    pts.forEach(function (p) { for (i = 0; i < 3; i++) c[i] += p[i] / pts.length; });
+    var C = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+    pts.forEach(function (p) { for (i = 0; i < 3; i++) for (j = 0; j < 3; j++) C[i][j] += (p[i] - c[i]) * (p[j] - c[j]); });
+    var V = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+    for (var sweep = 0; sweep < 30; sweep++) {
+      for (i = 0; i < 2; i++) for (j = i + 1; j < 3; j++) {
+        if (Math.abs(C[i][j]) < 1e-9) continue;
+        var th = 0.5 * Math.atan2(2 * C[i][j], C[j][j] - C[i][i]), cs = Math.cos(th), sn = Math.sin(th);
+        for (k = 0; k < 3; k++) { var a1 = C[k][i], a2 = C[k][j]; C[k][i] = cs * a1 - sn * a2; C[k][j] = sn * a1 + cs * a2; }
+        for (k = 0; k < 3; k++) { var b1 = C[i][k], b2 = C[j][k]; C[i][k] = cs * b1 - sn * b2; C[j][k] = sn * b1 + cs * b2; }
+        for (k = 0; k < 3; k++) { var v1 = V[k][i], v2 = V[k][j]; V[k][i] = cs * v1 - sn * v2; V[k][j] = sn * v1 + cs * v2; }
+      }
+    }
+    var ev = [0, 1, 2].map(function (q) { return { val: C[q][q], vec: [V[0][q], V[1][q], V[2][q]] }; })
+      .sort(function (p, q) { return q.val - p.val; });
+    return { c: c, axes: ev.map(function (e) { return e.vec; }) };
+  }
+  function dot3(u, w) { return u[0] * w[0] + u[1] * w[1] + u[2] * w[2]; }
+  function cross3(u, w) { return [u[1] * w[2] - u[2] * w[1], u[2] * w[0] - u[0] * w[2], u[0] * w[1] - u[1] * w[0]]; }
+
+  var POSE_ZOOM = 0.5;  // same for every structure; 1 = tight on the ligands, lower leaves more of the pocket around them
   function initPoses(wrap) {
     var node = wrap.querySelector('.pk-viewer');
     var refBtns = wrap.querySelectorAll('[data-ref]'), toolBtns = wrap.querySelectorAll('[data-show]');
@@ -474,9 +599,73 @@
         .map(function (t) { return t + ' ' + poseMeta[ref].lrmsd[t].toFixed(1) + ' Å'; });
       readout.textContent = parts.length ? 'LRMSD to crystal: ' + parts.join(' · ') : '';
     }
+    // Camera for the ligands: look from outside the protein, along the line from the protein's centre through the ligands,
+    // so the pocket opens toward the reader. On screen, the predicted poses spread across the view with the crystal pose on
+    // the right (for a compact ligand group, along the group's longest axis).
+    function ligandView(clearSight) {
+      var lig = [], crys = [], pred = [], cas = [], bulk = [0, 0, 0], nb = 0;
+      text.split('\n').forEach(function (l) {
+        var xyz = [+l.slice(30, 38), +l.slice(38, 46), +l.slice(46, 54)], rec = l.slice(0, 6);
+        if (rec === 'HETATM') { lig.push(xyz); (l.slice(21, 22) === 'C' ? crys : pred).push(xyz); }
+        else if (rec === 'ATOM  ' && l.slice(12, 16).trim() === 'CA') { cas.push(xyz); bulk[0] += xyz[0]; bulk[1] += xyz[1]; bulk[2] += xyz[2]; nb++; }
+      });
+      if (!lig.length || !nb) return null;
+      var P = pcaAxes(lig);
+      function mean(a) { return [0, 1, 2].map(function (i) { return a.reduce(function (t, p) { return t + p[i]; }, 0) / a.length; }); }
+      function unit(u) { var n = Math.hypot(u[0], u[1], u[2]) || 1; return u.map(function (t) { return t / n; }); }
+      function perp(u, z) { var d = dot3(u, z); return [u[0] - d * z[0], u[1] - d * z[1], u[2] - d * z[2]]; }
+      var z = unit([P.c[0] - bulk[0] / nb, P.c[1] - bulk[1] / nb, P.c[2] - bulk[2] / nb]);
+      var gap = null, x;
+      if (crys.length && pred.length) {
+        var cm = mean(crys), pm = mean(pred);
+        gap = [cm[0] - pm[0], cm[1] - pm[1], cm[2] - pm[2]];
+      }
+      if (gap && Math.hypot(gap[0], gap[1], gap[2]) > 6) {
+        // Far-apart crystal and predicted poses (the allosteric cases) define the horizontal.
+        x = perp(gap, z);
+      } else {
+        // A compact ligand group (the orthosteric drugs): try many camera directions and take the one with the fewest protein
+        // atoms between the reader and the ligand, preferring a view onto its flat side, so the docking pose is not hidden
+        // behind helices.
+        var flat = P.axes[2], bestScore = 1e9, n = 300;
+        for (var i = 0; i < n; i++) {
+          var yy = 1 - 2 * (i + 0.5) / n, rr = Math.sqrt(1 - yy * yy), th = i * 2.399963;
+          var d = [Math.cos(th) * rr, yy, Math.sin(th) * rr], blocked = 0;
+          for (var k = 0; k < cas.length; k++) {
+            var vx = cas[k][0] - P.c[0], vy = cas[k][1] - P.c[1], vz = cas[k][2] - P.c[2], t = vx * d[0] + vy * d[1] + vz * d[2];
+            if (t > 3 && vx * vx + vy * vy + vz * vz - t * t < 64) blocked++;
+          }
+          // For idelalisib, how clear the line of sight is counts for more than facing the flat side of the ligand.
+          var score = (clearSight ? 12 : 3) * blocked + (clearSight ? 12 : 40) * (1 - Math.abs(dot3(d, flat)));
+          if (score < bestScore) { bestScore = score; z = d; }
+        }
+        x = perp(P.axes[0], z);
+      }
+      if (Math.hypot(x[0], x[1], x[2]) < 1e-3) x = perp(P.axes[1], z);
+      x = unit(x);
+      var y = cross3(z, x);
+      var bc = [bulk[0] / nb, bulk[1] / nb, bulk[2] / nb];
+      return { M: [x, y, z], gap: gap, protein: { c: bc, pts: cas } };
+    }
     function home() {
-      v.orient({ near: { type: 'L' }, angstroms: 12 }, { animate: false });
-      v.clip({ near: { type: 'L' }, angstroms: 4 });  // a slab through the pockets, refitted as the reader turns it
+      v.clip(null);
+      v.orient({ type: 'L', animate: false });
+      var lv = ligandView(wrap.id === 'viewer-idel');
+      if (lv) v.viewerState.rotation = lv.M;
+      v.viewerState.zoom = POSE_ZOOM;
+      v.render('poses home');
+      // The viewer can hand back a turned copy of the rotation it was given, so check the result and, if the crystal pose
+      // ended up on the left, half-turn about the vertical axis.
+      var R = v.viewerState.rotation;
+      if (lv && lv.gap && dot3(lv.gap, R[0]) < 0) {
+        v.viewerState.rotation = [R[0].map(function (t) { return -t; }), R[1].slice(), R[2].map(function (t) { return -t; })];
+        v.render('poses home');
+      }
+      v.clip(null);  // no depth cut: the whole protein stays in view
+      if (lv) {
+        var pc = lv.protein.c, fz = fitZoom(node, v, lv.protein.pts, pc);
+        if (fz) setZoomLimit(node, Math.min(POSE_ZOOM, fz), { x: pc[0], y: pc[1], z: pc[2] });
+      }
     }
     function build() {
       if (!text) return;
@@ -532,12 +721,29 @@
         }).join('\n') + '\nEND'
       };
     }
+    // The trajectory model is the pocket only, so "the whole model" is the zoom-out limit: no further than all of its atoms.
+    function zoomLimit() {
+      var first = pdb.text.split('ENDMDL')[0].split('\n'), atomsXYZ = [], lig = [];
+      first.forEach(function (l) {
+        var xyz = [+l.slice(30, 38), +l.slice(38, 46), +l.slice(46, 54)];
+        if (l.slice(0, 6) === 'ATOM  ') atomsXYZ.push(xyz); else if (l.slice(0, 6) === 'HETATM') lig.push(xyz);
+      });
+      if (!atomsXYZ.length || !lig.length) return;
+      function centre(a) { return [0, 1, 2].map(function (i) { return a.reduce(function (t, q) { return t + q[i]; }, 0) / a.length; }); }
+      var mc = centre(atomsXYZ);
+      (function wait() {
+        if (v.isOrientAnimating) { requestAnimationFrame(wait); return; }
+        var fz = fitZoom(node, v, atomsXYZ, mc);
+        if (fz) setZoomLimit(node, Math.min(1, fz), { x: mc[0], y: mc[1], z: mc[2] });
+      })();
+    }
     function build() {
       if (!pdb) return;
       v = showMol(node, pdb.text, { style: 'tube', play: false, rendering: { width: 1.2 } });
       colourParts(v);
       try { v.showSidechains({ chain: 'A' }); v.setSidechainColor(cssVar('--pk-pocket'), { chain: 'A' }); } catch (e) { /* C-alpha only */ }
       v.orient({ type: 'L' });
+      zoomLimit();
       v.setFrame(cur);
       drawSpark();
     }
@@ -678,6 +884,8 @@
           v._orientAnim.targetCenter = home.center;
         }
         fill();
+        // The overview is the zoom-out limit: scrolling out stops at the whole protein.
+        setTimeout(function () { if (!site) setZoomLimit(node, v.viewerState.zoom * 0.92, v.viewerState.center); }, 1100);
       }
     }
     // Overview rotation: look down the thinnest axis of the protein (principal axes of the CA atoms), with the
@@ -760,7 +968,7 @@
 
   // ---------- boot ----------
   fetch(DATA + 'pik3ca.json').then(function (r) { return r.json(); }).then(function (d) {
-    var state = { metric: 'rho', tool: 'CheapNet | Boltz-2' };
+    var state = { metric: 'rho', hidden: {} };
     var q = function (s) { return document.querySelector(s); };
 
     function drawAll() {
@@ -768,7 +976,7 @@
       drawTanimoto(q('[data-chart="tanimoto"]'), d);
       drawPca(q('[data-chart="pca"]'), d);
       drawRank(q('[data-chart="rank"]'), d, state.metric);
-      drawDp(q('[data-chart="dp"]'), d, state.tool);
+      drawDp(q('[data-chart="dp"]'), d, state.hidden);
       drawLrmsd(q('[data-chart="lrmsd"]'), d);
       drawTfg(q('[data-chart="tfg"]'), d);
     }
@@ -804,13 +1012,14 @@
         drawRank(q('[data-chart="rank"]'), d, state.metric);
       });
     });
-    q('#chart-dp').querySelectorAll('[data-tool]').forEach(function (b) {
-      b.addEventListener('click', function () {
-        state.tool = b.dataset.tool;
-        setPressed(b.parentNode, b);
-        drawDp(q('[data-chart="dp"]'), d, state.tool);
-      });
-    });
+    function toggleTool(tool) {
+      var other = DP_TOOLS.filter(function (t) { return t.tool !== tool; })[0].tool;
+      if (!state.hidden[tool] && state.hidden[other]) return;  // keep at least one tool on the chart
+      state.hidden[tool] = !state.hidden[tool];
+      dpLegend(q('[data-legend="dp"]'), d, state.hidden, toggleTool);
+      drawDp(q('[data-chart="dp"]'), d, state.hidden);
+    }
+    dpLegend(q('[data-legend="dp"]'), d, state.hidden, toggleTool);
 
     drawAll();
     var lastW = window.innerWidth, rt;
