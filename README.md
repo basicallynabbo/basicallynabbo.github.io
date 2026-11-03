@@ -20,7 +20,7 @@ bundle install && bundle exec jekyll serve
 
 ## Reading list
 
-The home page's Reading section shows the five newest Bluesky posts from `bluesky.handle` that carry `#bluesky.tag`
+The home page's Reading section shows the seven newest Bluesky posts from `bluesky.handle` that carry `#bluesky.tag`
 (both in `_config.yml`). `assets/js/reading.js` reads them in the browser from Bluesky's public API, so a new, edited
 or deleted post shows up on the next page load with no rebuild. The section stays hidden until there is a tagged post.
 
