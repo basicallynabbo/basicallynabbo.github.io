@@ -14,8 +14,8 @@ extra_js:
   <p class="pk-kicker">Master's thesis · M.Tech Biotechnology · 2025–26</p>
   <h1 class="pk-title">Benchmarking AI Tools for Mutation&#8209;Aware PIK3CA Recognition</h1>
   <p class="pk-subtitle">Can AI binding models see what a cancer mutation changes in PI3Kα?</p>
-  <p class="pk-dek">This is my master's thesis project. I tested co-folding, docking and affinity-prediction tools on 300 pairs of PIK3CA variants and inhibitors. They rank known inhibitors well. Every tool that builds a pose misses the allosteric pocket that the newest mutant-selective drugs bind.</p>
-  <p class="pk-byline">Nabajit Kumar Borah · M.Tech dissertation, Amity University, research done at CSIR-IGIB, New Delhi · supervised by Dr. Lipi Thukral (CSIR-IGIB) and Dr. Abhishek Sengupta (Amity University)</p>
+  <p class="pk-dek">Tested co-folding, docking and affinity-prediction tools on 300 pairs of PIK3CA variants and inhibitors. They rank known inhibitors well. Every tool that builds a pose misses the allosteric pocket that the newest mutant-selective drugs bind.</p>
+  <p class="pk-byline">M.Tech dissertation supervised by <a href="https://thukrallab.igib.res.in/">Dr. Lipi Thukral</a> (CSIR-IGIB) and <a href="https://auup.amity.edu/faculty-detail.aspx?facultyID=4465">Dr. Abhishek Sengupta</a> (Amity University)</p>
   <ul class="pk-links">
     <li><a class="pk-pill" href="{{ '/assets/thesis.pdf' | relative_url }}">Read the thesis (PDF)</a></li>
     <li><a class="pk-pill pk-pill--quiet" href="#thesis">Corrections &amp; reruns</a></li>
@@ -223,11 +223,11 @@ TFG fixed the geometry. The top pose passed every PoseBusters check in 30 of 30 
 <div class="pk-doc">
   <a class="pk-doc-link" href="{{ '/assets/thesis.pdf' | relative_url }}">
     <span class="pk-doc-title">Benchmarking AI Tools for Mutation-Aware PIK3CA Recognition</span>
-    <span class="pk-doc-meta">M.Tech dissertation · Amity University / CSIR-IGIB · June 2026 · PDF, 66 pages</span>
+    <span class="pk-doc-meta">M.Tech dissertation · Amity University / CSIR-IGIB · June 2026 · PDF, 65 pages</span>
   </a>
 </div>
 
-In November 2026 every reported result was recomputed from the raw tool outputs. The tool runs and figure values reproduced. A few numbers in the text did not. They are corrected in the PDF above, and an errata page at the front lists every change. The main ones:
+In November 2026 every reported result was recomputed from the raw tool outputs. The tool runs and figure values reproduced. A few numbers in the text did not, and they are corrected in the PDF above. The main ones:
 
 - **Mutation response.** The text gave ρ = 0.90 for GatorAffinity. The data give 0.67, and the best tool is CheapNet on Boltz-2 poses at 0.75.
 - **Protenix PoseBusters rate.** The text gave a 94.7% failure rate. The correct figure is 35.5% of top poses failing at least one check, against 3.5% for Boltz-2.
