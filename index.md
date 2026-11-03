@@ -3,6 +3,8 @@ layout: page
 title: Nabajit Borah
 show_title: false
 protein: true
+extra_js:
+  - /assets/js/reading.js
 ---
 
 <section class="profile-section">
@@ -36,13 +38,19 @@ protein: true
   <span>Founding Computational Biologist at <strong><a href="https://www.litefold.ai/" rel="noopener">LiteFold</a></strong></span>
 </div>
 
-## Selected publications
+## Research interests
 
-<div class="section">
-{% for pub in site.data.publications %}{% if pub.selected %}{% include pub.html pub=pub %}{% endif %}{% endfor %}
-<p class="more-link"><a href="{{ '/publications/' | relative_url }}">All publications →</a></p>
+<ul class="research-list">
+  <li>Structural Biology</li>
+  <li>Machine Learning in Drug Discovery</li>
+  <li>Deep Learning for Structure Prediction</li>
+</ul>
+
+{% if site.bluesky.handle %}
+<h2 id="reading" hidden>Reading</h2>
+
+<div class="section reading" data-handle="{{ site.bluesky.handle }}" data-tag="{{ site.bluesky.tag }}" hidden>
+  <div class="reading-list"></div>
+  <p class="more-link"><a href="https://bsky.app/profile/{{ site.bluesky.handle }}">More on Bluesky →</a></p>
 </div>
-
-## Log
-
-{% include log.html limit=3 per_kind=2 %}
+{% endif %}

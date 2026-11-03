@@ -121,19 +121,21 @@
   function drawMatrix(node, d) {
     var m = d.matrix, W = widthOf(node);
     var left = 92, top = 58;
-    var cell = Math.min(24, Math.floor((W - left) / m.variants.length));
-    var w = left + cell * m.variants.length, h = top + cell * m.ligands.length + 4;
+    // Cells are wider than tall, so the grid reads as a landscape block; on narrow screens they shrink towards square.
+    var cw = Math.min(36, Math.floor((W - left) / m.variants.length)), ch = Math.min(26, cw);
+    var w = left + cw * m.variants.length, h = top + ch * m.ligands.length + 4;
     var svg = newSvg(node, w, h);
     svg.style.maxWidth = w + 'px';
+    svg.style.margin = '0 auto';
     m.variants.forEach(function (v, j) {
-      var cx = left + j * cell + cell / 2;
+      var cx = left + j * cw + cw / 2;
       text(svg, cx, top - 8, v, { transform: 'rotate(-55 ' + cx + ' ' + (top - 8) + ')', 'text-anchor': 'start', class: v === 'WT' ? 't-strong' : null });
     });
     m.ligands.forEach(function (l, i) {
-      var y = top + i * cell;
-      text(svg, left - 8, y + cell / 2 + 4, l, { 'text-anchor': 'end' });
+      var y = top + i * ch;
+      text(svg, left - 8, y + ch / 2 + 4, l, { 'text-anchor': 'end' });
       m.cells[i].forEach(function (c, j) {
-        var r = svgEl('rect', { x: left + j * cell + 1, y: y + 1, width: cell - 2, height: cell - 2, rx: 2, class: 'cell c-' + c }, svg);
+        var r = svgEl('rect', { x: left + j * cw + 1, y: y + 1, width: cw - 2, height: ch - 2, rx: 2, class: 'cell c-' + c }, svg);
         hover(r, '<b>' + l + ' · ' + m.variants[j] + '</b><br>' + MATRIX_LABEL[c]);
       });
     });
@@ -565,8 +567,8 @@
   function dot3(u, w) { return u[0] * w[0] + u[1] * w[1] + u[2] * w[2]; }
   function cross3(u, w) { return [u[1] * w[2] - u[2] * w[1], u[2] * w[0] - u[0] * w[2], u[0] * w[1] - u[1] * w[0]]; }
 
-  var POSE_ZOOMS = { '7PG6': 1.0, '8TDU': 0.8 };  // closer starting views for these two
   var POSE_ZOOM = 0.5;  // same for every structure; 1 = tight on the ligands, lower leaves more of the pocket around them
+  var POSE_ZOOMS = { '7PG6': 0.71 };  // alpelisib's fitted extent differs; this matches inavolisib's on-screen scale
   function initPoses(wrap) {
     var node = wrap.querySelector('.pk-viewer');
     var refBtns = wrap.querySelectorAll('[data-ref]'), toolBtns = wrap.querySelectorAll('[data-show]');

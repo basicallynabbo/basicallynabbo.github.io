@@ -3,6 +3,9 @@ layout: page
 title: "Benchmarking AI Tools for Mutation-Aware PIK3CA Recognition"
 description: "Master's thesis. A 300-pair benchmark of co-folding, docking and affinity tools on clinical PIK3CA variants. Affinity ranking works; every pose tool misses the allosteric pocket."
 permalink: /projects/pik3ca-benchmark/
+image:
+  path: /assets/images/projects/pik3ca/og.png  # link-card preview, made by scripts/make_og.py
+  alt: "Thesis title beside the p110α structure coloured by domain, with the clinical mutation sites in red"
 show_title: false
 background: none  # no protein animation behind the 3D viewers and charts
 extra_css: /assets/css/pik3ca.css
@@ -44,11 +47,11 @@ Structure-based AI tools are now used to triage compounds like these. For them t
 <figure class="pk-figure pk-viewer-wrap" id="viewer-mutmap">
   <div class="pk-viewer" data-viewer="mutmap" role="img" aria-label="3D view of full-length p110α coloured by domain, with the twelve mutated residues shown as red balls"></div>
   <div class="pk-mutkey" role="group" aria-label="Domains and mutation sites">
-    <div class="pk-mutgroup"><span class="pk-key"><i class="pk-sw" style="--sw: var(--pk-dom-abd)"></i><b>ABD</b></span><button type="button" class="pk-mutbtn" data-site="88" aria-pressed="false">R88Q</button></div>
-    <div class="pk-mutgroup"><span class="pk-key"><i class="pk-sw" style="--sw: var(--pk-dom-rbd)"></i><b>RBD</b></span></div>
-    <div class="pk-mutgroup"><span class="pk-key"><i class="pk-sw" style="--sw: var(--pk-dom-c2)"></i><b>C2</b></span><button type="button" class="pk-mutbtn" data-site="345" aria-pressed="false">N345K</button><button type="button" class="pk-mutbtn" data-site="420" aria-pressed="false">C420R</button></div>
-    <div class="pk-mutgroup"><span class="pk-key"><i class="pk-sw" style="--sw: var(--pk-dom-helical)"></i><b>Helical</b></span><button type="button" class="pk-mutbtn" data-site="542" aria-pressed="false">E542K</button><button type="button" class="pk-mutbtn" data-site="545" aria-pressed="false">E545K</button><button type="button" class="pk-mutbtn" data-site="546" aria-pressed="false">Q546K</button></div>
-    <div class="pk-mutgroup"><span class="pk-key"><i class="pk-sw" style="--sw: var(--pk-dom-kinase)"></i><b>Kinase</b></span><button type="button" class="pk-mutbtn" data-site="726" aria-pressed="false">E726K</button><button type="button" class="pk-mutbtn" data-site="780" aria-pressed="false">W780R</button><button type="button" class="pk-mutbtn" data-site="859" aria-pressed="false">Q859H/K</button><button type="button" class="pk-mutbtn" data-site="1043" aria-pressed="false">M1043I</button><button type="button" class="pk-mutbtn" data-site="1047" aria-pressed="false">H1047L/R</button><button type="button" class="pk-mutbtn" data-site="1049" aria-pressed="false">G1049R</button></div>
+    <div class="pk-mutgroup"><span class="pk-key"><i class="pk-sw" style="--sw: var(--pk-dom-abd)"></i><b>ABD domain</b></span><button type="button" class="pk-mutbtn" data-site="88" aria-pressed="false">R88Q</button></div>
+    <div class="pk-mutgroup"><span class="pk-key"><i class="pk-sw" style="--sw: var(--pk-dom-rbd)"></i><b>RBD domain</b></span></div>
+    <div class="pk-mutgroup"><span class="pk-key"><i class="pk-sw" style="--sw: var(--pk-dom-c2)"></i><b>C2 domain</b></span><button type="button" class="pk-mutbtn" data-site="345" aria-pressed="false">N345K</button><button type="button" class="pk-mutbtn" data-site="420" aria-pressed="false">C420R</button></div>
+    <div class="pk-mutgroup"><span class="pk-key"><i class="pk-sw" style="--sw: var(--pk-dom-helical)"></i><b>Helical domain</b></span><button type="button" class="pk-mutbtn" data-site="542" aria-pressed="false">E542K</button><button type="button" class="pk-mutbtn" data-site="545" aria-pressed="false">E545K</button><button type="button" class="pk-mutbtn" data-site="546" aria-pressed="false">Q546K</button></div>
+    <div class="pk-mutgroup"><span class="pk-key"><i class="pk-sw" style="--sw: var(--pk-dom-kinase)"></i><b>Kinase domain</b></span><button type="button" class="pk-mutbtn" data-site="726" aria-pressed="false">E726K</button><button type="button" class="pk-mutbtn" data-site="780" aria-pressed="false">W780R</button><button type="button" class="pk-mutbtn" data-site="859" aria-pressed="false">Q859H/K</button><button type="button" class="pk-mutbtn" data-site="1043" aria-pressed="false">M1043I</button><button type="button" class="pk-mutbtn" data-site="1047" aria-pressed="false">H1047L/R</button><button type="button" class="pk-mutbtn" data-site="1049" aria-pressed="false">G1049R</button></div>
     <button type="button" class="pk-btn" data-action="reset">Reset view</button>
   </div>
   <figcaption>AlphaFold model of p110α. Mutations in red; tap one to find it, drag to rotate, scroll to zoom.</figcaption>

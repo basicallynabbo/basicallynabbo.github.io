@@ -781,6 +781,33 @@ main {
   text-underline-offset: 3px;
 }
 
+/* Home-page Reading list (assets/js/reading.js); hidden until a tagged Bluesky post loads. */
+.page > h2[hidden] {
+  display: none;
+}
+
+.reading-body {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
+
+.reading-body a {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.reading-src {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+}
+
 .news-date {
   display: flex;
   align-items: baseline;
