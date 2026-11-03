@@ -34,7 +34,7 @@
 <body{% if page.protein %} class="home"{% endif %}>
   <a class="skip-link" href="#main">Skip to content</a>
   <div class="grain" aria-hidden="true"></div>
-  <canvas id="protein-canvas" aria-hidden="true"{% if page.protein == "aggregate" %} data-mode="aggregate"{% elsif page.protein != true %} data-sparse{% endif %}></canvas>
+  {% unless page.background == "none" %}<canvas id="protein-canvas" aria-hidden="true"{% if page.protein == "aggregate" %} data-mode="aggregate"{% elsif page.protein != true %} data-sparse{% endif %}></canvas>{% endunless %}
 
   <header>
     <div class="container header-inner">
@@ -136,7 +136,7 @@
 
       // Staggered scroll reveals. Classes are added here, so without JS nothing is hidden.
       var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      var targets = document.querySelectorAll('.page > *:not(.profile-section), .profile-info > *, .profile-photo, .section > *, .project-card');
+      var targets = document.querySelectorAll('.page > *:not(.profile-section), .profile-info > *, .profile-photo, .section > *, .thesis-card, .project-row');
       if ('IntersectionObserver' in window && !reduce) {
         var io = new IntersectionObserver(function (entries) {
           entries.forEach(function (e) {

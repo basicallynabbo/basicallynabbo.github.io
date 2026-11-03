@@ -4,6 +4,7 @@ title: "Benchmarking AI Tools for Mutation-Aware PIK3CA Recognition"
 description: "Master's thesis. A 300-pair benchmark of co-folding, docking and affinity tools on clinical PIK3CA variants. Affinity ranking works; every pose tool misses the allosteric pocket."
 permalink: /projects/pik3ca-benchmark/
 show_title: false
+background: none  # no protein animation behind the 3D viewers and charts
 extra_css: /assets/css/pik3ca.css
 extra_js:
   - /assets/js/pik3ca.js

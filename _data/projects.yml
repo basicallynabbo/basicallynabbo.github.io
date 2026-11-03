@@ -1,7 +1,11 @@
-# One card per project on /work/. Fields: title, when, where, problem, methods (list), outcome, link (optional).
+# Projects on /work/. Fields: title, when, where, problem, methods (list), outcome, link (optional).
+# thesis: "Master's thesis" / "Bachelor's thesis" puts the project in the Theses block at the top, with its
+# summary (one or two sentences). Everything else is listed as a compact row under Other projects.
 - title: "Benchmarking AI Tools for Mutation-Aware PIK3CA Recognition"
   when: "2025–2026"
-  where: "Master's thesis · CSIR-IGIB"
+  where: "CSIR-IGIB, New Delhi · Amity University"
+  thesis: "Master's thesis"
+  summary: "300 drug–variant pairs, 15 clinical PIK3CA variants and 20 inhibitors. Affinity ranking works (ρ = 0.85 on Boltz-2 poses), but every pose tool puts the allosteric inhibitors in the ATP pocket, about 20 Å from where they bind."
   problem: "Can co-folding, docking and affinity models tell how a clinical mutation in PIK3CA changes how an inhibitor binds, and find the pocket it binds in?"
   methods: [Boltz-2, Protenix, DiffDock-L, FlowDock, GNINA, GatorAffinity, CheapNet, PoseBusters]
   outcome: "300-pair benchmark (15 variants × 20 ligands). Rescoring on Boltz-2 poses ranks affinity well (ρ = 0.85), but every tool puts the allosteric inhibitors in the ATP pocket, about 20 Å from where they bind. Guidance fixes pose geometry, not placement."
