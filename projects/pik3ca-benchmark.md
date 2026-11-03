@@ -1,7 +1,7 @@
 ---
 layout: page
-title: "PIK3CA benchmark"
-description: "A 300-pair benchmark of co-folding, docking and affinity tools on clinical PIK3CA variants. Affinity ranking works; every pose tool misses the allosteric pocket."
+title: "Pocket-blind: AI binding models on mutant PI3Kα"
+description: "Master's thesis. A 300-pair benchmark of co-folding, docking and affinity tools on clinical PIK3CA variants. Affinity ranking works; every pose tool misses the allosteric pocket."
 permalink: /projects/pik3ca-benchmark/
 show_title: false
 extra_css: /assets/css/pik3ca.css
@@ -10,12 +10,13 @@ extra_js:
 ---
 
 <div class="pk-hero">
-  <p class="pk-kicker">M.Tech thesis · CSIR-IGIB · 2025–26</p>
-  <h1 class="pk-title">Can AI binding models see what a cancer mutation changes?</h1>
-  <p class="pk-dek">I tested co-folding, docking and affinity-prediction tools on 300 pairs of PIK3CA variants and inhibitors. They rank known inhibitors well. Every tool that builds a pose misses the allosteric pocket that the newest mutant-selective drugs bind.</p>
-  <p class="pk-byline">Nabajit Kumar Borah · supervised by Dr. Lipi Thukral (CSIR-IGIB) and Dr. Abhishek Sengupta (Amity University)</p>
+  <p class="pk-kicker">Master's thesis · M.Tech Biotechnology · 2025–26</p>
+  <h1 class="pk-title">Pocket-blind</h1>
+  <p class="pk-subtitle">Can AI binding models see what a cancer mutation changes in PI3Kα?</p>
+  <p class="pk-dek">This is my master's thesis project. I tested co-folding, docking and affinity-prediction tools on 300 pairs of PIK3CA variants and inhibitors. They rank known inhibitors well. Every tool that builds a pose misses the allosteric pocket that the newest mutant-selective drugs bind.</p>
+  <p class="pk-byline">Nabajit Kumar Borah · M.Tech dissertation, Amity University, research done at CSIR-IGIB, New Delhi · supervised by Dr. Lipi Thukral (CSIR-IGIB) and Dr. Abhishek Sengupta (Amity University)</p>
   <ul class="pk-links">
-    <li><a class="pk-pill" href="{{ '/assets/thesis.pdf' | relative_url }}">Thesis PDF</a></li>
+    <li><a class="pk-pill" href="{{ '/assets/thesis.pdf' | relative_url }}">Read the thesis (PDF)</a></li>
     <li><a class="pk-pill pk-pill--quiet" href="#thesis">Corrections &amp; reruns</a></li>
   </ul>
 </div>

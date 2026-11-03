@@ -677,3 +677,14 @@
     display: inline;
   }
 }
+
+.pk-subtitle {
+  max-width: 34em;
+  margin: -0.4rem 0 1.1rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 3vw, 1.6rem);
+  font-weight: 400;
+  line-height: 1.25;
+  color: var(--ink);
+  text-wrap: balance;
+}
