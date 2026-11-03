@@ -4,7 +4,7 @@
 (function () {
   var box = document.querySelector('.reading[data-handle]');
   if (!box || !window.fetch) return;
-  var handle = box.dataset.handle, tag = (box.dataset.tag || '').toLowerCase(), LIMIT = 5;
+  var handle = box.dataset.handle, tag = (box.dataset.tag || '').toLowerCase(), LIMIT = 7;
   var url = 'https://public.api.bsky.app/xrpc/app.bsky.feed.getAuthorFeed?filter=posts_no_replies&limit=100&actor=' +
     encodeURIComponent(handle);
 
