@@ -527,7 +527,27 @@
   border-radius: var(--radius);
   background: var(--surface);
   overflow: hidden;
-  touch-action: none;
+  touch-action: pan-y;  /* vertical swipes scroll the page; drags across and pinches go to the viewer */
+}
+
+.pk-zoom-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.pk-zoom-hint.is-on {
+  opacity: 0.92;
 }
 
 .pk-viewer--short {
@@ -589,7 +609,7 @@
 .pk-spark svg {
   display: block;
   width: 100%;
-  height: 54px;
+  height: 116px;
   overflow: visible;
 }
 
@@ -604,6 +624,21 @@
   fill: var(--pk-c2);
   stroke: var(--paper);
   stroke-width: 2;
+}
+
+.pk-key[hidden],
+.pk-readout [hidden] {
+  display: none;
+}
+
+.pk-spark .bar {
+  fill: var(--ink-soft);
+  opacity: 0.55;
+}
+
+.pk-spark .cursor {
+  stroke: var(--ink-soft);
+  stroke-dasharray: 2 3;
 }
 
 .pk-spark .grid {
@@ -749,6 +784,55 @@
 
 .pk-narrow-only {
   display: none;
+}
+
+/* Three models, three strengths */
+.pk-cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 1.2rem 0;
+}
+
+.pk-card {
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.pk-card h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.pk-card p {
+  margin: 0.5rem 0 0;
+  font-size: 0.88rem;
+}
+
+.pk-card .pk-card-lede {
+  margin-top: 0.15rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.pk-card .pk-card-catch {
+  color: var(--ink-soft);
+}
+
+@media (max-width: 960px) {
+  .pk-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .pk-cards {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 760px) {
