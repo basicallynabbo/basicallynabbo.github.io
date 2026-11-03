@@ -41,8 +41,14 @@ extra_js:
 {% if site.bluesky.handle %}
 <h2 id="reading" hidden>Reading</h2>
 
-<div class="section reading" data-handle="{{ site.bluesky.handle }}" data-tag="{{ site.bluesky.tag }}" hidden>
+<div class="section reading" data-handle="{{ site.bluesky.handle }}" data-tag="{{ site.bluesky.tag }}" data-done-tag="{{ site.bluesky.done_tag }}" hidden>
   <div class="reading-list"></div>
   <p class="more-link"><a href="https://bsky.app/profile/{{ site.bluesky.handle }}">More on Bluesky →</a></p>
+</div>
+
+<h2 id="books" hidden>Books</h2>
+
+<div class="section books" hidden>
+  <div class="books-list"></div>
 </div>
 {% endif %}

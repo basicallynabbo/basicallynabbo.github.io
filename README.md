@@ -18,11 +18,17 @@ bundle install && bundle exec jekyll serve
 | `_blogs/` | Posts, imported from [Medium](https://medium.com/@nabbo) weekly by `scripts/import_medium.py` |
 | `assets/data/pik3ca/` | Structures and results the thesis page's charts and 3D viewers load |
 
-## Reading list
+## Reading and Books
 
-The home page's Reading section shows the seven newest Bluesky posts from `bluesky.handle` that carry `#bluesky.tag`
-(both in `_config.yml`). `assets/js/reading.js` reads them in the browser from Bluesky's public API, so a new, edited
-or deleted post shows up on the next page load with no rebuild. The section stays hidden until there is a tagged post.
+Both home-page lists come from Bluesky posts by `bluesky.handle` (`_config.yml`), read in the browser by
+`assets/js/reading.js` from Bluesky's public API, so new, edited or deleted posts show on the next page load with no
+rebuild. Each list stays hidden until it has something to show.
+
+- **Reading**: the seven newest posts tagged `#reading` (`bluesky.tag`) that link a paper, article or anything else.
+- **Books**: posts linking a Goodreads (or StoryGraph / Open Library) book page. Start a book with
+  `The Gene by Siddhartha Mukherjee #reading <link>`; finish it by posting the same book with `#completed`
+  (`bluesky.done_tag`). The two posts pair up by the book's Goodreads id, and the list shows "since Jun '26" while
+  reading and "Jun–Sep '26" once finished. Without "by Author", the title comes from the link card.
 
 ## Link previews
 

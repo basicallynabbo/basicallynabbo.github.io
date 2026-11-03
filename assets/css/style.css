@@ -792,7 +792,7 @@ main {
   display: flex;
   align-items: baseline;
   gap: 14px;
-  flex: 0 0 120px;
+  flex: 0 0 132px;
   font-family: var(--font-mono);
   font-size: 0.75rem;
   letter-spacing: 0.04em;
