@@ -13,21 +13,20 @@ extra_js:
 <div class="pk-hero">
   <p class="pk-kicker">Master's thesis · M.Tech Biotechnology · 2025–26</p>
   <h1 class="pk-title">Benchmarking AI Tools for Mutation&#8209;Aware PIK3CA Recognition</h1>
-  <p class="pk-subtitle">Can AI binding models see what a cancer mutation changes in PI3Kα?</p>
   <p class="pk-dek">Tested co-folding, docking and affinity-prediction tools on 300 pairs of PIK3CA variants and inhibitors. They rank known inhibitors well. Every tool that builds a pose misses the allosteric pocket that the newest mutant-selective drugs bind.</p>
-  <p class="pk-byline">M.Tech dissertation supervised by <a href="https://thukrallab.igib.res.in/">Dr. Lipi Thukral</a> (CSIR-IGIB) and <a href="https://auup.amity.edu/faculty-detail.aspx?facultyID=4465">Dr. Abhishek Sengupta</a> (Amity University)</p>
+  <p class="pk-byline">M.Tech dissertation supervised by <a href="https://www.igib.res.in/Scientists/lipi-thukral">Dr. Lipi Thukral</a> (CSIR-IGIB)</p>
   <ul class="pk-links">
     <li><a class="pk-pill" href="{{ '/assets/thesis.pdf' | relative_url }}">Read the thesis (PDF)</a></li>
     <li><a class="pk-pill pk-pill--quiet" href="#thesis">Corrections &amp; reruns</a></li>
   </ul>
 </div>
 
-<div class="pk-stats" role="list">
-  <div class="pk-stat" role="listitem"><span class="pk-stat-num">300</span><span class="pk-stat-label">variant–ligand pairs<br>15 variants × 20 ligands</span></div>
-  <div class="pk-stat" role="listitem"><span class="pk-stat-num">ρ 0.85</span><span class="pk-stat-label">affinity ranking<br>GatorAffinity on Boltz-2 poses</span></div>
-  <div class="pk-stat" role="listitem"><span class="pk-stat-num">≈ 20 Å</span><span class="pk-stat-label">pose error for allosteric<br>inhibitors, every pose tool</span></div>
-  <div class="pk-stat" role="listitem"><span class="pk-stat-num">15 → 0</span><span class="pk-stat-label">PoseBusters failures with<br>guidance <span class="pk-tag">after thesis</span></span></div>
-</div>
+<section class="pk-abstract" aria-labelledby="abstract-h">
+  <p class="pk-abstract-label" id="abstract-h">Abstract</p>
+  <p>Generative and deep-learning tools for protein–ligand modelling are increasingly used, but it is unclear whether they can reliably detect structural changes caused by clinical mutations and how an inhibitor engages its target. This study benchmarks co-folding, docking and affinity-rescoring tools on PIK3CA, the catalytic p110α subunit of PI3Kα and one of the most frequently mutated oncogenes in human cancer. A 300-pair cross-docking matrix was built from fourteen clinical p110α variants and the wild type, with twenty ligands spanning FDA-approved inhibitors, clinical candidates, allosteric and isoform-selective compounds, and inactive controls. Performance was assessed on four independent axes: experimental affinity ranking, cross-docked specificity, mutation-driven affinity change (Δp), and pose correctness against crystallographic references.</p>
+  <p>GatorAffinity rescoring on Boltz-2 poses gave the best affinity ranking (Spearman ρ = 0.85) and the best separation of binders from controls (AUROC = 0.88). CheapNet (Δp ρ = 0.75) and GatorAffinity (Δp ρ = 0.67) on Boltz-2 poses both signed all five significant mutational shifts correctly, so current models partly capture mutation-dependent changes (preliminary). Performance depended heavily on the pose source, and some generative models produced chemically invalid geometries.</p>
+  <p>Most critically, every pose tool placed the allosteric inhibitors in or beside the orthosteric ATP pocket (LRMSD &gt; 19 Å), often with high confidence, mirroring the near-absence of allosteric PIK3CA structures in training data. Mutation-aware affinity is partly captured; allosteric pocket recognition remains an open problem.</p>
+</section>
 
 <figure class="pk-figure pk-viewer-wrap" id="viewer-poses">
   <div class="pk-controls" role="group" aria-label="Crystal structure">
@@ -223,7 +222,7 @@ TFG fixed the geometry. The top pose passed every PoseBusters check in 30 of 30 
 <div class="pk-doc">
   <a class="pk-doc-link" href="{{ '/assets/thesis.pdf' | relative_url }}">
     <span class="pk-doc-title">Benchmarking AI Tools for Mutation-Aware PIK3CA Recognition</span>
-    <span class="pk-doc-meta">M.Tech dissertation · Amity University / CSIR-IGIB · June 2026 · PDF, 65 pages</span>
+    <span class="pk-doc-meta">M.Tech dissertation · Amity University / CSIR-IGIB · June 2026 · PDF, 64 pages</span>
   </a>
 </div>
 
