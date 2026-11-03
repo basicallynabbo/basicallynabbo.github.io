@@ -288,6 +288,7 @@
     var w = left + cell * n + 4, h = top + cell * n + 4;
     var svg = newSvg(node, w, h);
     svg.style.maxWidth = w + 'px';
+    svg.style.margin = '0 auto';
     var breaks = [4, 6, 10, 13];  // class boundaries: orthosteric | allosteric | pan-PI3K | δ/γ | decoys
     SIM.rows = []; SIM.cols = [];
     s.ligands.forEach(function (l, j) {
