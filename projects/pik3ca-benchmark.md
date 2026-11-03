@@ -28,32 +28,6 @@ extra_js:
   <p>Most critically, every pose tool placed the allosteric inhibitors in or beside the orthosteric ATP pocket (LRMSD &gt; 19 Å), often with high confidence, mirroring the near-absence of allosteric PIK3CA structures in training data. Mutation-aware affinity is partly captured; allosteric pocket recognition remains an open problem.</p>
 </section>
 
-<figure class="pk-figure pk-viewer-wrap" id="viewer-poses">
-  <div class="pk-controls" role="group" aria-label="Crystal structure">
-    <button type="button" class="pk-btn is-on" data-ref="8TSD" aria-pressed="true">RLY-2608 · 8TSD</button>
-    <button type="button" class="pk-btn" data-ref="8TDU" aria-pressed="false">STX-478 · 8TDU</button>
-    <button type="button" class="pk-btn" data-ref="8TGD" aria-pressed="false">STX-478 H1047R · 8TGD</button>
-    <button type="button" class="pk-btn" data-ref="7PG6" aria-pressed="false">Alpelisib · 7PG6</button>
-    <button type="button" class="pk-btn" data-ref="8AM0" aria-pressed="false">Inavolisib · 8AM0</button>
-    <button type="button" class="pk-btn" data-ref="8EXL" aria-pressed="false">Taselisib · 8EXL</button>
-  </div>
-  <div class="pk-controls pk-controls--tools" role="group" aria-label="Poses to show">
-    <span class="pk-controls-label">Show</span>
-    <button type="button" class="pk-btn is-on" data-show="Boltz-2" aria-pressed="true"><i class="pk-sw" style="--sw: var(--pk-c1)"></i>Boltz-2</button>
-    <button type="button" class="pk-btn is-on" data-show="DiffDock-L" aria-pressed="true"><i class="pk-sw" style="--sw: var(--pk-c2)"></i>DiffDock-L</button>
-    <button type="button" class="pk-btn is-on" data-show="Protenix" aria-pressed="true"><i class="pk-sw" style="--sw: var(--pk-c3)"></i>Protenix</button>
-    <button type="button" class="pk-btn is-on" data-show="FlowDock" aria-pressed="true"><i class="pk-sw" style="--sw: var(--pk-c4)"></i>FlowDock</button>
-    <button type="button" class="pk-btn is-on" data-show="O" aria-pressed="true"><i class="pk-sw pk-sw--pocket"></i>ATP site</button>
-  </div>
-  <div class="pk-viewer" data-viewer="poses" role="img" aria-label="3D view of p110α with the crystal ligand and each tool's top-ranked pose. For the allosteric inhibitors every predicted pose sits in the ATP pocket, about 20 Å from the crystal pose."></div>
-  <div class="pk-viewer-bar">
-    <span class="pk-key"><i class="pk-sw pk-sw--crystal-ink"></i>Crystal pose</span>
-    <span class="pk-readout" data-out="lrmsd"></span>
-    <button type="button" class="pk-btn" data-action="reset">Reset view</button>
-  </div>
-  <figcaption>Each tool's top-ranked pose, fitted onto the crystal structure through the pocket. For RLY-2608 and STX-478 every pose sits in the ATP pocket (grey, where alpelisib binds), not in the allosteric pocket the crystal shows. Boltz-2 gave its RLY-2608 pose a confidence of 0.91. Pick a structure above; drag to rotate, scroll to zoom. Drawn with <a href="https://github.com/sokrypton/py2Dmol">py2Dmol</a>.</figcaption>
-</figure>
-
 ## The question
 
 PIK3CA encodes p110α, the catalytic subunit of PI3Kα, and is one of the most frequently mutated oncogenes in human cancer. Most clinical mutations sit in two hotspots: the helical domain (E542K, E545K) and the kinase domain (H1047R). The first PI3Kα drugs, such as alpelisib, bind the ATP pocket and hit wild-type and mutant enzyme alike. Newer inhibitors try to tell them apart. Inavolisib binds the ATP pocket and preferentially degrades the mutant protein. RLY-2608 and STX-478 bind a separate allosteric pocket and favour the mutant enzyme.
@@ -166,6 +140,41 @@ Six crystal structures gave a direct check of pose. The three orthosteric ligand
 No tool recovered the allosteric pocket. All twelve allosteric poses were 20–27 Å from the crystal pose, and I checked where they went instead. Eleven sit in the ATP pocket: their centre is within 5 Å of where alpelisib binds, and they come within about 4 Å of the hinge residue Val851. FlowDock's RLY-2608 pose sits at the edge of that pocket, 6.6 Å out. Boltz-2 reported its RLY-2608 pose with a confidence of 0.91. Allosteric PIK3CA structures are almost absent from the training data, and the models fall back on the pocket they have seen thousands of times.
 
 Nesso-1 and PLAPT predict affinity without building an atomic pose, so they have nothing to check here.
+
+### Explore it in 3D
+
+Each button loads one crystal structure of p110α (the ribbon) with the drug as it was solved by X-ray (black sticks). The coloured sticks are where each tool put the same drug, fitted onto the crystal through the pocket. The number under the viewer is how far each pose is from the crystal one; under 2 Å counts as correct.
+
+- **Alpelisib, inavolisib, taselisib** bind the ATP pocket. Boltz-2, Protenix and DiffDock-L overlap the black crystal pose; FlowDock lands 8–10 Å away.
+- **RLY-2608 and STX-478** bind the allosteric pocket, on wild type (8TDU) and on the H1047R mutant (8TGD). Here the grey sticks mark the ATP pocket for reference (alpelisib from 7PG6). Every coloured pose sits on or next to the grey marker, 20–27 Å from the black crystal pose.
+
+Use **Show** to turn each tool, or the ATP-site marker, on or off.
+
+<figure class="pk-figure pk-viewer-wrap" id="viewer-poses">
+  <div class="pk-controls" role="group" aria-label="Crystal structure">
+    <button type="button" class="pk-btn is-on" data-ref="8TSD" aria-pressed="true">RLY-2608 · 8TSD</button>
+    <button type="button" class="pk-btn" data-ref="8TDU" aria-pressed="false">STX-478 · 8TDU</button>
+    <button type="button" class="pk-btn" data-ref="8TGD" aria-pressed="false">STX-478 H1047R · 8TGD</button>
+    <button type="button" class="pk-btn" data-ref="7PG6" aria-pressed="false">Alpelisib · 7PG6</button>
+    <button type="button" class="pk-btn" data-ref="8AM0" aria-pressed="false">Inavolisib · 8AM0</button>
+    <button type="button" class="pk-btn" data-ref="8EXL" aria-pressed="false">Taselisib · 8EXL</button>
+  </div>
+  <div class="pk-controls pk-controls--tools" role="group" aria-label="Poses to show">
+    <span class="pk-controls-label">Show</span>
+    <button type="button" class="pk-btn is-on" data-show="Boltz-2" aria-pressed="true"><i class="pk-sw" style="--sw: var(--pk-c1)"></i>Boltz-2</button>
+    <button type="button" class="pk-btn is-on" data-show="DiffDock-L" aria-pressed="true"><i class="pk-sw" style="--sw: var(--pk-c2)"></i>DiffDock-L</button>
+    <button type="button" class="pk-btn is-on" data-show="Protenix" aria-pressed="true"><i class="pk-sw" style="--sw: var(--pk-c3)"></i>Protenix</button>
+    <button type="button" class="pk-btn is-on" data-show="FlowDock" aria-pressed="true"><i class="pk-sw" style="--sw: var(--pk-c4)"></i>FlowDock</button>
+    <button type="button" class="pk-btn is-on" data-show="O" aria-pressed="true"><i class="pk-sw pk-sw--pocket"></i>ATP site</button>
+  </div>
+  <div class="pk-viewer" data-viewer="poses" role="img" aria-label="3D view of p110α with the crystal ligand and each tool's top-ranked pose. For the allosteric inhibitors every predicted pose sits in the ATP pocket, about 20 Å from the crystal pose."></div>
+  <div class="pk-viewer-bar">
+    <span class="pk-key"><i class="pk-sw pk-sw--crystal-ink"></i>Crystal pose</span>
+    <span class="pk-readout" data-out="lrmsd"></span>
+    <button type="button" class="pk-btn" data-action="reset">Reset view</button>
+  </div>
+  <figcaption>Drag to rotate; hold Ctrl or ⌘ and scroll, or pinch, to zoom. Reset view brings back the starting angle. Drawn with <a href="https://github.com/sokrypton/py2Dmol">py2Dmol</a>.</figcaption>
+</figure>
 
 <figure class="pk-figure pk-chart" id="chart-lrmsd">
   <div class="pk-legend" data-legend="pose"></div>
