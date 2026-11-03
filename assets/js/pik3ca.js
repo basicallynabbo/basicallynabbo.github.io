@@ -121,9 +121,10 @@
   function drawMatrix(node, d) {
     var m = d.matrix, W = widthOf(node);
     var left = 92, top = 58;
-    var cell = Math.min(30, Math.floor((W - left) / m.variants.length));
+    var cell = Math.min(24, Math.floor((W - left) / m.variants.length));
     var w = left + cell * m.variants.length, h = top + cell * m.ligands.length + 4;
     var svg = newSvg(node, w, h);
+    svg.style.maxWidth = w + 'px';
     m.variants.forEach(function (v, j) {
       var cx = left + j * cell + cell / 2;
       text(svg, cx, top - 8, v, { transform: 'rotate(-55 ' + cx + ' ' + (top - 8) + ')', 'text-anchor': 'start', class: v === 'WT' ? 't-strong' : null });
@@ -619,8 +620,9 @@
 
   // Mutation map: full-length p110α by domain, one marker atom per mutated residue, each on its own chain
   // (assets/data/pik3ca/mutation_map.*, built by PIK3K_bench/scripts/audit/build_mutation_map.py).
+  var DEPTH_SIGN = 1;
   function initMutMap(wrap) {
-    var node = wrap.querySelector('.pk-viewer'), v = null, text = null, meta = null, site = null;
+    var node = wrap.querySelector('.pk-viewer'), v = null, text = null, meta = null, site = null, home = null;
     var siteBtns = wrap.querySelectorAll('[data-site]');
     function residues(a, b) { var o = []; for (var i = a; i <= b; i++) o.push(i); return o; }
     function chainOf(resi) { return meta.sites.filter(function (s) { return s.resi === resi; })[0].chain; }
@@ -638,11 +640,90 @@
         v.setColor(cssVar('--pk-dom-' + dm.key.toLowerCase()), { chain: 'A', residues: residues(dm.first, dm.last) });
       });
       v.setColor(cssVar('--pk-mut'), { chain: meta.sites.map(function (s) { return s.chain; }) });  // one chain per marker
+      meta.sites.forEach(function (s) { v.setColor(cssVar('--pk-mut'), { chain: 'A', residues: [s.resi] }); });
       look();
     }
+    // Camera direction for a site: from the centre of the protein out through the marker, so the dot faces the viewer
+    // instead of sitting behind the ribbon. Rows are the screen x, y and depth axes.
+    function facing(resi) {
+      var cx = 0, cy = 0, cz = 0, n = 0, m = null, ch = chainOf(resi);
+      text.split('\n').forEach(function (l) {
+        var xyz = [+l.slice(30, 38), +l.slice(38, 46), +l.slice(46, 54)];
+        if (l.slice(0, 4) === 'ATOM' && l.slice(12, 16).trim() === 'CA') { cx += xyz[0]; cy += xyz[1]; cz += xyz[2]; n++; }
+        else if (l.slice(0, 6) === 'HETATM' && l.slice(21, 22) === ch) m = xyz;
+      });
+      if (!n || !m) return null;
+      facing.marker = { x: m[0], y: m[1], z: m[2] };
+      var z = [m[0] - cx / n, m[1] - cy / n, m[2] - cz / n], zl = Math.hypot(z[0], z[1], z[2]);
+      z = z.map(function (c) { return DEPTH_SIGN * c / zl; });
+      var up = Math.abs(z[1]) > 0.95 ? [1, 0, 0] : [0, 1, 0];
+      var x = [up[1] * z[2] - up[2] * z[1], up[2] * z[0] - up[0] * z[2], up[0] * z[1] - up[1] * z[0]], xl = Math.hypot(x[0], x[1], x[2]);
+      x = x.map(function (c) { return c / xl; });
+      var y = [z[1] * x[2] - z[2] * x[1], z[2] * x[0] - z[0] * x[2], z[0] * x[1] - z[1] * x[0]];
+      return [x, y, z];
+    }
     function look() {
-      if (site) v.orient({ near: { chain: chainOf(site) }, angstroms: 16 });
-      else { v.orient({ chain: 'A' }); fill(); }
+      // Light depth trim: drops only the chains well in front of or behind the picked dot.
+      v.clip(site ? { near: { chain: chainOf(site) }, angstroms: 36 } : null);
+      if (site) {
+        v.orient({ near: { chain: chainOf(site) }, angstroms: 12 });
+        var M = facing(site);
+        if (M && v._orientAnim) { v._orientAnim.targetMatrix = M; v._orientAnim.targetCenter = facing.marker; }
+      }
+      else {
+        v.orient({ chain: 'A' });
+        if (v._orientAnim) {
+          home = home || overview();
+          v._orientAnim.targetMatrix = home.M;
+          v._orientAnim.targetCenter = home.center;
+        }
+        fill();
+      }
+    }
+    // Overview rotation: look down the thinnest axis of the protein (principal axes of the CA atoms), with the
+    // adaptor-binding domain at the top and the kinase domain on the left, so reset is the same view every time.
+    function overview() {
+      var ca = [], c = [0, 0, 0], i, j, k;
+      text.split('\n').forEach(function (l) {
+        if (l.slice(0, 4) === 'ATOM' && l.slice(12, 16).trim() === 'CA' && l.slice(21, 22) === 'A')
+          ca.push([+l.slice(30, 38), +l.slice(38, 46), +l.slice(46, 54), +l.slice(22, 26)]);
+      });
+      ca.forEach(function (p) { for (i = 0; i < 3; i++) c[i] += p[i] / ca.length; });
+      var C = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+      ca.forEach(function (p) { for (i = 0; i < 3; i++) for (j = 0; j < 3; j++) C[i][j] += (p[i] - c[i]) * (p[j] - c[j]); });
+      var V = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];  // Jacobi eigenvectors (columns)
+      for (var sweep = 0; sweep < 30; sweep++) {
+        for (i = 0; i < 2; i++) for (j = i + 1; j < 3; j++) {
+          if (Math.abs(C[i][j]) < 1e-9) continue;
+          var th = 0.5 * Math.atan2(2 * C[i][j], C[j][j] - C[i][i]), cs = Math.cos(th), sn = Math.sin(th);
+          for (k = 0; k < 3; k++) { var a1 = C[k][i], a2 = C[k][j]; C[k][i] = cs * a1 - sn * a2; C[k][j] = sn * a1 + cs * a2; }
+          for (k = 0; k < 3; k++) { var b1 = C[i][k], b2 = C[j][k]; C[i][k] = cs * b1 - sn * b2; C[j][k] = sn * b1 + cs * b2; }
+          for (k = 0; k < 3; k++) { var v1 = V[k][i], v2 = V[k][j]; V[k][i] = cs * v1 - sn * v2; V[k][j] = sn * v1 + cs * v2; }
+        }
+      }
+      var ev = [0, 1, 2].map(function (q) { return { val: C[q][q], vec: [V[0][q], V[1][q], V[2][q]] }; })
+        .sort(function (p, q) { return q.val - p.val; });
+      var x = ev[0].vec, y = ev[1].vec;
+      function centroid(a, b) {
+        var m = [0, 0, 0], n = 0;
+        ca.forEach(function (p) { if (p[3] >= a && p[3] <= b) { for (var q = 0; q < 3; q++) m[q] += p[q] - c[q]; n++; } });
+        return m.map(function (t) { return t / n; });
+      }
+      function dot(u, w) { return u[0] * w[0] + u[1] * w[1] + u[2] * w[2]; }
+      var abd = centroid(16, 105), kin = centroid(695, 1068);
+      // Screen y points up: the ABD goes to positive y, the kinase to negative x.
+      if (dot(abd, y) < 0) y = y.map(function (t) { return -t; });
+      if (dot(kin, x) > 0) x = x.map(function (t) { return -t; });
+      var z = [x[1] * y[2] - x[2] * y[1], x[2] * y[0] - x[0] * y[2], x[0] * y[1] - x[1] * y[0]];
+      // Centre on the middle of the projected outline rather than the centre of mass, so the protruding ABD does not
+      // push the rest of the protein off-centre.
+      var lo = [1e9, 1e9], hi = [-1e9, -1e9];
+      ca.forEach(function (p) {
+        var d = [p[0] - c[0], p[1] - c[1], p[2] - c[2]], u = [dot(d, x), dot(d, y)];
+        for (var q = 0; q < 2; q++) { lo[q] = Math.min(lo[q], u[q]); hi[q] = Math.max(hi[q], u[q]); }
+      });
+      var mx = (lo[0] + hi[0]) / 2, my = (lo[1] + hi[1]) / 2;
+      return { M: [x, y, z], center: { x: c[0] + x[0] * mx + y[0] * my, y: c[1] + x[1] * mx + y[1] * my, z: c[2] + x[2] * mx + y[2] * my } };
     }
     function pick(resi) {
       site = resi;
