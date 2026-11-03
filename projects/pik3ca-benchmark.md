@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Pocket-blind: AI binding models on mutant PI3Kα"
+title: "Benchmarking AI Tools for Mutation-Aware PIK3CA Recognition"
 description: "Master's thesis. A 300-pair benchmark of co-folding, docking and affinity tools on clinical PIK3CA variants. Affinity ranking works; every pose tool misses the allosteric pocket."
 permalink: /projects/pik3ca-benchmark/
 show_title: false
@@ -11,7 +11,7 @@ extra_js:
 
 <div class="pk-hero">
   <p class="pk-kicker">Master's thesis · M.Tech Biotechnology · 2025–26</p>
-  <h1 class="pk-title">Pocket-blind</h1>
+  <h1 class="pk-title">Benchmarking AI Tools for Mutation&#8209;Aware PIK3CA Recognition</h1>
   <p class="pk-subtitle">Can AI binding models see what a cancer mutation changes in PI3Kα?</p>
   <p class="pk-dek">This is my master's thesis project. I tested co-folding, docking and affinity-prediction tools on 300 pairs of PIK3CA variants and inhibitors. They rank known inhibitors well. Every tool that builds a pose misses the allosteric pocket that the newest mutant-selective drugs bind.</p>
   <p class="pk-byline">Nabajit Kumar Borah · M.Tech dissertation, Amity University, research done at CSIR-IGIB, New Delhi · supervised by Dr. Lipi Thukral (CSIR-IGIB) and Dr. Abhishek Sengupta (Amity University)</p>

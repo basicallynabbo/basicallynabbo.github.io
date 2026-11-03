@@ -1,5 +1,5 @@
 # One card per project on /work/. Fields: title, when, where, problem, methods (list), outcome, link (optional).
-- title: "Pocket-blind: AI binding models on mutant PI3Kα"
+- title: "Benchmarking AI Tools for Mutation-Aware PIK3CA Recognition"
   when: "2025–2026"
   where: "Master's thesis · CSIR-IGIB"
   problem: "Can co-folding, docking and affinity models tell how a clinical mutation in PIK3CA changes how an inhibitor binds, and find the pocket it binds in?"
