@@ -749,7 +749,8 @@
     var outStep = wrap.querySelector('[data-out="step"]'), outDist = wrap.querySelector('[data-out="dist"]');
     var outClash = wrap.querySelector('[data-out="clash"]'), outConf = wrap.querySelector('[data-out="conf"]');
     var distPart = wrap.querySelector('[data-out="distpart"]'), refKey = wrap.querySelector('[data-out="refkey"]');
-    var outNote = wrap.querySelector('[data-out="note"]');
+    var outNote = wrap.querySelector('[data-out="note"]'), outRefLabel = wrap.querySelector('[data-out="reflabel"]');
+    var outRefKeyText = wrap.querySelector('[data-out="refkeytext"]');
     var tool = wrap.querySelector('[data-tool].is-on').dataset.tool;  // one run per model, each on its own ligand
     var spark = wrap.querySelector('[data-chart="spark"]');
     var cache = {};
@@ -814,6 +815,10 @@
       // A run without a crystal (DiffDock-L on idelalisib) has no distance line and no reference ligand.
       distPart.hidden = refKey.hidden = !info.dist;
       if (info.dist) outDist.textContent = info.dist[cur].toFixed(1) + ' Å';
+      // Idelalisib has only a PI3Kδ crystal (4XE0); its run is measured against that, fitted through the aligned pocket.
+      var delta = info.ref === '4XE0';
+      outRefLabel.textContent = delta ? 'PI3Kδ crystal' : 'crystal';
+      outRefKeyText.textContent = delta ? 'Crystal ligand (PI3Kδ, 4XE0)' : 'Crystal ligand';
       outClash.textContent = info.clash[cur] + (info.clash[cur] === 1 ? ' atom' : ' atoms');
       outConf.textContent = info.confidence === null ? '' : ' · confidence ' + info.confidence.toFixed(2).replace('-', '−');
       var dot = spark.querySelector('.now'), bar = spark.querySelector('.cursor');
