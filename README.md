@@ -31,3 +31,8 @@ or deleted post shows up on the next page load with no rebuild. The section stay
 ```bash
 python3 scripts/make_og.py --fonts DIR   # DIR: Fraunces.ttf, PlexMono-Regular.ttf, PlexMono-Medium.ttf from github.com/google/fonts
 ```
+
+## Favicon
+
+The "n_" monogram (`assets/favicon.svg`, `favicon-32.png`, `apple-touch-icon.png`) is drawn from the Fraunces "n" by
+`python3 scripts/make_favicon.py --fonts DIR`, with the same fonts folder as above.
