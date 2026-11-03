@@ -749,6 +749,7 @@
     var outStep = wrap.querySelector('[data-out="step"]'), outDist = wrap.querySelector('[data-out="dist"]');
     var outClash = wrap.querySelector('[data-out="clash"]'), outConf = wrap.querySelector('[data-out="conf"]');
     var distPart = wrap.querySelector('[data-out="distpart"]'), refKey = wrap.querySelector('[data-out="refkey"]');
+    var outNote = wrap.querySelector('[data-out="note"]');
     var tool = wrap.querySelector('[data-tool].is-on').dataset.tool;  // one run per model, each on its own ligand
     var spark = wrap.querySelector('[data-chart="spark"]');
     var cache = {};
@@ -868,6 +869,7 @@
     function load() {
       clearTimeout(timer);
       info = d.traj.filter(function (t) { return t.tool === tool; })[0];
+      outNote.textContent = wrap.querySelector('[data-tool="' + tool + '"]').dataset.note || '';  // what this run shows
       var key = info.key;
       viewerMsg(node, 'Loading trajectory…');
       var get = cache[key] || (cache[key] = Promise.all([getText('traj/' + key + '.pdb'), info.dist ? getText('traj/' + info.pair + '_crystal.pdb') : ''])

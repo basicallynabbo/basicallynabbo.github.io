@@ -602,6 +602,12 @@
   font-variant-numeric: tabular-nums;
 }
 
+.pk-traj-note {
+  margin: 0.6rem 0 0;
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+
 .pk-spark {
   margin-top: 0.4rem;
 }
