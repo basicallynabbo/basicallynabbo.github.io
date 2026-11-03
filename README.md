@@ -30,6 +30,18 @@ rebuild. Each list stays hidden until it has something to show.
   (`bluesky.done_tag`). The two posts pair up by the book's Goodreads id, and the list shows "since Jun '26" while
   reading and "Jun–Sep '26" once finished. Without "by Author", the title comes from the link card.
 
+## PIK3CA sampling trajectories
+
+The four looping viewers on the thesis page (`assets/data/pik3ca/traj/`) are made by `scripts/pik3ca_traj/`:
+
+- `pod/`: GPU runs. `px_traj.py` and `bz_traj.py` wrap `protenix pred` / `boltz predict` and save every 4th diffusion step;
+  the `run_*.sh` scripts set up one conda env per tool under `/nabajit` and run the inputs in `pod/inputs/` (MSAs not
+  included). DiffDock-L needs its receptor split into two chains (ESM embeds at most 1022 residues) and `dd_fix.sh`, since
+  its `environment.yml` installs only the last pip block.
+- `traj_frames.py`: puts each run in the crystal frame and counts distance and clashes per step (`flowdock_traj.py` makes
+  the FlowDock input; `pose_eval.py` holds the crystal references and expects the thesis folder, `BENCH`).
+- `build_site_assets.py <thesis dir> <site dir>`: writes the page data; `SHOWN_TRAJ` picks the runs shown.
+
 ## Link previews
 
 `assets/og.png` is the default link-preview card. The thesis page has its own, made by:
