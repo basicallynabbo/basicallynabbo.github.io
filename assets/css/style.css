@@ -681,26 +681,6 @@ main {
   padding: 0;
 }
 
-.research-list {
-  list-style: none;
-  padding: 0 !important;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.research-list li {
-  margin: 0;
-  padding: 4px 13px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-}
-
 /* Timeline */
 .timeline-item {
   position: relative;

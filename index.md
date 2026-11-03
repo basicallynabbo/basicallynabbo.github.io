@@ -38,14 +38,6 @@ extra_js:
   <span>Founding Computational Biologist at <strong><a href="https://www.litefold.ai/" rel="noopener">LiteFold</a></strong></span>
 </div>
 
-## Research interests
-
-<ul class="research-list">
-  <li>Structural Biology</li>
-  <li>Machine Learning in Drug Discovery</li>
-  <li>Deep Learning for Structure Prediction</li>
-</ul>
-
 {% if site.bluesky.handle %}
 <h2 id="reading" hidden>Reading</h2>
 
