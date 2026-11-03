@@ -1,8 +1,9 @@
 """Sampling trajectories (Protenix v2 +/- TFG, Boltz-2, DiffDock-L) -> pocket + ligand frames in the crystal frame, for the website.
 Protenix ran on inavolisib and RLY-2608 with and without guidance; Boltz-2 on inavolisib and alpelisib; DiffDock-L on idelalisib.
 FlowDock is the earlier sampling run on inavolisib (flowdock_traj.py; already trimmed to the pocket, 1-based residues).
-Idelalisib has no PI3Kalpha crystal, so that run has no reference: it stays in the frame of its receptor (the AlphaFold WT model,
-DiffDock-L's input) and gets clash counts and DiffDock-L's rank-1 confidence, but no distance.
+Idelalisib has no PI3Kalpha crystal. Its reference is the PI3Kdelta crystal 4XE0, fitted the way build_pose_views.py does it:
+align the PI3Kalpha (AlphaFold, DiffDock-L's receptor) and PI3Kdelta sequences and superpose on the aligned pocket Calpha
+(PI3Kdelta residues within 12 A of the crystal ligand). The distance is to the crystal idelalisib in PI3Kdelta.
 
 Inputs (from compute/server_scripts/run_px_traj.sh and run_bz_dd_traj.sh, synced to runs_gpu/):
   px_traj/<pair>_tfg-<bool>/  traj/call0.npz + CIFs     (px_traj.py records x_t, x0 and the final coordinates of 5 samples)
@@ -18,6 +19,7 @@ than 0.75 x the sum of their vdW radii (the PoseBusters minimum-distance criteri
 Output: compute/traj/<key>.pdb (multi-model), <pair>_crystal_ligand.pdb, traj.json.
 """
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -108,8 +110,42 @@ def from_models(pdb):
     return models[0], [np.array([a["xyz"] for a in m]) for m in models], None, np.arange(len(models))
 
 
+def delta_reference():
+    """4XE0 (PI3Kdelta + idelalisib) as a reference for runs on the PI3Kalpha AlphaFold model: PI3Kdelta Calpha keyed by the aligned
+    PI3Kalpha residue number, so the usual pocket superposition works across isoforms."""
+    def seq_and_ca(st):
+        seq, ca = [], []
+        for res in st[0][0]:
+            if res.het_flag == "A" and res.find_atom("CA", "*"):
+                a = res.find_atom("CA", "*")
+                seq.append(gemmi.find_tabulated_residue(res.name).one_letter_code.upper())
+                ca.append((res.seqid.num, np.array(a.pos.tolist())))
+        return "".join(seq), ca
+    path = pe.BENCH / "references/pose/pdb/surrogate_isoforms/4XE0.pdb"
+    d_st = pe._read(path)
+    d_seq, d_ca = seq_and_ca(d_st)
+    lig = np.array([x for _, x in pe._ligand_atoms(d_st, "40L")])
+    a_seq, a_ca = seq_and_ca(pe._read(RECEPTOR))
+    aln = gemmi.align_string_sequences(list(a_seq), list(d_seq), [])
+    ref_ca, i, j = {}, 0, 0
+    for op, n in [(c[-1], int(c[:-1])) for c in re.findall(r"\d+[MID]", aln.cigar_str())]:
+        for _ in range(n):
+            if op == "M":
+                if np.linalg.norm(lig - d_ca[j][1], axis=1).min() <= 12.0:
+                    ref_ca[a_ca[i][0]] = d_ca[j][1]
+                i += 1; j += 1
+            elif op == "I":
+                i += 1
+            else:
+                j += 1
+    text = "".join(l + "\n" for l in path.read_text().splitlines() if l.startswith("HETATM") and l[17:20] == "40L")
+    return ref_ca, lig, sorted(ref_ca), text
+
+
 def reference(ref):
     """(Calpha by residue, crystal ligand xyz, pocket residues, crystal ligand PDB text) for a crystal id."""
+    if ref == "4XE0":
+        return delta_reference()
     ref_ca, ref_lig, _, pocket = pe._ref(ref)
     refpdb = next(pe.REFDIR.glob(f"{ref}_*_protein_ligand.pdb"))
     text = "".join(l for l in refpdb.read_text().splitlines(True) if l.startswith("HETATM") and l[17:20].strip() == pe.REFS[ref][1])
@@ -135,7 +171,7 @@ for pair, ref in [("WT__Inavolisib", "8AM0"), ("WT__Alpelisib", "7PG6")]:
 fd = pe.BENCH / "compute/flowdock_traj/WT__Inavolisib_prior.pdb"
 RUN_SPECS.append(("flowdock_WT__Inavolisib", "FlowDock", "WT__Inavolisib", "8AM0", False, lambda: from_models(fd), fd))
 vis = RUNS / "dd_traj/WT__Idelalisib/rank1_reverseprocess.pdb"
-RUN_SPECS.append(("diffdock_WT__Idelalisib", "DiffDock-L", "WT__Idelalisib", None, False, lambda: from_diffdock(vis),
+RUN_SPECS.append(("diffdock_WT__Idelalisib", "DiffDock-L", "WT__Idelalisib", "4XE0", False, lambda: from_diffdock(vis),
                   RUNS / "dd_traj/WT__Idelalisib/rank1.sdf"))
 
 summary = {}

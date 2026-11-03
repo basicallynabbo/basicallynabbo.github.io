@@ -200,23 +200,23 @@ TFG fixed the geometry. The top pose passed every PoseBusters check in 30 of 30 
   <div class="pk-controls" role="group" aria-label="Model">
     <button type="button" class="pk-btn is-on" data-tool="Protenix v2" data-note="RLY-2608 binds the allosteric site, which every model here misses. On the ATP-pocket drugs, Protenix v2 lands within 2 Å." aria-pressed="true">Protenix v2 + TFG · RLY-2608</button>
     <button type="button" class="pk-btn" data-tool="Boltz-2" data-note="Alpelisib binds the ATP pocket. Boltz-2 lands within 1 Å of the crystal pose." aria-pressed="false">Boltz-2 · alpelisib</button>
-    <button type="button" class="pk-btn" data-tool="FlowDock" data-note="FlowDock's best case: inavolisib settles within 2 Å while the pocket moves around it." aria-pressed="false">FlowDock · inavolisib</button>
-    <button type="button" class="pk-btn" data-tool="DiffDock-L" data-note="Idelalisib is selective for PI3Kδ, the sister isoform, and only weakly active on PI3Kα. DiffDock-L docks it into the pocket but gives it a low confidence, as it should." aria-pressed="false">DiffDock-L · idelalisib</button>
+    <button type="button" class="pk-btn" data-tool="FlowDock" data-note="FlowDock gets only the protein sequence (no crystal): it docks into its own ESMFold-predicted structure, moving ligand and pocket together. Its best case: inavolisib settles within 2 Å." aria-pressed="false">FlowDock · inavolisib</button>
+    <button type="button" class="pk-btn" data-tool="DiffDock-L" data-note="Idelalisib is selective for PI3Kδ, the sister isoform, and only weakly active on PI3Kα. DiffDock-L docks it about 2 Å from its pose in the PI3Kδ crystal (4XE0) but gives it a low confidence, as it should." aria-pressed="false">DiffDock-L · idelalisib</button>
   </div>
   <div class="pk-viewer pk-viewer--short" data-viewer="traj" role="img" aria-label="Animated sampling trajectory of the chosen model in the p110α pocket, with the crystal ligand shown for comparison"></div>
   <div class="pk-viewer-bar">
     <button type="button" class="pk-btn pk-play" data-action="play" aria-label="Pause">Pause</button>
     <input type="range" class="pk-scrub" min="0" max="25" value="0" step="1" aria-label="Sampling step">
-    <span class="pk-readout" aria-live="off"><span data-out="step">step 1/26</span><span data-out="distpart"> · <span data-out="dist">–</span> from crystal</span> · <span data-out="clash">–</span> clashing<span data-out="conf"></span></span>
+    <span class="pk-readout" aria-live="off"><span data-out="step">step 1/26</span><span data-out="distpart"> · <span data-out="dist">–</span> from <span data-out="reflabel">crystal</span></span> · <span data-out="clash">–</span> clashing<span data-out="conf"></span></span>
   </div>
   <p class="pk-traj-note" data-out="note" aria-live="polite"></p>
   <div class="pk-spark" data-chart="spark" aria-hidden="true"></div>
   <div class="pk-viewer-bar pk-viewer-bar--keys">
-    <span class="pk-key" data-out="refkey"><i class="pk-sw pk-sw--crystal"></i>Crystal ligand</span>
+    <span class="pk-key" data-out="refkey"><i class="pk-sw pk-sw--crystal"></i><span data-out="refkeytext">Crystal ligand</span></span>
     <span class="pk-key"><i class="pk-sw pk-sw--pred"></i>Predicted ligand</span>
     <span class="pk-key"><i class="pk-sw pk-sw--pocket"></i>Pocket residues</span>
   </div>
-  <figcaption>One sampling run per model, from a random start to its final pose. The co-folders build ligand and protein together, FlowDock moves the ligand and pocket, and DiffDock-L moves only the ligand. Line: distance to the crystal ligand. Bars: ligand atoms clashing with the protein.</figcaption>
+  <figcaption>One sampling run per model, from a random start to its final pose. The co-folders build ligand and protein together, FlowDock moves the ligand and pocket, and DiffDock-L moves only the ligand. Line: distance to the crystal ligand (for idelalisib, its PI3Kδ crystal, 4XE0). Bars: ligand atoms clashing with the protein.</figcaption>
 </figure>
 
 - **Protenix v2**: physically valid poses with guidance (TFG); no affinity output.
