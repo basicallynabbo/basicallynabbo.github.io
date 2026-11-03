@@ -29,6 +29,7 @@
 
   <!-- Styles -->
   <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}?v={{ site.time | date: '%s' }}">
+  {% if page.extra_css %}<link rel="stylesheet" href="{{ page.extra_css | relative_url }}?v={{ site.time | date: '%s' }}">{% endif %}
 </head>
 <body{% if page.protein %} class="home"{% endif %}>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -161,5 +162,6 @@
     })();
   </script>
   <script defer src="{{ '/assets/js/protein.js' | relative_url }}"></script>
-</body>
+  {% for js in page.extra_js %}<script defer src="{{ js | relative_url }}?v={{ site.time | date: '%s' }}"></script>
+  {% endfor %}</body>
 </html>

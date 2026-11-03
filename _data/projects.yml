@@ -1,4 +1,12 @@
 # One card per project on /work/. Fields: title, when, where, problem, methods (list), outcome, link (optional).
+- title: "Benchmarking AI tools for mutation-aware PIK3CA recognition"
+  when: "2025–2026"
+  where: "CSIR-IGIB · M.Tech thesis"
+  problem: "Can co-folding, docking and affinity models tell how a clinical mutation in PIK3CA changes how an inhibitor binds, and find the pocket it binds in?"
+  methods: [Boltz-2, Protenix, DiffDock-L, FlowDock, GNINA, GatorAffinity, CheapNet, PoseBusters]
+  outcome: "300-pair benchmark (15 variants × 20 ligands). Rescoring on Boltz-2 poses ranks affinity well (ρ = 0.85), but every tool puts the allosteric inhibitors in the ATP pocket, about 20 Å from where they bind. Guidance fixes pose geometry, not placement."
+  link: /projects/pik3ca-benchmark/
+
 - title: "G-quadruplex biophysics with telomeric DNA and TERRA RNA"
   when: "2025"
   where: "CSIR-IGIB, Biophysics Lab"
