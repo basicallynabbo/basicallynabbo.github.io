@@ -492,7 +492,7 @@
       // instead. Ctrl/Cmd + scroll zooms (a trackpad pinch sends the same), which is all the viewer itself listens to.
       var hint = document.createElement('div');
       hint.className = 'pk-zoom-hint';
-      hint.textContent = (/Mac|iPhone|iPad/.test(navigator.platform) ? '⌘' : 'Ctrl') + ' + scroll to zoom';
+      hint.textContent = '⌘ / Ctrl + scroll to zoom';
       node.appendChild(hint);
       var hintTimer = null;
       node.addEventListener('wheel', function (e) {
