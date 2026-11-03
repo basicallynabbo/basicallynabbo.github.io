@@ -402,12 +402,17 @@
     }
     return host;
   }
+  function wrapId(node) {
+    var f = node.closest('figure');
+    return 'pk-' + (f && f.id ? f.id : 'viewer');
+  }
   function showMol(node, pdb, opts) {
     var host = molHost(node);
     var dark = document.documentElement.getAttribute('data-theme') === 'dark';
     var v = window.py2Dmol.show(host, pdb, Object.assign({
       width: host.clientWidth, height: node.clientHeight,
-      style: 'richardson', bg: dark ? 'black' : 'white', box: false, biounit: false, select: false, controls: false
+      style: 'richardson', bg: dark ? 'black' : 'white', box: false, biounit: false, select: false, controls: false,
+      name: wrapId(node)  // py2Dmol keeps colours per object name across viewers; the default "structure" would be shared
     }, opts || {}));
     v.setClearColor(true);  // transparent canvas: the page surface shows through (bg only sets the shading base)
     return v;
@@ -612,6 +617,50 @@
     return load(wrap.querySelector('[data-traj].is-on').dataset.traj);
   }
 
+  // Mutation map: full-length p110α by domain, one marker atom per mutated residue, each on its own chain
+  // (assets/data/pik3ca/mutation_map.*, built by PIK3K_bench/scripts/audit/build_mutation_map.py).
+  function initMutMap(wrap) {
+    var node = wrap.querySelector('.pk-viewer'), v = null, text = null, meta = null, site = null;
+    var siteBtns = wrap.querySelectorAll('[data-site]');
+    function residues(a, b) { var o = []; for (var i = a; i <= b; i++) o.push(i); return o; }
+    function chainOf(resi) { return meta.sites.filter(function (s) { return s.resi === resi; })[0].chain; }
+    // orient() leaves a wide margin round the whole protein; zoom in once it settles, the way Ctrl + scroll does.
+    function fill() {
+      if (v.isOrientAnimating) { requestAnimationFrame(fill); return; }
+      var c = node.querySelector('canvas'), r = c.getBoundingClientRect();
+      c.dispatchEvent(new WheelEvent('wheel', { deltaY: -140, ctrlKey: true, bubbles: true, cancelable: true,
+        clientX: r.left + r.width / 2, clientY: r.top + r.height / 2 }));
+    }
+    function build() {
+      v = showMol(node, text);
+      v.setColor(cssVar('--pk-cartoon'), 'A');
+      meta.domains.forEach(function (dm) {
+        v.setColor(cssVar('--pk-dom-' + dm.key.toLowerCase()), { chain: 'A', residues: residues(dm.first, dm.last) });
+      });
+      v.setColor(cssVar('--pk-mut'), { chain: meta.sites.map(function (s) { return s.chain; }) });  // one chain per marker
+      look();
+    }
+    function look() {
+      if (site) v.orient({ near: { chain: chainOf(site) }, angstroms: 16 });
+      else { v.orient({ chain: 'A' }); fill(); }
+    }
+    function pick(resi) {
+      site = resi;
+      siteBtns.forEach(function (o) {
+        var on = +o.dataset.site === resi;
+        o.classList.toggle('is-on', on);
+        o.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+      look();
+    }
+    siteBtns.forEach(function (b) { b.addEventListener('click', function () { pick(+b.dataset.site); }); });
+    wrap.querySelector('[data-action="reset"]').addEventListener('click', function () { pick(null); });
+    rebuildOn(node, build);
+    viewerMsg(node, 'Loading structure…');
+    return Promise.all([getText('mutation_map.pdb'), fetch(DATA + 'mutation_map.json').then(function (r) { return r.json(); })])
+      .then(function (r) { text = r[0]; meta = r[1]; viewerMsg(node, ''); build(); });
+  }
+
   // Load py2Dmol only when a viewer is about to scroll into view.
   function whenNear(node, fn) {
     if (!('IntersectionObserver' in window)) { fn(); return; }
@@ -691,6 +740,7 @@
       rt = setTimeout(drawAll, 150);
     });
 
+    startViewer(q('#viewer-mutmap'), initMutMap);
     document.querySelectorAll('[data-viewer="poses"]').forEach(function (n) { startViewer(n.closest('figure'), initPoses); });
     startViewer(q('#viewer-traj'), function (wrap) { return initTraj(wrap, d); });
   });
