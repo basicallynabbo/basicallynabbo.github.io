@@ -565,6 +565,7 @@
   function dot3(u, w) { return u[0] * w[0] + u[1] * w[1] + u[2] * w[2]; }
   function cross3(u, w) { return [u[1] * w[2] - u[2] * w[1], u[2] * w[0] - u[0] * w[2], u[0] * w[1] - u[1] * w[0]]; }
 
+  var POSE_ZOOMS = { '7PG6': 1.0, '8TDU': 0.8 };  // closer starting views for these two
   var POSE_ZOOM = 0.5;  // same for every structure; 1 = tight on the ligands, lower leaves more of the pocket around them
   function initPoses(wrap) {
     var node = wrap.querySelector('.pk-viewer');
@@ -681,7 +682,7 @@
       v.orient({ type: 'L', animate: false });
       var lv = ligandView(poseMeta[ref].site === 'allosteric' || ref === '7PG6' ? 'exposed' : wrap.id === 'viewer-idel');
       if (lv) v.viewerState.rotation = lv.M;
-      v.viewerState.zoom = POSE_ZOOM;
+      v.viewerState.zoom = POSE_ZOOMS[ref] || POSE_ZOOM;
       v.render('poses home');
       // The viewer can hand back a turned copy of the rotation it was given, so check the result and, if the crystal pose
       // ended up on the left, half-turn about the vertical axis.
