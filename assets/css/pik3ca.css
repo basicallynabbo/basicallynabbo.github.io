@@ -319,6 +319,7 @@
   margin-bottom: 0.6rem;
 }
 
+#chart-similarity .pk-sim-plot:first-child h4,
 #chart-matrix .pk-legend,
 #chart-matrix figcaption {
   justify-content: center;
