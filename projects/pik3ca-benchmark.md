@@ -182,31 +182,6 @@ Use **Show** to turn each tool, or the ATP-site marker, on or off.
   <figcaption>Pocket-aligned ligand RMSD of the top pose, log scale. The dashed line marks 2 Å, the usual cut-off for a correct pose.</figcaption>
 </figure>
 
-### Watching FlowDock place a ligand
-
-FlowDock builds a pose by flowing the ligand and pocket from a random start to a final structure. These trajectories come from a separate sampling run with FlowDock's default predicted apo structure as the starting protein. In that run inavolisib was FlowDock's one good pose: it settles within about 1 Å of the crystal ligand (1.6 Å LRMSD), the only FlowDock pose under 2 Å. Alpelisib's centre stays about 3 Å out. RLY-2608 goes straight to the ATP pocket and stays there.
-
-<figure class="pk-figure pk-viewer-wrap" id="viewer-traj">
-  <div class="pk-controls" role="group" aria-label="Ligand">
-    <button type="button" class="pk-btn is-on" data-traj="WT__Inavolisib" aria-pressed="true">Inavolisib</button>
-    <button type="button" class="pk-btn" data-traj="WT__Alpelisib" aria-pressed="false">Alpelisib</button>
-    <button type="button" class="pk-btn" data-traj="WT__RLY-2608" aria-pressed="false">RLY-2608</button>
-  </div>
-  <div class="pk-viewer pk-viewer--short" data-viewer="traj" role="img" aria-label="Animated FlowDock sampling trajectory of a ligand in the p110α pocket, with the crystal ligand shown for comparison"></div>
-  <div class="pk-viewer-bar">
-    <button type="button" class="pk-btn pk-play" data-action="play" aria-label="Pause">Pause</button>
-    <input type="range" class="pk-scrub" min="0" max="21" value="0" step="1" aria-label="Sampling step">
-    <span class="pk-readout" aria-live="off"><span data-out="step">step 1/22</span> · <span data-out="dist">–</span> from crystal</span>
-  </div>
-  <div class="pk-spark" data-chart="spark" aria-hidden="true"></div>
-  <div class="pk-viewer-bar pk-viewer-bar--keys">
-    <span class="pk-key"><i class="pk-sw pk-sw--crystal"></i>Crystal ligand</span>
-    <span class="pk-key"><i class="pk-sw pk-sw--pred"></i>FlowDock ligand</span>
-    <span class="pk-key"><i class="pk-sw pk-sw--pocket"></i>Pocket residues</span>
-  </div>
-  <figcaption>FlowDock sampling run with the predicted apo structure as the start, rank-1 sample, shown in the crystal frame. The line below the viewer tracks the distance from the ligand centroid to the crystal ligand centroid.</figcaption>
-</figure>
-
 ## Guidance fixes geometry, not placement <span class="pk-tag">after thesis</span>
 
 Protenix often produced poses that fail PoseBusters checks: atoms overlapping the protein, or ligands too close to it. Protenix v2 has an optional training-free guidance (TFG) step that steers sampling toward physically valid geometry during diffusion. After submission I reran the six crystal pairs with and without TFG, each with five seeds.
@@ -217,6 +192,55 @@ TFG fixed the geometry. The top pose passed every PoseBusters check in 30 of 30 
   <div class="pk-legend" data-legend="tfg"></div>
   <div class="pk-plot" data-chart="tfg" role="img" aria-label="Ligand RMSD for five seeds per crystal pair, with and without guidance, marking which poses pass PoseBusters"></div>
   <figcaption>Top-ranked Protenix v2 pose per seed (5 seeds), log scale. Each dot is one seed. Filled dots pass all PoseBusters checks; open dots fail at least one.</figcaption>
+</figure>
+
+## Four models, four strengths
+
+<div class="pk-cards">
+  <div class="pk-card">
+    <h3>Protenix v2</h3>
+    <p class="pk-card-lede">Clean geometry with guidance</p>
+    <p class="pk-card-catch">but no affinity score</p>
+  </div>
+  <div class="pk-card">
+    <h3>Boltz-2</h3>
+    <p class="pk-card-lede">Best poses, best ranking</p>
+    <p class="pk-card-catch">but confident even when wrong</p>
+  </div>
+  <div class="pk-card">
+    <h3>FlowDock</h3>
+    <p class="pk-card-lede">Lets the pocket move as it docks</p>
+    <p class="pk-card-catch">but most top poses land 8–10 Å off</p>
+  </div>
+  <div class="pk-card">
+    <h3>DiffDock-L</h3>
+    <p class="pk-card-lede">Knows when a ligand doesn't fit</p>
+    <p class="pk-card-catch">but a weak ranker</p>
+  </div>
+</div>
+
+All four share one blind spot: every allosteric ligand went to or near the ATP pocket, 20–27 Å from where it binds.
+
+<figure class="pk-figure pk-viewer-wrap" id="viewer-traj">
+  <div class="pk-controls" role="group" aria-label="Model">
+    <button type="button" class="pk-btn is-on" data-tool="Protenix v2" aria-pressed="true">Protenix v2 + TFG · RLY-2608</button>
+    <button type="button" class="pk-btn" data-tool="Boltz-2" aria-pressed="false">Boltz-2 · alpelisib</button>
+    <button type="button" class="pk-btn" data-tool="FlowDock" aria-pressed="false">FlowDock · inavolisib</button>
+    <button type="button" class="pk-btn" data-tool="DiffDock-L" aria-pressed="false">DiffDock-L · idelalisib</button>
+  </div>
+  <div class="pk-viewer pk-viewer--short" data-viewer="traj" role="img" aria-label="Animated sampling trajectory of the chosen model in the p110α pocket, with the crystal ligand shown for comparison"></div>
+  <div class="pk-viewer-bar">
+    <button type="button" class="pk-btn pk-play" data-action="play" aria-label="Pause">Pause</button>
+    <input type="range" class="pk-scrub" min="0" max="25" value="0" step="1" aria-label="Sampling step">
+    <span class="pk-readout" aria-live="off"><span data-out="step">step 1/26</span><span data-out="distpart"> · <span data-out="dist">–</span> from crystal</span> · <span data-out="clash">–</span> clashing<span data-out="conf"></span></span>
+  </div>
+  <div class="pk-spark" data-chart="spark" aria-hidden="true"></div>
+  <div class="pk-viewer-bar pk-viewer-bar--keys">
+    <span class="pk-key" data-out="refkey"><i class="pk-sw pk-sw--crystal"></i>Crystal ligand</span>
+    <span class="pk-key"><i class="pk-sw pk-sw--pred"></i>Predicted ligand</span>
+    <span class="pk-key"><i class="pk-sw pk-sw--pocket"></i>Pocket residues</span>
+  </div>
+  <figcaption>One sampling run per model: Protenix v2 with guidance on the allosteric RLY-2608 (crystal 8TSD), Boltz-2 on alpelisib (7PG6), FlowDock on inavolisib (8AM0), and DiffDock-L on idelalisib, a PI3Kδ drug the benchmark uses as a control, docked onto the AlphaFold model with no crystal to compare against. Co-folding runs (seed 102) start at step 100 of 200, once the noise has shrunk to protein size; FlowDock moves ligand and pocket together from its predicted apo structure; DiffDock-L moves only the ligand on a fixed protein. Line: distance to the crystal ligand. Bars: ligand atoms clashing with the protein.</figcaption>
 </figure>
 
 ## What it means

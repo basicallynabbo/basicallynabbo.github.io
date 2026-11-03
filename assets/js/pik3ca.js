@@ -488,20 +488,20 @@
     var host = node.querySelector('.pk-mol');
     if (!host) {
       host = document.createElement('div'); host.className = 'pk-mol'; node.insertBefore(host, node.firstChild);
-      // Scrolling over a viewer zooms it. The viewer itself only zooms on Ctrl/Cmd + scroll (which is also what a trackpad
-      // pinch sends), so a plain wheel is turned into that and the page is kept from scrolling underneath.
+      // A plain scroll over a viewer scrolls the page, so reading down the page never gets caught in a viewer; it shows a hint
+      // instead. Ctrl/Cmd + scroll zooms (a trackpad pinch sends the same), which is all the viewer itself listens to.
+      var hint = document.createElement('div');
+      hint.className = 'pk-zoom-hint';
+      hint.textContent = '⌘ / Ctrl + scroll to zoom';
+      node.appendChild(hint);
+      var hintTimer = null;
       node.addEventListener('wheel', function (e) {
-        clampSoon(node);
-        if (e.ctrlKey || e.metaKey) return;
-        e.preventDefault();
-        e.stopPropagation();
-        var c = node.querySelector('canvas');
-        if (!c) return;
-        c.dispatchEvent(new WheelEvent('wheel', {
-          deltaY: e.deltaY, deltaMode: e.deltaMode, ctrlKey: true, clientX: e.clientX, clientY: e.clientY,
-          bubbles: true, cancelable: true
-        }));
-      }, { capture: true, passive: false });
+        if (e.ctrlKey || e.metaKey) { clampSoon(node); return; }
+        e.stopPropagation();  // keep it from the canvas; no preventDefault, so the page scrolls
+        hint.classList.add('is-on');
+        clearTimeout(hintTimer);
+        hintTimer = setTimeout(function () { hint.classList.remove('is-on'); }, 1200);
+      }, { capture: true, passive: true });
       node.addEventListener('touchend', function () { clampSoon(node); }, { passive: true });
     }
     return host;
@@ -744,13 +744,16 @@
 
   function initTraj(wrap, d) {
     var node = wrap.querySelector('.pk-viewer');
-    var v = null, pdb = null, n = 0, cur = 0, timer = null, playing = !reduceMotion, info = null;
+    var v = null, pdb = null, n = 0, cur = 0, timer = null, playing = !reduceMotion, info = null, orienting = false, inView = false;
     var scrub = wrap.querySelector('.pk-scrub'), playBtn = wrap.querySelector('[data-action="play"]');
     var outStep = wrap.querySelector('[data-out="step"]'), outDist = wrap.querySelector('[data-out="dist"]');
+    var outClash = wrap.querySelector('[data-out="clash"]'), outConf = wrap.querySelector('[data-out="conf"]');
+    var distPart = wrap.querySelector('[data-out="distpart"]'), refKey = wrap.querySelector('[data-out="refkey"]');
+    var tool = wrap.querySelector('[data-tool].is-on').dataset.tool;  // one run per model, each on its own ligand
     var spark = wrap.querySelector('[data-chart="spark"]');
     var cache = {};
 
-    // One model per sampling step: pocket (A) + FlowDock ligand (P) + the crystal ligand (C), repeated so it stays put.
+    // One model per sampling step: pocket (A) + predicted ligand (P) + the crystal ligand (C), repeated so it stays put.
     function merge(traj, crystal) {
       var ref = atoms(crystal, 'HETATM', 'C');
       var models = traj.split('ENDMDL').filter(function (b) { return b.indexOf('ATOM') !== -1; });
@@ -762,9 +765,10 @@
       };
     }
     // The trajectory model is the pocket only, so "the whole model" is the zoom-out limit: no further than all of its atoms.
+    // Measured on the last frame: early co-folding frames are still a noise cloud far larger than the pocket.
     function zoomLimit() {
-      var first = pdb.text.split('ENDMDL')[0].split('\n'), atomsXYZ = [], lig = [];
-      first.forEach(function (l) {
+      var blocks = pdb.text.split('ENDMDL'), last = blocks[blocks.length - 2].split('\n'), atomsXYZ = [], lig = [];
+      last.forEach(function (l) {
         var xyz = [+l.slice(30, 38), +l.slice(38, 46), +l.slice(46, 54)];
         if (l.slice(0, 6) === 'ATOM  ') atomsXYZ.push(xyz); else if (l.slice(0, 6) === 'HETATM') lig.push(xyz);
       });
@@ -782,59 +786,91 @@
       v = showMol(node, pdb.text, { style: 'tube', play: false, rendering: { width: 1.2 } });
       colourParts(v);
       try { v.showSidechains({ chain: 'A' }); v.setSidechainColor(cssVar('--pk-pocket'), { chain: 'A' }); } catch (e) { /* C-alpha only */ }
+      // Frame the finished pose, then rewind. The orient animates and tracks the shown frame, so hold frame changes until it ends;
+      // otherwise a playing trajectory rewinds to the noise cloud mid-animation and the view zooms out to fit it.
+      v.setFrame(n - 1);
       v.orient({ type: 'L' });
-      zoomLimit();
-      v.setFrame(cur);
+      orienting = true;
+      var built = v;
+      (function settle() {
+        if (built !== v) return;
+        if (v.isOrientAnimating) { requestAnimationFrame(settle); return; }
+        orienting = false;
+        zoomLimit();
+        v.setFrame(cur);
+      })();
       drawSpark();
     }
     function show(i) {
       if (i === cur) return;
       cur = i;
-      v.setFrame(cur);
+      if (!orienting) v.setFrame(cur);
       readout();
     }
     function readout() {
       scrub.value = cur;
       outStep.textContent = 'step ' + (cur + 1) + '/' + n;
-      outDist.textContent = info.dist[cur].toFixed(1) + ' Å';
-      var dot = spark.querySelector('.now');
-      if (dot) { dot.setAttribute('cx', sparkX(cur)); dot.setAttribute('cy', sparkY(info.dist[cur])); }
+      // A run without a crystal (DiffDock-L on idelalisib) has no distance line and no reference ligand.
+      distPart.hidden = refKey.hidden = !info.dist;
+      if (info.dist) outDist.textContent = info.dist[cur].toFixed(1) + ' Å';
+      outClash.textContent = info.clash[cur] + (info.clash[cur] === 1 ? ' atom' : ' atoms');
+      outConf.textContent = info.confidence === null ? '' : ' · confidence ' + info.confidence.toFixed(2).replace('-', '−');
+      var dot = spark.querySelector('.now'), bar = spark.querySelector('.cursor');
+      if (dot) { dot.setAttribute('cx', sparkX(cur)); dot.setAttribute('cy', sparkY(Math.min(info.dist[cur], 30))); }
+      if (bar) { bar.setAttribute('x1', sparkX(cur)); bar.setAttribute('x2', sparkX(cur)); }
     }
+    // Two strips on one step axis: ligand distance to the crystal ligand (line), clashing ligand atoms (bars).
+    // Both y scales are shared by all runs, so switching runs compares like with like. Distance is capped at 30 Å: the first
+    // co-folding frames are still a noise cloud far from the pocket, and their line is drawn along the top.
     var sparkX, sparkY;
     function drawSpark() {
-      var W = widthOf(spark), h = 54, l = 34, r = 8;
-      var max = Math.max.apply(null, info.dist);
-      sparkX = lin(0, info.dist.length - 1, l, W - r);
-      sparkY = lin(0, Math.ceil(max / 5) * 5, h - 6, 6);
+      var W = widthOf(spark), l = 34, r = 8, h = 116;
+      var dMax = 30, cMax = Math.max(5, d.traj_scale.clash);
+      var m = info.clash.length;
+      sparkX = lin(0, m - 1, l, W - r);
+      sparkY = lin(0, dMax, 46, 6);
+      var clashY = lin(0, cMax, h - 4, 74), bw = Math.max(1.5, (W - l - r) / m - 1.5);
       var svg = newSvg(spark, W, h);
-      [0, Math.ceil(max / 5) * 5].forEach(function (t) {
-        svgEl('line', { x1: l, x2: W - r, y1: sparkY(t), y2: sparkY(t), class: 'grid' }, svg);
-        text(svg, l - 6, sparkY(t) + 3, t + ' Å', { 'text-anchor': 'end' });
-      });
-      svgEl('polyline', { points: info.dist.map(function (dv, i) { return sparkX(i) + ',' + sparkY(dv); }).join(' '), class: 'line' }, svg);
-      svgEl('circle', { cx: sparkX(cur), cy: sparkY(info.dist[cur]), r: 4.5, class: 'now' }, svg);
-    }
-    function tick() {
-      var next = cur + 1;
-      if (next >= n) {
-        timer = setTimeout(function () { show(0); timer = setTimeout(tick, 220); }, 1400);
-        return;
+      if (info.dist) {
+        [0, dMax].forEach(function (t) {
+          svgEl('line', { x1: l, x2: W - r, y1: sparkY(t), y2: sparkY(t), class: 'grid' }, svg);
+          text(svg, l - 6, sparkY(t) + 3, t + ' Å', { 'text-anchor': 'end' });
+        });
+      } else {
+        text(svg, l, 30, 'no PI3Kα crystal for this ligand, so no distance', {});
       }
-      show(next);
-      timer = setTimeout(tick, next === n - 1 ? 1400 : 170);
+      svgEl('line', { x1: l, x2: W - r, y1: clashY(0), y2: clashY(0), class: 'grid' }, svg);
+      text(svg, l - 6, clashY(0) + 3, '0', { 'text-anchor': 'end' });
+      text(svg, l - 6, clashY(cMax) + 3, String(cMax), { 'text-anchor': 'end' });
+      text(svg, l, 62, 'ligand atoms clashing with the protein', {});
+      info.clash.forEach(function (c, i) {
+        if (c) svgEl('rect', { x: sparkX(i) - bw / 2, width: bw, y: clashY(c), height: clashY(0) - clashY(c), class: 'bar' }, svg);
+      });
+      svgEl('line', { x1: sparkX(cur), x2: sparkX(cur), y1: 4, y2: h, class: 'cursor' }, svg);
+      if (!info.dist) return;
+      svgEl('polyline', { points: info.dist.map(function (dv, i) { return sparkX(i) + ',' + sparkY(Math.min(dv, dMax)); }).join(' '), class: 'line' }, svg);
+      svgEl('circle', { cx: sparkX(cur), cy: sparkY(Math.min(info.dist[cur], dMax)), r: 4.5, class: 'now' }, svg);
+    }
+    // Every run loops in about 11 s, whatever its frame count: the frames take 8.5 s, then the final pose holds for 2.5 s.
+    function frameMs() { return Math.round(8500 / n); }
+    function tick() {
+      if (!inView) return;
+      show(cur + 1 >= n ? 0 : cur + 1);
+      timer = setTimeout(tick, cur === n - 1 ? 2500 : frameMs());
     }
     function setPlaying(on) {
       playing = on;
       clearTimeout(timer);
       playBtn.textContent = on ? 'Pause' : 'Play';
       playBtn.setAttribute('aria-label', on ? 'Pause' : 'Play');
-      if (on) timer = setTimeout(tick, 200);
+      if (on && inView) timer = setTimeout(tick, 200);
     }
-    function load(pair) {
+    function load() {
       clearTimeout(timer);
-      info = d.flowdock_traj.filter(function (t) { return t.pair === pair; })[0];
+      info = d.traj.filter(function (t) { return t.tool === tool; })[0];
+      var key = info.key;
       viewerMsg(node, 'Loading trajectory…');
-      var get = cache[pair] || (cache[pair] = Promise.all([getText('flowdock/' + pair + '.pdb'), getText('flowdock/' + pair + '_crystal.pdb')])
+      var get = cache[key] || (cache[key] = Promise.all([getText('traj/' + key + '.pdb'), info.dist ? getText('traj/' + info.pair + '_crystal.pdb') : ''])
         .then(function (txt) { return merge(txt[0], txt[1]); }));
       return get.then(function (m) {
         viewerMsg(node, '');
@@ -848,10 +884,12 @@
       });
     }
 
-    wrap.querySelectorAll('[data-traj]').forEach(function (b) {
+    wrap.querySelectorAll('[data-tool]').forEach(function (b) {
       b.addEventListener('click', function () {
         setPressed(b.parentNode, b);
-        load(b.dataset.traj);
+        tool = b.dataset.tool;
+        if (!reduceMotion) playing = true;  // each model's trajectory starts looping when picked
+        load();
       });
     });
     playBtn.addEventListener('click', function () { setPlaying(!playing); });
@@ -861,7 +899,19 @@
     });
     rebuildOn(node, build);
     playBtn.textContent = playing ? 'Pause' : 'Play';
-    return load(wrap.querySelector('[data-traj].is-on').dataset.traj);
+    // The trajectory loads as the viewer nears the screen but only plays once it is (almost) fully in view, so it is watched
+    // from step 1; it pauses when scrolled mostly out of view and carries on when back.
+    new IntersectionObserver(function (entries) {
+      var r = entries[0].intersectionRatio;
+      if (r >= 0.9 && !inView) {
+        inView = true;
+        if (playing) { clearTimeout(timer); timer = setTimeout(tick, 500); }
+      } else if (r < 0.25 && inView) {
+        inView = false;
+        clearTimeout(timer);
+      }
+    }, { threshold: [0, 0.25, 0.9] }).observe(node);
+    return load();
   }
 
   // Mutation map: full-length p110α by domain, one marker atom per mutated residue, each on its own chain

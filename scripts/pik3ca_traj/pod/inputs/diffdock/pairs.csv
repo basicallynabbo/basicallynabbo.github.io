@@ -1,0 +1,2 @@
+complex_name,protein_path,ligand_description,protein_sequence
+WT__Idelalisib,/nabajit/traj_inputs/diffdock/PIK3CA_WT_alphafold_split.pdb,/nabajit/traj_inputs/diffdock/Idelalisib.sdf,
