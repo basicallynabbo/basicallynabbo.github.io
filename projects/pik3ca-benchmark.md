@@ -41,21 +41,24 @@ Structure-based AI tools are now used to triage compounds like these. For them t
 
 ## The benchmark
 
-<div class="pk-split">
-<div markdown="1">
-
 The matrix crosses 15 p110α sequences (wild type and 14 clinical variants) with 20 ligands: approved and clinical PI3Kα inhibitors, the two allosteric compounds, pan-PI3K and isoform-selective inhibitors, and drugs for unrelated targets as negative controls. Every one of the 300 pairs went through every tool.
 
 Labels came from literature mining. 52 pairs have binding evidence, 19 of them with a measured IC₅₀ or Kᵢ. These 19 are used for ranking. 150 pairs are negative controls. The remaining pairs had no usable evidence and were left out of scoring.
 
 Structures came from co-folding (Boltz-2, Protenix) and docking (DiffDock-L, FlowDock, GNINA, Vina, TankBind). Affinity rescorers (GatorAffinity, CheapNet, GIGN, DualBind) were run on both Boltz-2 and DiffDock-L poses. PLAPT predicts affinity from sequence and SMILES alone, with no structure.
 
-</div>
-<figure class="pk-figure pk-figure--paper">
-  <img src="{{ '/assets/images/projects/pik3ca/mutation-map.webp' | relative_url }}" alt="p110α structure coloured by domain, with the 14 benchmark mutation sites marked in red" loading="lazy" width="1126" height="1041">
-  <figcaption>The 14 clinical mutation sites on p110α, coloured by domain.</figcaption>
+<figure class="pk-figure pk-viewer-wrap" id="viewer-mutmap">
+  <div class="pk-viewer" data-viewer="mutmap" role="img" aria-label="3D view of full-length p110α coloured by domain, with the twelve mutated residues shown as red balls"></div>
+  <div class="pk-mutkey" role="group" aria-label="Domains and mutation sites">
+    <div class="pk-mutgroup"><span class="pk-key"><i class="pk-sw" style="--sw: var(--pk-dom-abd)"></i><b>ABD</b></span><button type="button" class="pk-mutbtn" data-site="88" aria-pressed="false">R88Q</button></div>
+    <div class="pk-mutgroup"><span class="pk-key"><i class="pk-sw" style="--sw: var(--pk-dom-rbd)"></i><b>RBD</b></span></div>
+    <div class="pk-mutgroup"><span class="pk-key"><i class="pk-sw" style="--sw: var(--pk-dom-c2)"></i><b>C2</b></span><button type="button" class="pk-mutbtn" data-site="345" aria-pressed="false">N345K</button><button type="button" class="pk-mutbtn" data-site="420" aria-pressed="false">C420R</button></div>
+    <div class="pk-mutgroup"><span class="pk-key"><i class="pk-sw" style="--sw: var(--pk-dom-helical)"></i><b>Helical</b></span><button type="button" class="pk-mutbtn" data-site="542" aria-pressed="false">E542K</button><button type="button" class="pk-mutbtn" data-site="545" aria-pressed="false">E545K</button><button type="button" class="pk-mutbtn" data-site="546" aria-pressed="false">Q546K</button></div>
+    <div class="pk-mutgroup"><span class="pk-key"><i class="pk-sw" style="--sw: var(--pk-dom-kinase)"></i><b>Kinase</b></span><button type="button" class="pk-mutbtn" data-site="726" aria-pressed="false">E726K</button><button type="button" class="pk-mutbtn" data-site="780" aria-pressed="false">W780R</button><button type="button" class="pk-mutbtn" data-site="859" aria-pressed="false">Q859H/K</button><button type="button" class="pk-mutbtn" data-site="1043" aria-pressed="false">M1043I</button><button type="button" class="pk-mutbtn" data-site="1047" aria-pressed="false">H1047L/R</button><button type="button" class="pk-mutbtn" data-site="1049" aria-pressed="false">G1049R</button></div>
+    <button type="button" class="pk-btn" data-action="reset">Reset view</button>
+  </div>
+  <figcaption>AlphaFold model of p110α. Mutations in red; tap one to find it, drag to rotate.</figcaption>
 </figure>
-</div>
 
 <figure class="pk-figure pk-chart" id="chart-matrix">
   <div class="pk-legend" data-legend="matrix"></div>

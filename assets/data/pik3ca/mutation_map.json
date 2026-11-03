@@ -1,0 +1,147 @@
+{
+ "source": "AlphaFold AF-P42336 (full-length p110α)",
+ "domains": [
+  {
+   "key": "ABD",
+   "name": "Adaptor-binding domain",
+   "first": 16,
+   "last": 105
+  },
+  {
+   "key": "RBD",
+   "name": "Ras-binding domain",
+   "first": 187,
+   "last": 289
+  },
+  {
+   "key": "C2",
+   "name": "C2 domain",
+   "first": 330,
+   "last": 487
+  },
+  {
+   "key": "Helical",
+   "name": "Helical domain",
+   "first": 517,
+   "last": 694
+  },
+  {
+   "key": "Kinase",
+   "name": "Kinase domain",
+   "first": 695,
+   "last": 1068
+  }
+ ],
+ "sites": [
+  {
+   "resi": 88,
+   "wt": "R",
+   "variants": [
+    "R88Q"
+   ],
+   "chain": "a",
+   "domain": "ABD"
+  },
+  {
+   "resi": 345,
+   "wt": "N",
+   "variants": [
+    "N345K"
+   ],
+   "chain": "b",
+   "domain": "C2"
+  },
+  {
+   "resi": 420,
+   "wt": "C",
+   "variants": [
+    "C420R"
+   ],
+   "chain": "c",
+   "domain": "C2"
+  },
+  {
+   "resi": 542,
+   "wt": "E",
+   "variants": [
+    "E542K"
+   ],
+   "chain": "d",
+   "domain": "Helical"
+  },
+  {
+   "resi": 545,
+   "wt": "E",
+   "variants": [
+    "E545K"
+   ],
+   "chain": "e",
+   "domain": "Helical"
+  },
+  {
+   "resi": 546,
+   "wt": "Q",
+   "variants": [
+    "Q546K"
+   ],
+   "chain": "f",
+   "domain": "Helical"
+  },
+  {
+   "resi": 726,
+   "wt": "E",
+   "variants": [
+    "E726K"
+   ],
+   "chain": "g",
+   "domain": "Kinase"
+  },
+  {
+   "resi": 780,
+   "wt": "W",
+   "variants": [
+    "W780R"
+   ],
+   "chain": "h",
+   "domain": "Kinase"
+  },
+  {
+   "resi": 859,
+   "wt": "Q",
+   "variants": [
+    "Q859H",
+    "Q859K"
+   ],
+   "chain": "i",
+   "domain": "Kinase"
+  },
+  {
+   "resi": 1043,
+   "wt": "M",
+   "variants": [
+    "M1043I"
+   ],
+   "chain": "j",
+   "domain": "Kinase"
+  },
+  {
+   "resi": 1047,
+   "wt": "H",
+   "variants": [
+    "H1047L",
+    "H1047R"
+   ],
+   "chain": "k",
+   "domain": "Kinase"
+  },
+  {
+   "resi": 1049,
+   "wt": "G",
+   "variants": [
+    "G1049R"
+   ],
+   "chain": "l",
+   "domain": "Kinase"
+  }
+ ]
+}

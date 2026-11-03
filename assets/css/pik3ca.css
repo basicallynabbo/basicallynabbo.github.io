@@ -14,6 +14,12 @@
   --pk-grid: rgba(87, 81, 69, 0.18);
   --pk-pocket: #9f968a;
   --pk-cartoon: #b9b0a0;   /* protein in the structure viewers */
+  --pk-dom-abd: #3f9b97;   /* p110α domains in the mutation map */
+  --pk-dom-rbd: #c99a2e;
+  --pk-dom-c2: #5b7fc4;
+  --pk-dom-helical: #8b7cc8;
+  --pk-dom-kinase: #c9785f;
+  --pk-mut: #d0201a;
   --pk-tip-bg: #15120e;
   --pk-tip-ink: #f7f3ec;
 }
@@ -28,6 +34,12 @@
   --pk-grid: rgba(139, 148, 163, 0.16);
   --pk-pocket: #6b7688;
   --pk-cartoon: #47526a;
+  --pk-dom-abd: #5fc0bb;
+  --pk-dom-rbd: #e0b84f;
+  --pk-dom-c2: #7fa0e0;
+  --pk-dom-helical: #a99ae6;
+  --pk-dom-kinase: #e0957c;
+  --pk-mut: #ff4a3d;
   --pk-tip-bg: #e8e3d8;
   --pk-tip-ink: #0a0f16;
 }
@@ -196,6 +208,58 @@
   background: #ffffff;
 }
 
+.pk-mutkey {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 22px;
+  margin: 0.8rem 0 0.4rem;
+}
+
+.pk-mutgroup {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+}
+
+.pk-mutgroup .pk-key {
+  margin-right: 2px;
+}
+
+.pk-mutgroup .pk-key b {
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.pk-mutbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 7px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--ink-soft);
+  background: transparent;
+  cursor: pointer;
+}
+
+.pk-mutbtn::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--pk-mut);
+}
+
+.pk-mutbtn:hover,
+.pk-mutbtn.is-on {
+  color: var(--ink);
+  border-color: var(--pk-mut);
+}
+
 .pk-split {
   display: grid;
   grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
@@ -284,6 +348,7 @@
 .pk-sw--crystal { --sw: var(--pk-c1); }
 .pk-sw--pred { --sw: var(--pk-c2); }
 .pk-sw--pocket { --sw: var(--pk-pocket); }
+.pk-sw--mut { --sw: var(--pk-mut); border-radius: 50%; }
 
 /* SVG charts */
 .pk-plot {
