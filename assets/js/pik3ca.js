@@ -395,7 +395,11 @@
   // py2Dmol.show() replaces the contents of its target, so the canvas lives in its own child.
   function molHost(node) {
     var host = node.querySelector('.pk-mol');
-    if (!host) { host = document.createElement('div'); host.className = 'pk-mol'; node.insertBefore(host, node.firstChild); }
+    if (!host) {
+      host = document.createElement('div'); host.className = 'pk-mol'; node.insertBefore(host, node.firstChild);
+      // A plain scroll wheel scrolls the page; Ctrl/Cmd + scroll (and trackpad pinch, which sends ctrlKey) zooms.
+      node.addEventListener('wheel', function (e) { if (!e.ctrlKey && !e.metaKey) e.stopPropagation(); }, true);
+    }
     return host;
   }
   function showMol(node, pdb, opts) {
