@@ -780,6 +780,30 @@ main {
   text-overflow: ellipsis;
 }
 
+/* "display: flex" on .news-item would otherwise override the hidden attribute. */
+.reading-item[hidden] {
+  display: none;
+}
+
+.reading-toggle {
+  margin: 10px 0 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  color: var(--accent-ink);
+  cursor: pointer;
+}
+
+.reading-toggle:hover,
+.reading-toggle:focus-visible {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .reading-src {
   flex: none;
   font-family: var(--font-mono);

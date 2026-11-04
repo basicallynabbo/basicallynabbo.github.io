@@ -7,7 +7,7 @@
 (function () {
   var box = document.querySelector('.reading[data-handle]');
   if (!box || !window.fetch) return;
-  var handle = box.dataset.handle, tag = (box.dataset.tag || '').toLowerCase(), LIMIT = 7;
+  var handle = box.dataset.handle, tag = (box.dataset.tag || '').toLowerCase(), LIMIT = 5, MAX = 200, BOOKS_MAX = 50;  // shown at first / most shown after "Show more"
   var doneTag = (box.dataset.doneTag || '').toLowerCase(), books = document.querySelector('.books');
   var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   var FEED = 'https://public.api.bsky.app/xrpc/app.bsky.feed.getAuthorFeed?filter=posts_no_replies&limit=100&actor=' +
@@ -177,9 +177,27 @@
     if (h) h.hidden = false;
   }
 
+  // Hides every item past the first LIMIT behind a "Show N more" / "Show less" button. The posts are already fetched,
+  // so the toggle costs no request.
+  function collapse(list) {
+    var items = Array.prototype.slice.call(list.children, LIMIT);
+    if (!items.length) return;
+    var more = el('button', 'reading-toggle', 'Show more');
+    more.type = 'button';
+    more.setAttribute('aria-expanded', 'false');
+    items.forEach(function (n) { n.hidden = true; });
+    more.addEventListener('click', function () {
+      var open = more.getAttribute('aria-expanded') !== 'true';
+      items.forEach(function (n) { n.hidden = !open; });
+      more.setAttribute('aria-expanded', open ? 'true' : 'false');
+      more.textContent = open ? 'Show less' : 'Show more';
+    });
+    list.parentNode.insertBefore(more, list.nextSibling);
+  }
+
   function showPapers(posts) {
     var list = box.querySelector('.reading-list');
-    posts.filter(function (p) { return tagged(p.record, tag) && !bookKey(linkOf(p).u); }).slice(0, LIMIT).forEach(function (p) {
+    posts.filter(function (p) { return tagged(p.record, tag) && !bookKey(linkOf(p).u); }).slice(0, MAX).forEach(function (p) {
       var postUrl = 'https://bsky.app/profile/' + handle + '/post/' + p.uri.split('/').pop();
       var when = shownDate(new Date(p.record.createdAt || p.indexedAt));
       var item = el('div', 'news-item reading-item');
@@ -192,6 +210,7 @@
       item.appendChild(body);
       list.appendChild(item);
     });
+    collapse(list);
     if (list.children.length) reveal(box, 'reading');
   }
 
@@ -216,7 +235,7 @@
       return (b.end || b.start) - (a.end || a.start);
     });
     var box2 = books.querySelector('.books-list');
-    list.forEach(function (b) {
+    list.slice(0, BOOKS_MAX).forEach(function (b) {
       var item = el('div', 'news-item reading-item' + (b.end ? '' : ' is-current'));
       item.appendChild(el('span', 'news-date', span(b.start, b.end)));
       var body = el('span', 'reading-body');
@@ -225,6 +244,7 @@
       item.appendChild(body);
       box2.appendChild(item);
     });
+    collapse(box2);
     if (box2.children.length) reveal(books, 'books');
   }
 
