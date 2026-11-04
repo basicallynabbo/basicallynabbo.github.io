@@ -28,7 +28,7 @@
   var POSE_TOOLS = [
     { tool: 'Boltz-2', color: '--pk-c1' },
     { tool: 'DiffDock-L', color: '--pk-c2' },
-    { tool: 'Protenix', color: '--pk-c3' },
+    { tool: 'Protenix', label: 'Protenix v2', color: '--pk-c3' },
     { tool: 'FlowDock', color: '--pk-c4' }
   ];
 
@@ -378,6 +378,79 @@
     return { svg: svg, x: x, top: top, rowH: rowH };
   }
 
+  // Pairwise ligand similarity, split by whether the two ligands share a class.
+  // Violin plus every underlying point, because the within-class group is only n = 25.
+  function simGroups(d) {
+    var m = d.similarity.matrix, sub = d.similarity.subtype, w = [], b = [];
+    for (var i = 0; i < sub.length; i++) {
+      for (var j = i + 1; j < sub.length; j++) (sub[i] === sub[j] ? w : b).push(m[i][j]);
+    }
+    return [
+      { label: 'Same class', vals: w, color: '--pk-c1' },
+      { label: 'Different class', vals: b, color: '--pk-c3' }
+    ];
+  }
+  function kdeAt(vals, bw, t) {
+    var sum = 0;
+    for (var i = 0; i < vals.length; i++) {
+      var z = (t - vals[i]) / bw;
+      sum += Math.exp(-0.5 * z * z);
+    }
+    return sum / (vals.length * bw * Math.sqrt(2 * Math.PI));
+  }
+  function median(vals) {
+    var v = vals.slice().sort(function (a, b) { return a - b; }), n = v.length;
+    return n % 2 ? v[(n - 1) / 2] : (v[n / 2 - 1] + v[n / 2]) / 2;
+  }
+  function drawViolin(node, d) {
+    if (!node) return;
+    var groups = simGroups(d);
+    var W = widthOf(node), narrow = W < 520;
+    var left = narrow ? 104 : 140, right = 20, top = 58, rowH = 92, bottom = 34;
+    var h = top + rowH * groups.length + bottom;
+    var svg = newSvg(node, W, h);
+    var x = lin(0, 0.6, left, W - right);
+    [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6].forEach(function (t) {
+      svgEl('line', { x1: x(t), x2: x(t), y1: top - 6, y2: top + rowH * groups.length + 2, class: 'grid' }, svg);
+      text(svg, x(t), top - 14, t.toFixed(1), { 'text-anchor': 'middle' });
+    });
+    text(svg, left, top - 36, 'Pairwise Tanimoto similarity', { class: 't-strong' });
+    groups.forEach(function (g, gi) {
+      var yc = top + gi * rowH + rowH / 2;
+      var n = g.vals.length, mu = g.vals.reduce(function (a, b) { return a + b; }, 0) / n;
+      var sd = Math.sqrt(g.vals.reduce(function (a, b) { return a + (b - mu) * (b - mu); }, 0) / n);
+      var bw = Math.max(0.018, 1.06 * sd * Math.pow(n, -0.2));
+      var steps = 72, dens = [], peak = 0;
+      for (var k = 0; k <= steps; k++) {
+        var t = k / steps * 0.6, v = kdeAt(g.vals, bw, t);
+        dens.push(v); if (v > peak) peak = v;
+      }
+      var half = 30, up = [], down = [];
+      dens.forEach(function (v, k) {
+        var px = x(k / steps * 0.6), py = (v / peak) * half;
+        up.push(px.toFixed(1) + ',' + (yc - py).toFixed(1));
+        down.push(px.toFixed(1) + ',' + (yc + py).toFixed(1));
+      });
+      var gEl = svgEl('g', {}, svg);
+      svgEl('path', {
+        d: 'M' + up.join('L') + 'L' + down.reverse().join('L') + 'Z',
+        class: 'violin', style: 'fill:var(' + g.color + ');stroke:var(' + g.color + ')'
+      }, gEl);
+      g.vals.forEach(function (v, i) {
+        var jit = ((Math.sin(i * 12.9898 + gi) * 43758.5453) % 1 + 1) % 1;
+        svgEl('circle', {
+          cx: x(v), cy: yc + (jit - 0.5) * 34, r: 2.1,
+          class: 'violin-pt', style: 'fill:var(' + g.color + ')'
+        }, gEl);
+      });
+      var md = median(g.vals);
+      svgEl('line', { x1: x(md), x2: x(md), y1: yc - half, y2: yc + half, class: 'violin-med' }, gEl);
+      text(svg, left - 10, yc - 2, g.label, { 'text-anchor': 'end', class: 't-strong' });
+      text(svg, left - 10, yc + 12, n + ' pairs', { 'text-anchor': 'end', 'font-size': 9.5 });
+      hover(gEl, '<b>' + g.label + '</b><br>' + n + ' pairs<br>median ' + md.toFixed(3) + '<br>mean ' + mu.toFixed(3));
+    });
+  }
+
   function drawLrmsd(node, d) {
     var f = poseFrame(node, 44, [0.2, 40], [0.2, 0.5, 1, 2, 5, 10, 20, 40]);
     REFS.forEach(function (r, i) {
@@ -389,7 +462,7 @@
         var g = svgEl('g', {}, f.svg);
         svgEl('circle', { cx: cx, cy: cy, r: 5.5, class: 'dot', style: 'fill:var(' + pt.color + ')' }, g);
         svgEl('circle', { cx: cx, cy: cy, r: 10, class: 'hit' }, g);
-        hover(g, '<b>' + pt.tool + '</b><br>' + r.ligand + ' (' + r.pdb + ')<br>LRMSD ' + row.lrmsd.toFixed(2) + ' Å');
+        hover(g, '<b>' + (pt.label || pt.tool) + '</b><br>' + r.ligand + ' (' + r.pdb + ')<br>LRMSD ' + row.lrmsd.toFixed(2) + ' Å');
       });
     });
   }
@@ -586,7 +659,7 @@
     function colour() {
       v.setColor(cssVar('--pk-cartoon'), 'A');
       v.setColor(cssVar('--ink'), 'C');
-      v.setColor(cssVar('--pk-pocket'), 'O');
+      v.setColor(cssVar('--pk-atp'), 'O');
       POSE_TOOLS.forEach(function (t) { v.setColor(cssVar(t.color), POSE_CHAIN[t.tool]); });
       v.hideElements({ type: 'L' });
     }
@@ -1072,6 +1145,7 @@
       drawMatrix(q('[data-chart="matrix"]'), d);
       drawTanimoto(q('[data-chart="tanimoto"]'), d);
       drawPca(q('[data-chart="pca"]'), d);
+      drawViolin(q('[data-chart="violin"]'), d);
       drawRank(q('[data-chart="rank"]'), d, state.metric);
       drawDp(q('[data-chart="dp"]'), d, state.hidden);
       drawLrmsd(q('[data-chart="lrmsd"]'), d);
@@ -1094,7 +1168,7 @@
       return { label: FAMILY[k].label, color: 'var(' + FAMILY[k].color + ')', shape: 'dot' };
     }));
     legend(q('[data-legend="pose"]'), POSE_TOOLS.map(function (p) {
-      return { label: p.tool, color: 'var(' + p.color + ')', shape: 'dot' };
+      return { label: p.label || p.tool, color: 'var(' + p.color + ')', shape: 'dot' };
     }));
     legend(q('[data-legend="tfg"]'), [
       { label: 'Without TFG', color: 'var(--pk-c2)', shape: 'dot' },

@@ -15,7 +15,7 @@ extra_js:
 
 <div class="pk-hero">
   <h1 class="pk-title">Benchmarking AI Tools for Mutation&#8209;Aware PIK3CA Recognition</h1>
-  <p class="pk-dek">Tested co-folding, docking and affinity-prediction tools on 300 pairs of PIK3CA variants and inhibitors. They rank known inhibitors well. Every tool that builds a pose misses the allosteric pocket that the newest mutant-selective drugs bind.</p>
+  <p class="pk-dek">Co-folding, docking and affinity-prediction tools evaluated across a 300-pair cross-docking matrix of PIK3CA variants and inhibitors. Affinity ranking holds up. Every pose generator places the mutant-selective allosteric inhibitors in the orthosteric ATP pocket.</p>
   <p class="pk-byline">M.Tech dissertation supervised by <a href="https://www.igib.res.in/Scientists/lipi-thukral">Dr. Lipi Thukral</a> (CSIR-IGIB)</p>
   <ul class="pk-links">
     <li><a class="pk-pill" href="{{ '/assets/thesis.pdf' | relative_url }}">Read the thesis (PDF)</a></li>
@@ -23,23 +23,18 @@ extra_js:
   </ul>
 </div>
 
-<section class="pk-abstract" aria-labelledby="abstract-h">
-  <p class="pk-abstract-label" id="abstract-h">Abstract</p>
-  <p>Generative and deep-learning tools for protein–ligand modelling are increasingly used, but it is unclear whether they can reliably detect structural changes caused by clinical mutations and how an inhibitor engages its target. This study benchmarks co-folding, docking and affinity-rescoring tools on PIK3CA, the catalytic p110α subunit of PI3Kα and one of the most frequently mutated oncogenes in human cancer. A 300-pair cross-docking matrix was built from fourteen clinical p110α variants and the wild type, with twenty ligands spanning FDA-approved inhibitors, clinical candidates, allosteric and isoform-selective compounds, and inactive controls. Performance was assessed on four independent axes: experimental affinity ranking, cross-docked specificity, mutation-driven affinity change (Δp), and pose correctness against crystallographic references.</p>
-  <p>GatorAffinity rescoring on Boltz-2 poses gave the best affinity ranking (Spearman ρ = 0.85) and the best separation of binders from controls (AUROC = 0.88). CheapNet (Δp ρ = 0.75) and GatorAffinity (Δp ρ = 0.67) on Boltz-2 poses both signed all five significant mutational shifts correctly, so current models partly capture mutation-dependent changes (preliminary). Performance depended heavily on the pose source, and some generative models produced chemically invalid geometries.</p>
-  <p>Most critically, every pose tool placed the allosteric inhibitors in or beside the orthosteric ATP pocket (LRMSD &gt; 19 Å), often with high confidence, mirroring the near-absence of allosteric PIK3CA structures in training data. Mutation-aware affinity is partly captured; allosteric pocket recognition remains an open problem.</p>
-</section>
-
 ## The question
 
-PIK3CA encodes p110α, the catalytic subunit of PI3Kα, and is one of the most frequently mutated oncogenes in human cancer. Most clinical mutations sit in two hotspots: the helical domain (E542K, E545K) and the kinase domain (H1047R). The first PI3Kα drugs, such as alpelisib, bind the ATP pocket and hit wild-type and mutant enzyme alike. Newer inhibitors try to tell them apart. Inavolisib binds the ATP pocket and preferentially degrades the mutant protein. RLY-2608 and STX-478 bind a separate allosteric pocket and favour the mutant enzyme.
+PIK3CA encodes p110α, the catalytic subunit of PI3Kα and one of the most frequently mutated oncogenes in human cancer. Most clinical mutations cluster in two hotspots: the helical domain (E542K, E545K) and the kinase domain (H1047R).
 
-Structure-based AI tools are now used to triage compounds like these. For them to help here, they have to do four things:
+Three generations of inhibitors have targeted it, and they engage the enzyme differently. Orthosteric agents such as alpelisib occupy the ATP-binding cleft and suppress mutant and wild-type PI3Kα alike, causing the dose-limiting hyperglycaemia that restricts their use. Inavolisib binds the same cleft but couples inhibition with selective degradation of the mutant protein. RLY-2608 and STX-478 bind a cryptic allosteric pocket on the kinase-domain C-lobe that is accessible only in mutant conformations, giving 12- and 14-fold selectivity over wild type.
+
+Structure-based AI tools are now routinely used to triage compounds of this kind. Mutation-aware prediction asks more of them than conventional docking, because the comparison is conditional: whether the same ligand is recognised differently once the sequence carries a clinical mutation. Four capabilities have to hold.
 
 1. **Rank** inhibitors by measured potency.
-2. **Separate** real binders from compounds that do not bind p110α.
-3. **Shift** the prediction in the right direction when a mutation changes potency.
-4. **Place** the ligand in the right pocket.
+2. **Separate** known binders from compounds inactive against p110α.
+3. **Shift** the predicted affinity in the correct direction when a mutation alters potency.
+4. **Place** the ligand in the pocket it occupies experimentally.
 
 ## The benchmark
 
@@ -53,14 +48,14 @@ Structure-based AI tools are now used to triage compounds like these. For them t
     <div class="pk-mutgroup"><span class="pk-key"><i class="pk-sw" style="--sw: var(--pk-dom-kinase)"></i><b>Kinase domain</b></span><button type="button" class="pk-mutbtn" data-site="726" aria-pressed="false">E726K</button><button type="button" class="pk-mutbtn" data-site="780" aria-pressed="false">W780R</button><button type="button" class="pk-mutbtn" data-site="859" aria-pressed="false">Q859H/K</button><button type="button" class="pk-mutbtn" data-site="1043" aria-pressed="false">M1043I</button><button type="button" class="pk-mutbtn" data-site="1047" aria-pressed="false">H1047L/R</button><button type="button" class="pk-mutbtn" data-site="1049" aria-pressed="false">G1049R</button></div>
     <button type="button" class="pk-btn" data-action="reset">Reset view</button>
   </div>
-  <figcaption>AlphaFold model of p110α. Mutations in red; tap one to find it, drag to rotate, scroll to zoom.</figcaption>
+  <figcaption>AlphaFold model of p110α. Mutations in red; tap one to find it, drag to rotate, scroll to zoom. 3D views on this page drawn with <a href="https://github.com/sokrypton/py2Dmol">py2Dmol</a>.</figcaption>
 </figure>
 
-The matrix crosses 15 p110α sequences (wild type and 14 clinical variants) with 20 ligands: approved and clinical PI3Kα inhibitors, the two allosteric compounds, pan-PI3K and isoform-selective inhibitors, and drugs for unrelated targets as negative controls. Every one of the 300 pairs went through every tool.
+The benchmark crosses 15 p110α sequences (wild type and 14 clinical variants) with 20 ligands: approved and clinical PI3Kα inhibitors, the two mutant-selective allosteric compounds, pan-PI3K and isoform-selective inhibitors, and inhibitors of unrelated targets as negative controls. Every one of the 300 cross-docked pairs was run through every tool.
 
-Labels came from literature mining. 52 pairs have binding evidence, 19 of them with a measured IC₅₀ or Kᵢ. These 19 are used for ranking. 150 pairs are negative controls. The remaining pairs had no usable evidence and were left out of scoring.
+Ground-truth labels were curated from the primary literature and BindingDB. 52 pairs carry binding evidence, 19 of them a direct biochemical measurement (IC₅₀ or Kᵢ); that curated subset of 19 supports the affinity-ranking axis. 150 pairs are negative controls. The remainder lacked usable evidence and were excluded from scoring.
 
-Structures came from co-folding (Boltz-2, Protenix) and docking (DiffDock-L, FlowDock, GNINA, Vina, TankBind). Affinity rescorers (GatorAffinity, CheapNet, GIGN, DualBind) were run on both Boltz-2 and DiffDock-L poses. PLAPT predicts affinity from sequence and SMILES alone, with no structure.
+The panel spans three modelling paradigms. Co-folding models (Boltz-2, Protenix v2) generate the protein–ligand complex directly from sequence. Docking models (DiffDock-L, FlowDock, GNINA, Vina, TankBind) sample ligand conformations against an explicit receptor structure. Affinity rescorers (GatorAffinity, CheapNet, GIGN, DualBind) score a supplied pose, and were run on both Boltz-2 and DiffDock-L poses. PLAPT sits outside all three, predicting affinity from protein sequence and ligand SMILES without a structure. Nesso-1 was added after the thesis was submitted and is tagged <span class="pk-tag">after thesis</span> wherever it appears; the matrix stays open, and further models will be benchmarked on it as they are released.
 
 <figure class="pk-figure pk-chart" id="chart-matrix">
   <div class="pk-legend" data-legend="matrix"></div>
@@ -68,7 +63,7 @@ Structures came from co-folding (Boltz-2, Protenix) and docking (DiffDock-L, Flo
   <figcaption>The label for each pair. Hover a cell for details.</figcaption>
 </figure>
 
-The ligands are chemically diverse. Their mean pairwise Tanimoto similarity is 0.13, and only one pair, duvelisib and idelalisib, is above 0.4 (0.53). A tool cannot score well here by recognising near-copies of the same scaffold.
+The ligand panel is chemically diverse, which constrains what a good score can be attributed to. Tanimoto similarity on Morgan fingerprints quantifies shared substructure between two molecules, from 0 to 1. Across the 190 non-self pairs the mean coefficient is 0.13, and only duvelisib–idelalisib exceeds 0.4 (0.53). Strong performance here therefore cannot be explained by recognising near-duplicate scaffolds.
 
 <figure class="pk-figure pk-chart" id="chart-similarity">
   <div class="pk-sim-plot">
@@ -83,11 +78,18 @@ The ligands are chemically diverse. Their mean pairwise Tanimoto similarity is 0
   <figcaption>Top: Morgan fingerprint (radius 2) Tanimoto similarity, darker is more similar; lines separate the ligand classes. Bottom: the first two principal components of the same fingerprints, which together explain about 23% of the variance. Hover a cell, a label or a point to find the same ligand in both plots.</figcaption>
 </figure>
 
+Splitting the same 190 pairs by whether the two ligands belong to the same class tests the obvious objection, that a model could score well by learning what a PI3Kα inhibitor looks like. Same-class pairs are only modestly more similar (median 0.18) than different-class pairs (0.13), and the single pair above 0.4 is duvelisib–idelalisib. The classes are not internally redundant.
+
+<figure class="pk-figure pk-chart" id="chart-violin">
+  <div class="pk-plot" data-chart="violin" role="img" aria-label="Violin plot of pairwise Tanimoto similarity for same-class and different-class ligand pairs; both distributions sit low, with same-class pairs only slightly higher"></div>
+  <figcaption>Each violin is the distribution of pairwise Tanimoto similarity, with every pair drawn as a point and the vertical line marking the median. Same class means both ligands share a panel category, such as two orthosteric PI3Kα inhibitors.</figcaption>
+</figure>
+
 ## Ranking affinities
 
-Co-folding followed by rescoring ranked the 19 measured affinities well. GatorAffinity on Boltz-2 poses reached Spearman ρ = 0.85 (95% CI 0.63–0.93), and Boltz-2's own affinity head reached 0.80. Nesso-1, which Recursion and Valence Labs describe as “a fast, structure-based protein–ligand binding-affinity model”, reached 0.83 and gave the best binder-versus-control separation (AUROC 0.93). It was run after submission.
+Co-folding followed by rescoring recovered the experimental rank order well. Spearman ρ measures agreement between predicted and measured rank, where 1.0 is perfect and 0 is no association. On the curated subset of 19, GatorAffinity rescoring of Boltz-2 poses reached ρ = 0.85 (95% CI 0.63–0.93), and the Boltz-2 affinity head reached 0.80. Nesso-1, which Recursion and Valence Labs describe as “a fast, structure-based protein–ligand binding-affinity model”, reached 0.83 and gave the strongest binder-versus-control separation (AUROC 0.93, against 1.0 for perfect separation and 0.5 for chance). It was run after submission.
 
-The pose source mattered as much as the scorer. The same GatorAffinity model dropped to ρ = 0.62 on DiffDock-L poses. Docking scores (GNINA, Vina) and PLAPT were weaker still.
+Pose provenance mattered as much as the scoring model. The same GatorAffinity weights fell from 0.85 to ρ = 0.62 on DiffDock-L poses. Docking scores (GNINA, Vina) and PLAPT were weaker still.
 
 <figure class="pk-figure pk-chart" id="chart-rank">
   <div class="pk-controls" role="group" aria-label="Metric">
@@ -99,11 +101,11 @@ The pose source mattered as much as the scorer. The same GatorAffinity model dro
   <figcaption>Each row is a tool. For ρ the line shows the 95% bootstrap interval. “A | B” means scorer A on poses from B.<span class="pk-narrow-only"> Gator = GatorAffinity, DD-L = DiffDock-L.</span></figcaption>
 </figure>
 
-There is a catch. If every pair's Boltz-2 score is replaced by that ligand's average over all 15 variants, ρ rises to 0.83, above the per-pair score. For GatorAffinity the same baseline gives 0.79. Most of the ranking signal says which ligand it is, not which variant it is binding.
+This result carries an important caveat. Collapsing the variant dimension entirely — replacing each pair's Boltz-2 score with that ligand's mean across all 15 variants — raises ρ to 0.83, above the per-pair score; the same variant-blind baseline gives GatorAffinity 0.79. Most of the ranking signal is therefore ligand-class information, not variant-specific recognition.
 
 ### A right pose is not a right answer
 
-Idelalisib is a PI3Kδ drug and weakly active on PI3Kα, so the benchmark uses it as a control. Boltz-2 placed it in the PI3Kα ATP pocket in almost exactly the pose idelalisib takes in its PI3Kδ crystal structure (4XE0): 0.5 Å after fitting the two pockets. It gave that pose a confidence of 0.92 and predicted strong binding (p-scale 6.59). DiffDock-L also used the pocket, 3.4 Å off the PI3Kδ pose, but with a low confidence of −1.43. A plausible pose in a conserved pocket says little about whether the drug binds this isoform.
+Idelalisib is PI3Kδ-selective and only weakly active against PI3Kα, and serves as a negative control here. Boltz-2 placed it in the PI3Kα ATP cleft in essentially the conformation it adopts in its PI3Kδ crystal structure (4XE0), 0.5 Å after pocket alignment, and reported that pose with a confidence of 0.92 and a predicted p-scale of 6.59. DiffDock-L occupied the same cleft, 3.4 Å from the PI3Kδ pose, but assigned a low confidence of −1.43. A stereochemically plausible pose in a conserved pocket is therefore weak evidence of isoform-level activity.
 
 <figure class="pk-figure pk-viewer-wrap" id="viewer-idel">
   <div class="pk-controls"><button type="button" class="pk-btn is-on" data-ref="4XE0" aria-pressed="true">Idelalisib · 4XE0</button></div>
@@ -123,9 +125,9 @@ Idelalisib is a PI3Kδ drug and weakly active on PI3Kα, so the benchmark uses i
 
 ## Mutation response
 
-The harder test is whether a tool's prediction moves when a mutation changes potency. Only 9 mutant–wild-type pairs have measured shifts (Δp), so this axis is underpowered. CheapNet on Boltz-2 poses gave ρ = 0.75 (permutation p = 0.03) and GatorAffinity 0.67 (p = 0.06).
+The more demanding axis is whether a predicted score shifts in the correct direction, and by an approximately correct magnitude, when a mutation alters potency. Only 9 paired wild-type–mutant entries carry a measured shift (Δp, the change in potency on a log scale), which leaves the axis underpowered. CheapNet on Boltz-2 poses gave ρ = 0.75 (permutation p = 0.03) and GatorAffinity 0.67 (p = 0.06).
 
-All five shifts larger than 0.3 log units are potency gains. A constant “mutant binds tighter” guess also gets all five signs right, so a correct sign alone shows nothing. I treat this result as preliminary.
+All five shifts exceeding 0.3 log units are potency gains. A constant “mutant binds tighter” predictor would therefore sign all five correctly, so directional accuracy alone is not evidence of mutation awareness. This axis is treated as preliminary.
 
 <figure class="pk-figure pk-chart" id="chart-dp">
   <div class="pk-controls" data-legend="dp" role="group" aria-label="Tools"></div>
@@ -135,18 +137,18 @@ All five shifts larger than 0.3 log units are potency gains. A constant “mutan
 
 ## The wrong pocket
 
-Six crystal structures gave a direct check of pose. The three orthosteric ligands are alpelisib (7PG6), inavolisib (8AM0) and taselisib (8EXL). The allosteric ones are RLY-2608 (8TSD) and STX-478 on wild type (8TDU) and H1047R (8TGD). Boltz-2, Protenix and DiffDock-L placed the orthosteric ligands within 2 Å. FlowDock's top poses landed 8–10 Å away: near the right pocket, but not in the crystal pose.
+Six crystallographic references provide the most direct test available: the experimentally determined ligand position against the predicted one. The three orthosteric ligands are alpelisib (7PG6), inavolisib (8AM0) and taselisib (8EXL). The allosteric ones are RLY-2608 (8TSD) and STX-478 on wild type (8TDU) and H1047R (8TGD). Boltz-2, Protenix v2 and DiffDock-L placed the orthosteric ligands within 2 Å. FlowDock's top poses landed 8–10 Å away: near the right pocket, but not in the crystal pose.
 
-No tool recovered the allosteric pocket. All twelve allosteric poses were 20–27 Å from the crystal pose, and I checked where they went instead. Eleven sit in the ATP pocket: their centre is within 5 Å of where alpelisib binds, and they come within about 4 Å of the hinge residue Val851. FlowDock's RLY-2608 pose sits at the edge of that pocket, 6.6 Å out. Boltz-2 reported its RLY-2608 pose with a confidence of 0.91. Allosteric PIK3CA structures are almost absent from the training data, and the models fall back on the pocket they have seen thousands of times.
+No tool recovered the allosteric pocket. All twelve allosteric poses fell 19.6–26.7 Å from the crystallographic position. Eleven were placed in the ATP cleft itself, with pose centroids within 5 Å of the alpelisib site and closest approaches of about 4 Å to the hinge residue Val851. The twelfth, FlowDock's RLY-2608 pose, sits at the rim of that cleft, 6.6 Å outside it. Boltz-2 reported its RLY-2608 pose with a confidence of 0.91. Allosteric PIK3CA structures are near-absent from the training corpora, and the models default to the site that dominates them.
 
-Nesso-1 and PLAPT predict affinity without building an atomic pose, so they have nothing to check here.
+Nesso-1 and PLAPT predict affinity without generating an atomic pose, so neither is assessed on this axis.
 
-### Explore it in 3D
+### Where the poses landed
 
-Each button loads one crystal structure of p110α (the ribbon) with the drug as it was solved by X-ray (black sticks). The coloured sticks are where each tool put the same drug, fitted onto the crystal through the pocket. The number under the viewer is how far each pose is from the crystal one; under 2 Å counts as correct.
+Each button loads one crystallographic reference for p110α (ribbon) with the experimental ligand pose in black. Coloured sticks are each tool's top-ranked pose for the same ligand, aligned to the reference through the pocket residues. The readout below the viewer gives LRMSD from the crystal pose; ≤ 2 Å counts as recovery.
 
-- **Alpelisib, inavolisib, taselisib** bind the ATP pocket. Boltz-2, Protenix and DiffDock-L overlap the black crystal pose; FlowDock lands 8–10 Å away.
-- **RLY-2608 and STX-478** bind the allosteric pocket, on wild type (8TDU) and on the H1047R mutant (8TGD). Here the grey sticks mark the ATP pocket for reference (alpelisib from 7PG6). Every coloured pose sits on or next to the grey marker, 20–27 Å from the black crystal pose.
+- **Alpelisib, inavolisib, taselisib** occupy the ATP cleft. Boltz-2, Protenix v2 and DiffDock-L overlay the crystal pose; FlowDock lands 8–10 Å away.
+- **RLY-2608 and STX-478** occupy the allosteric pocket, on wild type (8TDU) and on the H1047R mutant (8TGD). Grey sticks mark the ATP site for reference (alpelisib from 7PG6). Every predicted pose sits on or beside that marker, about 20–27 Å from the crystal pose.
 
 Use **Show** to turn each tool, or the ATP-site marker, on or off.
 
@@ -163,9 +165,9 @@ Use **Show** to turn each tool, or the ATP-site marker, on or off.
     <span class="pk-controls-label">Show</span>
     <button type="button" class="pk-btn is-on" data-show="Boltz-2" aria-pressed="true"><i class="pk-sw" style="--sw: var(--pk-c1)"></i>Boltz-2</button>
     <button type="button" class="pk-btn is-on" data-show="DiffDock-L" aria-pressed="true"><i class="pk-sw" style="--sw: var(--pk-c2)"></i>DiffDock-L</button>
-    <button type="button" class="pk-btn is-on" data-show="Protenix" aria-pressed="true"><i class="pk-sw" style="--sw: var(--pk-c3)"></i>Protenix</button>
+    <button type="button" class="pk-btn is-on" data-show="Protenix" aria-pressed="true"><i class="pk-sw" style="--sw: var(--pk-c3)"></i>Protenix v2</button>
     <button type="button" class="pk-btn is-on" data-show="FlowDock" aria-pressed="true"><i class="pk-sw" style="--sw: var(--pk-c4)"></i>FlowDock</button>
-    <button type="button" class="pk-btn is-on" data-show="O" aria-pressed="true"><i class="pk-sw pk-sw--pocket"></i>ATP site</button>
+    <button type="button" class="pk-btn is-on" data-show="O" aria-pressed="true"><i class="pk-sw pk-sw--atp"></i>ATP site</button>
   </div>
   <div class="pk-viewer" data-viewer="poses" role="img" aria-label="3D view of p110α with the crystal ligand and each tool's top-ranked pose. For the allosteric inhibitors every predicted pose sits in the ATP pocket, about 20 Å from the crystal pose."></div>
   <div class="pk-viewer-bar">
@@ -173,7 +175,7 @@ Use **Show** to turn each tool, or the ATP-site marker, on or off.
     <span class="pk-readout" data-out="lrmsd"></span>
     <button type="button" class="pk-btn" data-action="reset">Reset view</button>
   </div>
-  <figcaption>Drag to rotate, scroll or pinch to zoom. Reset view brings back the starting angle. Drawn with <a href="https://github.com/sokrypton/py2Dmol">py2Dmol</a>.</figcaption>
+  <figcaption>Drag to rotate, scroll or pinch to zoom. Reset view brings back the starting angle.</figcaption>
 </figure>
 
 <figure class="pk-figure pk-chart" id="chart-lrmsd">
@@ -182,11 +184,11 @@ Use **Show** to turn each tool, or the ATP-site marker, on or off.
   <figcaption>Pocket-aligned ligand RMSD of the top pose, log scale. The dashed line marks 2 Å, the usual cut-off for a correct pose.</figcaption>
 </figure>
 
-## Guidance fixes geometry, not placement <span class="pk-tag">after thesis</span>
+## Physical validity <span class="pk-tag">after thesis</span>
 
-Protenix often produced poses that fail PoseBusters checks: atoms overlapping the protein, or ligands too close to it. Protenix v2 has an optional training-free guidance (TFG) step that steers sampling toward physically valid geometry during diffusion. After submission I reran the six crystal pairs with and without TFG, each with five seeds.
+Protenix v2 run without guidance frequently produced poses that fail PoseBusters, which flags chemically impossible geometry: here, steric clashes with the receptor and volume overlap. It provides an optional training-free guidance (TFG) step that steers sampling toward physically valid geometry during diffusion. After submission, the six crystallographic pairs were rerun with and without guidance across five seeds each, giving 30 runs per condition.
 
-TFG fixed the geometry. The top pose passed every PoseBusters check in 30 of 30 runs, against 15 of 30 without it. It did not move any ligand. Orthosteric poses stayed within about 2 Å either way, and the allosteric poses stayed 20–27 Å off. Across all 15 variants, 42 guided allosteric poses passed PoseBusters and none came closer than 18.7 Å. Each job took 23% longer: 256 s instead of 209 s on one NVIDIA L40.
+Guidance resolved the geometry without altering placement. The top pose passed every PoseBusters check in 30 of 30 guided runs, against 15 of 30 unguided. Orthosteric poses stayed within about 2 Å either way, and the allosteric poses remained about 20–27 Å off. Each job took 23% longer with TFG on than off: 256 s against 209 s on one NVIDIA L40.
 
 <figure class="pk-figure pk-chart" id="chart-tfg">
   <div class="pk-legend" data-legend="tfg"></div>
@@ -219,19 +221,26 @@ TFG fixed the geometry. The top pose passed every PoseBusters check in 30 of 30 
   <figcaption>One sampling run per model, from a random start to its final pose. The co-folders build ligand and protein together, FlowDock moves the ligand and pocket, and DiffDock-L moves only the ligand. Line: distance to the crystal ligand (for idelalisib, its PI3Kδ crystal, 4XE0). Bars: ligand atoms clashing with the protein.</figcaption>
 </figure>
 
-- **Protenix v2**: physically valid poses with guidance (TFG); no affinity output.
-- **Boltz-2**: the most accurate orthosteric poses and the best single-model affinity ranking; confident even on wrong poses.
-- **FlowDock**: models pocket flexibility while docking; most top poses land 8–10 Å from the crystal pose.
-- **DiffDock-L**: its confidence separates binders from controls (best average precision of the thesis tools); a weak affinity ranker.
+## Results
 
-All four share one blind spot: every allosteric ligand went to or near the ATP pocket, 20–27 Å from where it binds.
+Affinity depends on the pose: a correct pose is the minimum requirement for predicting a correct affinity. A rescorer only reads the structure it is handed, so a ligand placed in the wrong pocket can still return a confident number.
 
-## What it means
+- **Affinity ranking**: GatorAffinity on Boltz-2 poses recovered the experimental order best (ρ = 0.85), followed by the Boltz-2 affinity head (0.80). A variant-blind baseline reaches 0.79–0.83, so most of the signal is ligand class rather than variant recognition.
+- **Binder–control separation**: Nesso-1 led (AUROC 0.93, AP 0.85) <span class="pk-tag">after thesis</span>; among the thesis tools, DiffDock-L confidence led on AP (0.79).
+- **Mutation response**: CheapNet on Boltz-2 poses gave the strongest Δp correlation (ρ = 0.75). With nine pairs all shifting the same way, a constant “tighter” prior scores as well, so this stays preliminary.
+- **Orthosteric poses**: Boltz-2 was the most accurate (0.58 Å on alpelisib), with Protenix v2 and DiffDock-L also inside 2 Å; FlowDock's top poses landed 8–10 Å out.
+- **Allosteric poses**: every pose generator placed the ligand in or beside the ATP cleft, about 20–27 Å from the experimental site, Boltz-2 at a confidence of 0.91. For an allosteric series, verify placement before acting on any affinity built on such a pose.
+- **Physical validity**: Protenix v2 with guidance passed every PoseBusters check in 30 of 30 runs, against 15 of 30 unguided, for 23% more compute, and moved no ligand. Geometry is cheap to repair; placement is the bottleneck.
 
-- **Ranking known PI3Kα ligands works**, using co-folding plus rescoring, but most of the signal is ligand identity. A good ρ here is not evidence that the model reads the mutation.
-- **Mutation effects are unresolved.** Nine measured shifts, all in one direction, cannot separate a model that understands the mutation from one that guesses “tighter”.
-- **Pocket blindness with overconfidence.** No tool finds the allosteric pocket; every pose lands in or at the ATP pocket, sometimes at high confidence. For an allosteric series, check where the ligand landed before trusting any affinity number built on that pose.
-- **Physical validity is cheap to fix and is not the bottleneck.** Guidance cleans up geometry for about a quarter more compute. It does not fix placement.
+## Limitations
+
+Several limitations bound the interpretation of these results. The evidence base is small and heterogeneous, and each evaluation axis is constrained in a different way; these constraints carry more weight than the relative ordering of the tools.
+
+- **Affinity subset**: 19 measurements with mixed endpoints (14 IC₅₀, 5 Kᵢ); bootstrap intervals span roughly ±0.30, wide enough to overlap across neighbouring tools.
+- **Mutation response**: nine paired cases, five of them at or above the 0.30 log-unit threshold for a two-fold shift. Permutation p stays above 0.05 for most tools, and one mis-signed prediction moves sign accuracy by 20 points.
+- **Specificity labels**: the 52 positives mix numeric, qualitative, resistance-context and structural evidence, so tools that rank any PIK3CA-associated case highly benefit. The stricter biochemical subset gives lower AUROC and AP.
+- **Mutant receptors**: built by in-silico substitution on the wild-type AlphaFold backbone, so the models respond to local side-chain geometry rather than global conformational rearrangement.
+- **Pose references**: six crystal structures, three of them allosteric. The allosteric failure is uniform but rests on too few references to quote as a rate.
 
 ## Updates {#thesis}
 
