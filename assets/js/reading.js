@@ -182,7 +182,7 @@
   function collapse(list) {
     var items = Array.prototype.slice.call(list.children, LIMIT);
     if (!items.length) return;
-    var more = el('button', 'reading-toggle', 'Show ' + items.length + ' more');
+    var more = el('button', 'reading-toggle', 'Show more');
     more.type = 'button';
     more.setAttribute('aria-expanded', 'false');
     items.forEach(function (n) { n.hidden = true; });
@@ -190,7 +190,7 @@
       var open = more.getAttribute('aria-expanded') !== 'true';
       items.forEach(function (n) { n.hidden = !open; });
       more.setAttribute('aria-expanded', open ? 'true' : 'false');
-      more.textContent = open ? 'Show less' : 'Show ' + items.length + ' more';
+      more.textContent = open ? 'Show less' : 'Show more';
     });
     list.parentNode.insertBefore(more, list.nextSibling);
   }
