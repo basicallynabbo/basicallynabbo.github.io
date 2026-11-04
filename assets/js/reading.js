@@ -7,7 +7,7 @@
 (function () {
   var box = document.querySelector('.reading[data-handle]');
   if (!box || !window.fetch) return;
-  var handle = box.dataset.handle, tag = (box.dataset.tag || '').toLowerCase(), LIMIT = 7;
+  var handle = box.dataset.handle, tag = (box.dataset.tag || '').toLowerCase(), LIMIT = 10, MAX = 50;  // shown at first / shown after "Show more"
   var doneTag = (box.dataset.doneTag || '').toLowerCase(), books = document.querySelector('.books');
   var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   var FEED = 'https://public.api.bsky.app/xrpc/app.bsky.feed.getAuthorFeed?filter=posts_no_replies&limit=100&actor=' +
@@ -179,10 +179,11 @@
 
   function showPapers(posts) {
     var list = box.querySelector('.reading-list');
-    posts.filter(function (p) { return tagged(p.record, tag) && !bookKey(linkOf(p).u); }).slice(0, LIMIT).forEach(function (p) {
+    posts.filter(function (p) { return tagged(p.record, tag) && !bookKey(linkOf(p).u); }).slice(0, MAX).forEach(function (p, i) {
       var postUrl = 'https://bsky.app/profile/' + handle + '/post/' + p.uri.split('/').pop();
       var when = shownDate(new Date(p.record.createdAt || p.indexedAt));
       var item = el('div', 'news-item reading-item');
+      if (i >= LIMIT) item.hidden = true;  // revealed by the "Show more" button
       item.appendChild(el('span', 'news-date', when));
       // One line, like Log: the paper (or the post, if it links nothing) and a small source tag. The comment is the tooltip.
       var body = el('span', 'reading-body'), t = target(p), text = note(p.record);
@@ -192,6 +193,22 @@
       item.appendChild(body);
       list.appendChild(item);
     });
+    // Extra items beyond LIMIT sit behind a toggle; the posts are already fetched, so it costs no request.
+    var extra = list.querySelectorAll('.reading-item[hidden]');
+    if (extra.length) {
+      var more = el('button', 'reading-toggle', 'Show ' + extra.length + ' more');
+      more.type = 'button';
+      more.setAttribute('aria-expanded', 'false');
+      more.addEventListener('click', function () {
+        var open = more.getAttribute('aria-expanded') !== 'true';
+        Array.prototype.forEach.call(list.querySelectorAll('.reading-item:nth-child(n+' + (LIMIT + 1) + ')'), function (n) {
+          n.hidden = !open;
+        });
+        more.setAttribute('aria-expanded', open ? 'true' : 'false');
+        more.textContent = open ? 'Show less' : 'Show ' + extra.length + ' more';
+      });
+      list.parentNode.insertBefore(more, list.nextSibling);
+    }
     if (list.children.length) reveal(box, 'reading');
   }
 
